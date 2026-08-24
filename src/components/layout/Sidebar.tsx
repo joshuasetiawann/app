@@ -2,6 +2,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { pcss } from '../../lib/pcss';
 import { NAV_ACCOUNT, NAV_MAIN, NAV_MORE, type NavItem } from '../../lib/nav';
 import { useAppState } from '../../state/AppState';
+import { useAuthState } from '../../state/AuthState';
 
 function NavRow({ item, open }: { item: NavItem; open: boolean }) {
   const location = useLocation();
@@ -34,8 +35,10 @@ function NavRow({ item, open }: { item: NavItem; open: boolean }) {
 
 export function Sidebar() {
   const { viewport } = useAppState();
+  const { profile, partner, couple } = useAuthState();
   const isTablet = viewport === 'tablet';
   const open = !isTablet;
+  const coupleNames = `${profile?.name || 'Kamu'} & ${partner?.name || 'Pasangan'}`;
 
   return (
     <aside
@@ -54,12 +57,12 @@ export function Sidebar() {
         {open && (
           <div style={{ minWidth: 0 }}>
             <div style={pcss('font:700 15px/1.15 "Quicksand",sans-serif;color:var(--ink,#4A4A4A)')}>KisahKita</div>
-            <div style={pcss('font:600 10.5px "Nunito",sans-serif;color:var(--pki,#E86F87);white-space:nowrap')}>Joshua &amp; Partner</div>
+            <div style={pcss('font:600 10.5px "Nunito",sans-serif;color:var(--pki,#E86F87);white-space:nowrap;overflow:hidden;text-overflow:ellipsis')}>{coupleNames}</div>
           </div>
         )}
       </div>
 
-      {open && <div style={pcss('font:700 9.5px "Nunito",sans-serif;letter-spacing:.14em;color:var(--mut,#A99A9E);padding:4px 10px 8px')}>❤️ OUR SPACE</div>}
+      {open && <div style={pcss('font:700 9.5px "Nunito",sans-serif;letter-spacing:.14em;color:var(--mut,#A99A9E);padding:4px 10px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis')}>❤️ {couple?.spaceName || 'RUANG KITA'}</div>}
       {NAV_MAIN.map((item) => (
         <NavRow key={item.path} item={item} open={open} />
       ))}

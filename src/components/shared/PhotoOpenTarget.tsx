@@ -5,16 +5,12 @@ import { useAppState } from '../../state/AppState';
 export function PhotoOpenTarget({ index, style, children }: { index: number; style?: CSSProperties; children: ReactNode }) {
   const { openViewer } = useAppState();
   return (
-    <div
+    <button
+      type="button"
       onClick={() => openViewer(index)}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') openViewer(index);
-      }}
-      style={style}
+      style={{ display: 'block', padding: 0, border: 0, background: 'transparent', color: 'inherit', font: 'inherit', textAlign: 'inherit', cursor: 'pointer', ...style }}
     >
       {children}
-    </div>
+    </button>
   );
 }

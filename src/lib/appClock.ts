@@ -1,23 +1,7 @@
 import { useEffect, useState } from 'react';
 
-/**
- * KisahKita's mock data is written entirely relative to one in-story
- * "now": Selasa, 20 Mei 2026, 15:42 WIB (see the hero clock on Home, the
- * "127 hari bersama" stat, and every relative date in src/data/mockData.ts).
- *
- * Rather than hardcode every countdown/day-diff as a static string, we
- * anchor a real clock to that instant and let it tick forward in real
- * time from page load, then derive all countdowns via genuine Date math
- * (see daysUntil / countdownParts below). Numbers will therefore drift
- * slightly from the design's static screenshot values as time passes —
- * that's the intended outcome of wiring up real date calculations
- * instead of hardcoding them.
- */
-const ANCHOR_MS = new Date('2026-05-20T15:42:00+07:00').getTime();
-const LOAD_REAL_MS = Date.now();
-
 export function appNow(): Date {
-  return new Date(ANCHOR_MS + (Date.now() - LOAD_REAL_MS));
+  return new Date();
 }
 
 /** Live-ticking version of appNow() for components that render a countdown or clock. */

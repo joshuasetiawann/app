@@ -76,7 +76,7 @@ export const RELATIONSHIP: Relationship = {
 };
 
 export const PHOTOS: Photo[] = [
-  { id: 'p1', slotLabel: 'FOTO · PAP MALEM', caption: 'library sampe malem 🥲', meta: 'PARTNER · 16:38 · TAIPEI', takenAt: '2026-05-19T16:38:00', by: 'partner', tags: ['Daily Life'], rotationDeg: -2.2 },
+  { id: 'p1', slotLabel: 'FOTO · PAP MALEM', caption: 'library sampe malem 🥲', meta: 'PARTNER · 16:38 · TAIPEI', takenAt: '2026-05-19T16:38:00', by: 'partner', tags: ['Daily Life'], album: 'Daily Life', rotationDeg: -2.2 },
   { id: 'p2', slotLabel: 'FOTO · BEEF NOODLE', caption: 'enak banget pusing', meta: 'PARTNER · 12:32 · TAIPEI', takenAt: '2026-05-19T12:32:00', by: 'partner', tags: ['Makanan'], rotationDeg: 1.8 },
   { id: 'p3', slotLabel: 'FOTO · NASI PADANG', caption: 'makan siang sendirian', meta: 'JOSHUA · 12:10 · JAKARTA', takenAt: '2026-05-19T12:10:00', by: 'me', tags: ['Makanan'], rotationDeg: -1.4 },
   { id: 'p4', slotLabel: 'FOTO · BOBA RUN', caption: 'boba ke-3 minggu ini 🧋', meta: 'PARTNER · SEN, 19 MEI', takenAt: '2026-05-19T09:40:00', by: 'partner', tags: ['Makanan'], rotationDeg: 2.4 },
@@ -94,12 +94,11 @@ export const PHOTOS: Photo[] = [
 ];
 
 export const ALBUMS: Album[] = [
-  { id: 'al1', icon: '🍜', title: 'Rekam Jejak Kuliner', countLabel: '214 foto', coverGradient: 'linear-gradient(150deg,#FFE0DC,#FFD3B6)' },
-  { id: 'al2', icon: '🇹🇼', title: 'Trip to Taiwan', countLabel: '186 foto', coverGradient: 'linear-gradient(150deg,#D9E9FF,#E3D7F7)' },
-  { id: 'al3', icon: '🥺', title: 'Muka Kangen (PAP)', countLabel: '342 foto', coverGradient: 'linear-gradient(150deg,#FFD9DC,#FFE9F3)' },
-  { id: 'al4', icon: '🎥', title: 'Video Konyol', countLabel: '38 video', coverGradient: 'linear-gradient(150deg,#E2F0CB,#D7EFE2)' },
-  { id: 'al5', icon: '❤️', title: 'Dates', countLabel: '96 foto', coverGradient: 'linear-gradient(150deg,#FFDCE5,#F3E1FF)' },
-  { id: 'al6', icon: '🎁', title: 'Kado & Wishlist', countLabel: '24 file', coverGradient: 'linear-gradient(150deg,#FFF0D9,#FFE3C9)' },
+  { id: 'al1', icon: '🥺', title: 'Daily Life', coverGradient: 'linear-gradient(150deg,#FFD9DC,#FFE9F3)' },
+  { id: 'al2', icon: '🍜', title: 'Makanan', coverGradient: 'linear-gradient(150deg,#FFE0DC,#FFD3B6)' },
+  { id: 'al3', icon: '✈️', title: 'Travel', coverGradient: 'linear-gradient(150deg,#D9E9FF,#E3D7F7)' },
+  { id: 'al4', icon: '❤️', title: 'Dates', coverGradient: 'linear-gradient(150deg,#FFDCE5,#F3E1FF)' },
+  { id: 'al5', icon: '🎁', title: 'Memories', coverGradient: 'linear-gradient(150deg,#FFF0D9,#FFE3C9)' },
 ];
 
 export const INITIAL_MESSAGES: Message[] = [
@@ -134,16 +133,38 @@ export const FOOD_BARS = [
   { icon: '🥗', label: '6%', heightPx: 18 },
 ];
 
-export const CALENDAR_DOTS: Record<number, string> = { 20: 'var(--pk,#FFB7B2)', 22: '#B5EAD7', 25: '#E3D7F7', 27: 'var(--pk,#FFB7B2)', 28: '#E3D7F7' };
-export const TODAY_DOM = 20;
-export const CAL_LEAD_BLANKS = 4;
+function demoEventDate(daysAhead: number, hour: number, minute = 0) {
+  const date = new Date();
+  date.setDate(date.getDate() + daysAhead);
+  date.setHours(hour, minute, 0, 0);
+  return date;
+}
+
+function demoEventWhen(date: Date) {
+  return new Intl.DateTimeFormat('id-ID', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(date);
+}
+
+const DEMO_EVENT_DATES = [
+  demoEventDate(0, 21),
+  demoEventDate(0, 9),
+  demoEventDate(2, 19, 30),
+  demoEventDate(7, 9),
+  demoEventDate(12, 6, 20),
+];
 
 export const EVENTS: CalendarEvent[] = [
-  { id: 'e1', icon: '📞', title: 'Video call malam', when: 'Hari ini · 21:00 WIB', tzNote: 'Di Taipei jadi 22:00 CST ⏳', scope: 'Berdua', colorTag: 'pk' },
-  { id: 'e2', icon: '📚', title: 'Kelas Basis Data', when: 'Hari ini · 09:00 WIB', tzNote: 'Kampus · pengingat 30 mnt', scope: 'Pribadi', colorTag: 'mint' },
-  { id: 'e3', icon: '🏀', title: 'Basket bareng anak kos', when: 'Rabu · 19:30 WIB', tzNote: 'Ulang tiap Rabu', scope: 'Pribadi', colorTag: 'mint' },
-  { id: 'e4', icon: '🎉', title: 'Anniversary bulan ke-5', when: '27 Mei · sepanjang hari', tzNote: 'Pengingat 1 hari sebelum', scope: 'Berdua', colorTag: 'pk' },
-  { id: 'e5', icon: '✈️', title: 'Partner terbang ke Jakarta', when: '1 Jun · 06:20 CST', tzNote: 'Mendarat 10:05 WIB · CI 761', scope: 'Berdua', colorTag: 'pk' },
+  { id: 'e1', icon: '📞', title: 'Video call malam', when: demoEventWhen(DEMO_EVENT_DATES[0]), startsAt: DEMO_EVENT_DATES[0].toISOString(), tzNote: 'Berdua · zona waktu tampil otomatis', scope: 'Berdua', colorTag: 'pk', dayOfMonth: DEMO_EVENT_DATES[0].getDate() },
+  { id: 'e2', icon: '📚', title: 'Kelas Basis Data', when: demoEventWhen(DEMO_EVENT_DATES[1]), startsAt: DEMO_EVENT_DATES[1].toISOString(), tzNote: 'Kampus · pribadi', scope: 'Pribadi', colorTag: 'mint', dayOfMonth: DEMO_EVENT_DATES[1].getDate() },
+  { id: 'e3', icon: '🏀', title: 'Basket bareng anak kos', when: demoEventWhen(DEMO_EVENT_DATES[2]), startsAt: DEMO_EVENT_DATES[2].toISOString(), tzNote: 'Pribadi', scope: 'Pribadi', colorTag: 'mint', dayOfMonth: DEMO_EVENT_DATES[2].getDate() },
+  { id: 'e4', icon: '🎉', title: 'Date night mingguan', when: demoEventWhen(DEMO_EVENT_DATES[3]), startsAt: DEMO_EVENT_DATES[3].toISOString(), tzNote: 'Pengingat belum diaktifkan', scope: 'Berdua', colorTag: 'pk', dayOfMonth: DEMO_EVENT_DATES[3].getDate() },
+  { id: 'e5', icon: '✈️', title: 'Rencana perjalanan berikutnya', when: demoEventWhen(DEMO_EVENT_DATES[4]), startsAt: DEMO_EVENT_DATES[4].toISOString(), tzNote: 'Detail penerbangan belum ditambahkan', scope: 'Berdua', colorTag: 'pk', dayOfMonth: DEMO_EVENT_DATES[4].getDate() },
 ];
 
 export const MEMORIES: Memory[] = [
@@ -326,12 +347,12 @@ export const FAVORITE_THINGS = [
 export const GALLERY_CHIPS = ['Semua', 'Foto', 'Video', 'Makanan', 'Memories', 'Travel', 'Dates', 'Daily Life'];
 export const FOOD_CATS = ['Semua', 'Sarapan', 'Makan Siang', 'Makan Malam', 'Nyemil', 'Dessert', 'Minuman'];
 export const PLACE_CATS = ['Semua', '❤️ Dates', '🍜 Restoran', '🏫 Kampus', '🏠 Rumah', '✈️ Travel', '📸 Memories'];
-export const ATTACH_MENU: { label: string; route?: string; sheet?: string }[] = [
+export const ATTACH_MENU: { label: string; route?: string; sheet?: string; disabled?: boolean }[] = [
   { label: '📸 PAP', sheet: 'pap' },
-  { label: '🖼️ Galeri' },
-  { label: '🎤 Voice' },
-  { label: '📍 Lokasi' },
-  { label: '🗂️ Berkas' },
-  { label: '🎁 Sticker' },
+  { label: '🖼️ Galeri', route: '/gallery' },
+  { label: '🎤 Voice · segera', disabled: true },
+  { label: '📍 Lokasi', route: '/location' },
+  { label: '🗂️ Berkas', route: '/files' },
+  { label: '🎁 Stiker · segera', disabled: true },
   { label: '💌 Love note', route: '/notes' },
 ];

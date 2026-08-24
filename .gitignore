@@ -24,7 +24,13 @@ dist-ssr
 *.sw?
 
 # Visual QA output
-.qa-screenshots
+.qa-*/
+
+# Generated codebase knowledge graph
+graphify-out/
+
+# Supabase CLI local metadata
+supabase/.temp/
 
 # Local env (never commit real Supabase keys)
 .env

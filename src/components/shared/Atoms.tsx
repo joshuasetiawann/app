@@ -6,17 +6,17 @@ export function ChipRow({ items, active, onSelect }: { items: string[]; active: 
   return (
     <div style={{ display: 'flex', gap: 7, overflowX: 'auto', padding: '2px 0 4px' }}>
       {items.map((label) => (
-        <div
+        <button
+          type="button"
           key={label}
           onClick={() => onSelect(label)}
-          role="button"
           aria-pressed={active === label}
           style={pcss(
-            `flex:none;padding:8px 14px;border-radius:100px;cursor:pointer;font:700 11.5px "Nunito",sans-serif;background:${active === label ? 'var(--pk,#FFB7B2)' : 'var(--sf,#fff)'};color:${active === label ? '#5C3A42' : 'var(--ink2,#6B5B60)'};box-shadow:0 2px 8px rgba(120,90,100,.07)`,
+            `flex:none;padding:8px 14px;border:0;border-radius:100px;cursor:pointer;font:700 11.5px "Nunito",sans-serif;background:${active === label ? 'var(--pk,#FFB7B2)' : 'var(--sf,#fff)'};color:${active === label ? '#5C3A42' : 'var(--ink2,#6B5B60)'};box-shadow:0 2px 8px rgba(120,90,100,.07);white-space:nowrap`,
           )}
         >
           {label}
-        </div>
+        </button>
       ))}
     </div>
   );
@@ -49,21 +49,21 @@ export function HeroSurface({ background, children, style }: { background: strin
 }
 
 export function Card({ children, style, onClick }: { children: ReactNode; style?: CSSProperties; onClick?: () => void }) {
+  const cardStyle: CSSProperties = {
+    borderRadius: 24,
+    background: 'var(--sf,#fff)',
+    padding: '16px 17px',
+    boxShadow: 'var(--shadow,0 8px 24px rgba(0,0,0,.04))',
+    cursor: onClick ? 'pointer' : undefined,
+    ...style,
+  };
+
+  if (!onClick) return <div style={cardStyle}>{children}</div>;
+
   return (
-    <div
-      onClick={onClick}
-      role={onClick ? 'button' : undefined}
-      style={{
-        borderRadius: 24,
-        background: 'var(--sf,#fff)',
-        padding: '16px 17px',
-        boxShadow: 'var(--shadow,0 8px 24px rgba(0,0,0,.04))',
-        cursor: onClick ? 'pointer' : undefined,
-        ...style,
-      }}
-    >
+    <button type="button" onClick={onClick} style={{ width: '100%', border: 0, color: 'inherit', font: 'inherit', textAlign: 'left', ...cardStyle }}>
       {children}
-    </div>
+    </button>
   );
 }
 
@@ -72,9 +72,14 @@ export function SectionHeader({ title, action, onAction }: { title: string; acti
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '2px 2px 12px' }}>
       <span style={pcss("font:700 17px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>{title}</span>
       {action && (
-        <span style={pcss("font:700 11.5px 'Nunito',sans-serif;color:var(--pki,#E86F87);cursor:pointer")} onClick={onAction} role="button">
+        <button
+          type="button"
+          style={pcss("padding:0;border:0;background:transparent;font:700 11.5px 'Nunito',sans-serif;color:var(--pki,#E86F87);cursor:pointer")}
+          onClick={onAction}
+          disabled={!onAction}
+        >
           {action}
-        </span>
+        </button>
       )}
     </div>
   );
@@ -114,20 +119,25 @@ export function PolaroidPhoto({
   width?: number;
   onClick?: () => void;
 }) {
-  return (
-    <div
-      onClick={onClick}
-      role={onClick ? 'button' : undefined}
-      style={pcss(
-        `flex:none;width:${width}px;background:#fff;padding:10px 10px 0;border-radius:5px;box-shadow:0 8px 20px rgba(120,90,100,.16);transform:rotate(${rotationDeg}deg);cursor:${onClick ? 'pointer' : 'default'};transition:transform .2s`,
-      )}
-    >
+  const content = (
+    <>
       <PhotoPlaceholder label={label} style={{ borderRadius: 2 }} />
       <div style={{ padding: '9px 3px 4px', textAlign: 'center' }}>
         <div style={pcss("font:600 16px/1.1 'Caveat',cursive;color:var(--ink,#4A4A4A)")}>{caption}</div>
         {meta && <div style={pcss("font:700 8px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:3px")}>{meta}</div>}
       </div>
-    </div>
+    </>
+  );
+  const photoStyle = pcss(
+    `flex:none;width:${width}px;background:#fff;padding:10px 10px 0;border-radius:5px;box-shadow:0 8px 20px rgba(120,90,100,.16);transform:rotate(${rotationDeg}deg);cursor:${onClick ? 'pointer' : 'default'};transition:transform .2s`,
+  );
+
+  if (!onClick) return <div style={photoStyle}>{content}</div>;
+
+  return (
+    <button type="button" onClick={onClick} style={{ ...photoStyle, border: 0, color: 'inherit', font: 'inherit' }}>
+      {content}
+    </button>
   );
 }
 
@@ -168,29 +178,41 @@ export function EmptyState({
       <div style={{ fontSize: 38, marginTop: 14 }}>{emoji}</div>
       <div style={pcss("font:700 13px 'Nunito',sans-serif;color:var(--ink,#4A4A4A);margin-top:10px")}>{title}</div>
       <div style={pcss("font:600 11px/1.5 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:4px")}>{body}</div>
-      <div
+      <button
+        type="button"
         onClick={onAction}
-        role="button"
         style={pcss(
-          `display:inline-block;margin-top:12px;padding:10px 16px;border-radius:100px;background:${actionStyle === 'primary' ? 'var(--pk,#FFB7B2)' : 'var(--sf2,#FFF4F1)'};color:${actionStyle === 'primary' ? '#5C3A42' : 'var(--ink2,#6B5B60)'};font:700 11.5px "Nunito",sans-serif;cursor:pointer`,
+          `display:inline-block;margin-top:12px;padding:10px 16px;border:0;border-radius:100px;background:${actionStyle === 'primary' ? 'var(--pk,#FFB7B2)' : 'var(--sf2,#FFF4F1)'};color:${actionStyle === 'primary' ? '#5C3A42' : 'var(--ink2,#6B5B60)'};font:700 11.5px "Nunito",sans-serif;cursor:pointer`,
         )}
       >
         {actionLabel}
-      </div>
+      </button>
     </div>
   );
 }
 
-export function BigButton({ label, onClick }: { label: ReactNode; onClick: () => void }) {
+export function BigButton({
+  label,
+  onClick,
+  disabled = false,
+  pending = false,
+}: {
+  label: ReactNode;
+  onClick: () => void;
+  disabled?: boolean;
+  pending?: boolean;
+}) {
   return (
     <div style={{ display: 'flex', justifyContent: 'center', padding: '4px 0 10px' }}>
-      <div
+      <button
+        type="button"
         onClick={onClick}
-        role="button"
-        style={pcss("padding:13px 22px;border-radius:100px;background:var(--pk,#FFB7B2);color:#5C3A42;font:700 13px 'Nunito',sans-serif;cursor:pointer;box-shadow:0 8px 20px rgba(255,140,150,.3)")}
+        disabled={disabled || pending}
+        aria-busy={pending || undefined}
+        style={pcss("padding:13px 22px;border:0;border-radius:100px;background:var(--pk,#FFB7B2);color:#5C3A42;font:700 13px 'Nunito',sans-serif;cursor:pointer;box-shadow:0 8px 20px rgba(255,140,150,.3)")}
       >
-        {label}
-      </div>
+        {pending ? <>⏳ {label}</> : label}
+      </button>
     </div>
   );
 }

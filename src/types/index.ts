@@ -43,6 +43,7 @@ export interface Relationship {
 
 export interface Photo {
   id: ID;
+  imageUrl?: string;
   slotLabel: string; // placeholder label standing in for the real image
   caption: string;
   meta: string;
@@ -58,8 +59,8 @@ export interface Album {
   id: ID;
   icon: string;
   title: string;
-  countLabel: string;
-  coverGradient: string;
+  countLabel?: string;
+  coverGradient?: string;
 }
 
 export interface Message {
@@ -67,9 +68,11 @@ export interface Message {
   from: PartnerSlot;
   text?: string;
   photoId?: ID;
+  photoDataUrl?: string;
   time: string;
   read?: boolean;
   reaction?: string;
+  status?: 'sent' | 'queued' | 'failed';
 }
 
 export interface Conversation {
@@ -82,6 +85,8 @@ export type FoodStatus = 'ate' | 'now' | 'not' | '';
 export interface FoodEntry {
   id: ID;
   icon: string;
+  imageUrl?: string;
+  mediaId?: ID;
   name: string;
   time: string;
   by: PartnerSlot;
@@ -98,6 +103,7 @@ export interface CalendarEvent {
   icon: string;
   title: string;
   when: string;
+  startsAt?: ISODateTime;
   tzNote?: string;
   scope: 'Berdua' | 'Pribadi';
   colorTag: 'pk' | 'mint';
@@ -156,6 +162,10 @@ export interface Place {
   category: string;
   rating: number;
   note: string;
+  latitude?: number;
+  longitude?: number;
+  imageUrl?: string;
+  coverMediaId?: ID;
 }
 
 export interface Trip {

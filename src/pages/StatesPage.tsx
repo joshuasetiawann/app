@@ -6,6 +6,24 @@ export default function StatesPage() {
   const { viewport, offline, toggleOffline, openSheet, toast, setLocation } = useAppState();
   const stateCols = viewport === 'mobile' ? '1fr' : 'repeat(3,1fr)';
 
+  const requestLocation = () => {
+    if (!navigator.geolocation) {
+      toast('Perangkat ini tidak mendukung lokasi.');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      () => {
+        setLocation(true);
+        toast('Izin lokasi diberikan ✓');
+      },
+      (error) => {
+        setLocation(false);
+        toast(error.code === error.PERMISSION_DENIED ? 'Izin lokasi masih ditolak.' : 'Lokasi belum bisa dibaca. Coba lagi.');
+      },
+      { enableHighAccuracy: false, timeout: 10_000 },
+    );
+  };
+
   return (
     <ScrollColumn>
       <div style={pcss('border-radius:22px;background:var(--sf2,#FFF4F1);padding:16px 17px')}>
@@ -14,12 +32,12 @@ export default function StatesPage() {
           Semua kondisi yang harus dibikin: loading, kosong, error, offline, izin, upload, sukses. Copy langsung dari sini.
         </div>
         <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
-          <div style={pcss("padding:8px 13px;border-radius:100px;background:var(--sf,#fff);font:700 11px 'Nunito',sans-serif;color:var(--ink2,#6B5B60);cursor:pointer")} onClick={toggleOffline} role="button">
+          <button type="button" style={pcss("padding:8px 13px;border:0;border-radius:100px;background:var(--sf,#fff);font:700 11px 'Nunito',sans-serif;color:var(--ink2,#6B5B60);cursor:pointer")} onClick={toggleOffline} aria-pressed={offline}>
             {offline ? 'Matikan mode offline' : 'Coba mode offline'}
-          </div>
-          <div style={pcss("padding:8px 13px;border-radius:100px;background:var(--sf,#fff);font:700 11px 'Nunito',sans-serif;color:var(--ink2,#6B5B60);cursor:pointer")} onClick={() => openSheet('pap')} role="button">
+          </button>
+          <button type="button" style={pcss("padding:8px 13px;border:0;border-radius:100px;background:var(--sf,#fff);font:700 11px 'Nunito',sans-serif;color:var(--ink2,#6B5B60);cursor:pointer")} onClick={() => openSheet('pap')}>
             Lihat flow upload
-          </div>
+          </button>
         </div>
       </div>
 
@@ -43,13 +61,13 @@ export default function StatesPage() {
           <div style={{ fontSize: 38, marginTop: 14 }}>🧸📷</div>
           <div style={pcss("font:700 13px 'Nunito',sans-serif;color:var(--ink,#4A4A4A);margin-top:10px")}>Belum ada foto nih</div>
           <div style={pcss("font:600 11px/1.5 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:4px")}>Ayo kirim PAP biar kangennya ilang! 🥺</div>
-          <div
-            style={pcss("display:inline-block;margin-top:12px;padding:10px 16px;border-radius:100px;background:var(--pk,#FFB7B2);color:#5C3A42;font:700 11.5px 'Nunito',sans-serif;cursor:pointer")}
+          <button
+            type="button"
+            style={pcss("margin-top:12px;padding:10px 16px;border:0;border-radius:100px;background:var(--pk,#FFB7B2);color:#5C3A42;font:700 11.5px 'Nunito',sans-serif;cursor:pointer")}
             onClick={() => openSheet('pap')}
-            role="button"
           >
             Kirim PAP
-          </div>
+          </button>
         </div>
 
         <div style={pcss('border-radius:22px;background:var(--sf,#fff);padding:17px;box-shadow:var(--shadow,0 8px 24px rgba(0,0,0,.04));text-align:center')}>
@@ -57,27 +75,30 @@ export default function StatesPage() {
           <div style={{ fontSize: 38, marginTop: 14 }}>🍜😢</div>
           <div style={pcss("font:700 13px 'Nunito',sans-serif;color:var(--ink,#4A4A4A);margin-top:10px")}>Ayang belum update makan</div>
           <div style={pcss("font:600 11px/1.5 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:4px")}>Jangan sampai sakit perut ya! 🍜</div>
-          <div
-            style={pcss("display:inline-block;margin-top:12px;padding:10px 16px;border-radius:100px;background:var(--sf2,#FFF4F1);color:var(--ink2,#6B5B60);font:700 11.5px 'Nunito',sans-serif;cursor:pointer")}
-            onClick={() => toast('Nudge dikirim ke Partner 💌')}
-            role="button"
+          <button
+            type="button"
+            disabled
+            title="Pengingat pasangan akan hadir segera"
+            style={pcss("margin-top:12px;padding:10px 16px;border:0;border-radius:100px;background:var(--sf2,#FFF4F1);color:var(--mut,#A99A9E);font:700 11.5px 'Nunito',sans-serif;cursor:not-allowed")}
           >
-            Tanyain
-          </div>
+            Tanyain · segera
+          </button>
         </div>
 
         <div style={pcss('border-radius:22px;background:var(--sf,#fff);padding:17px;box-shadow:var(--shadow,0 8px 24px rgba(0,0,0,.04));text-align:center')}>
           <div style={{ font: '700 9.5px "Nunito",sans-serif', letterSpacing: '.12em', color: '#C2506B', textAlign: 'left' }}>ERROR</div>
           <div style={{ fontSize: 38, marginTop: 14 }}>💔</div>
           <div style={pcss("font:700 13px 'Nunito',sans-serif;color:var(--ink,#4A4A4A);margin-top:10px")}>Koneksi ngambek!</div>
-          <div style={pcss("font:600 11px/1.5 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:4px")}>Coba tap buat refresh ya 🥺</div>
-          <div
-            style={pcss("display:inline-block;margin-top:12px;padding:10px 16px;border-radius:100px;background:#FFE1E1;color:#C2506B;font:700 11.5px 'Nunito',sans-serif;cursor:pointer")}
-            onClick={() => toast('Mencoba lagi... ✓')}
-            role="button"
+          <div style={pcss("font:600 11px/1.5 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:4px")}>Aktifkan mode offline di atas untuk menguji pemulihan.</div>
+          <button
+            type="button"
+            disabled={!offline}
+            title={offline ? 'Kembali ke mode online' : 'Koneksi sedang aktif'}
+            style={pcss(`margin-top:12px;padding:10px 16px;border:0;border-radius:100px;background:${offline ? '#FFE1E1' : 'var(--sf2,#FFF4F1)'};color:${offline ? '#C2506B' : 'var(--mut,#A99A9E)'};font:700 11.5px 'Nunito',sans-serif;cursor:${offline ? 'pointer' : 'not-allowed'}`)}
+            onClick={toggleOffline}
           >
-            Coba lagi
-          </div>
+            {offline ? 'Pulihkan koneksi' : 'Koneksi aktif'}
+          </button>
         </div>
 
         <div style={pcss('border-radius:22px;background:var(--sf,#fff);padding:17px;box-shadow:var(--shadow,0 8px 24px rgba(0,0,0,.04))')}>
@@ -86,31 +107,28 @@ export default function StatesPage() {
           <div style={pcss("font:700 13px 'Nunito',sans-serif;color:var(--ink,#4A4A4A);margin-top:8px")}>Izin lokasi ditolak</div>
           <div style={pcss("font:600 11px/1.5 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:4px")}>Buka Setelan HP › Izin › Lokasi buat nyalain lagi. Kamu tetap bisa pakai fitur lain.</div>
           <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-            <div style={pcss("padding:9px 14px;border-radius:100px;background:var(--pk,#FFB7B2);color:#5C3A42;font:700 11px 'Nunito',sans-serif;cursor:pointer")} onClick={() => { setLocation(true); toast('Izin lokasi diberikan ✓'); }} role="button">
-              Buka setelan
-            </div>
-            <div style={pcss("padding:9px 14px;border-radius:100px;background:var(--sf2,#FFF4F1);color:var(--ink2,#6B5B60);font:700 11px 'Nunito',sans-serif;cursor:pointer")} onClick={() => toast('Oke, nanti aja')} role="button">
-              Nanti
-            </div>
+            <button type="button" style={pcss("padding:9px 14px;border:0;border-radius:100px;background:var(--pk,#FFB7B2);color:#5C3A42;font:700 11px 'Nunito',sans-serif;cursor:pointer")} onClick={requestLocation}>
+              Minta izin lokasi
+            </button>
           </div>
         </div>
 
         <div style={pcss('border-radius:22px;background:var(--sf,#fff);padding:17px;box-shadow:var(--shadow,0 8px 24px rgba(0,0,0,.04))')}>
-          <div style={pcss("font:700 9.5px 'Nunito',sans-serif;letter-spacing:.12em;color:var(--pki,#E86F87)")}>UPLOADING &amp; SUKSES</div>
+          <div style={pcss("font:700 9.5px 'Nunito',sans-serif;letter-spacing:.12em;color:var(--pki,#E86F87)")}>CONTOH UPLOAD &amp; SUKSES</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginTop: 14 }}>
             <div style={pcss('width:34px;height:34px;border-radius:11px;background:var(--sf2,#FFF4F1);display:flex;align-items:center;justify-content:center;font-size:15px')}>⬆️</div>
             <div style={{ flex: 1 }}>
               <div style={{ height: 7, borderRadius: 7, background: 'var(--sf2,#FFF4F1)' }}>
                 <div style={{ width: '64%', height: 7, borderRadius: 7, background: 'linear-gradient(90deg,var(--pk,#FFB7B2),var(--lav,#E3D7F7))' }} />
               </div>
-              <div style={pcss("font:600 9.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:5px")}>Mengunggah 64% · 3 dari 5 foto</div>
+              <div style={pcss("font:600 9.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:5px")}>Pratinjau proses · unggahan PAP memakai flow di atas</div>
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--ln,rgba(74,74,74,.07))' }}>
             <div style={{ width: 34, height: 34, borderRadius: '50%', background: '#E4F5EB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, animation: 'kk-pop .5s ease' }}>✓</div>
             <div>
-              <div style={pcss("font:700 12px 'Nunito',sans-serif;color:var(--ink,#4A4A4A)")}>Semua tersimpan!</div>
-              <div style={pcss("font:600 10px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>Sinkron ke cloud · 5 foto</div>
+              <div style={pcss("font:700 12px 'Nunito',sans-serif;color:var(--ink,#4A4A4A)")}>Contoh kondisi selesai</div>
+              <div style={pcss("font:600 10px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>Sinkronisasi cloud · segera</div>
             </div>
           </div>
         </div>

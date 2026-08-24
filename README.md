@@ -1,136 +1,255 @@
-# KisahKita — Our Space
+# KisahKita — Ruang Kita Berdua
 
-A relationship app for couples in a long-distance relationship: chat, a shared
-photo gallery, a food journal, a synced calendar with timezone-aware
-countdowns, memories, love notes, live location, and more — built as a
-faithful implementation of the approved KisahKita Claude Design.
+[![CI](https://github.com/joshuasetiawann/app/actions/workflows/ci.yml/badge.svg)](https://github.com/joshuasetiawann/app/actions/workflows/ci.yml)
 
-This is Phase 1: the app runs entirely on realistic in-memory mock data.
-It is architected so Supabase can be dropped in later without rewriting any
-screen — see [Supabase migration plan](#supabase-migration-plan) below.
+> Kandidat rilis web produksi untuk pasangan LDR, dengan autentikasi, data privat,
+> sinkronisasi dua arah, media cloud, lokasi, dan Google Drive.
 
-## Running it
+KisahKita adalah rumah digital privat untuk satu pasangan jarak jauh. Dua orang
+membuat akun masing-masing, terhubung dengan satu kode undangan, lalu memakai
+ruang bersama untuk obrolan, galeri, jurnal makan, jadwal, kenangan, dan ritual
+kecil sehari-hari.
+
+## Yang sudah berjalan
+
+- Pendaftaran, masuk, pemulihan password, sesi persisten, edit profil, dan
+  keluar akun.
+- Alur pasangan dua akun: buat ruang, kode undangan tujuh hari, gabung dengan
+  kode, batas dua anggota, pembaruan status, dan pencegahan klaim ruang ketiga.
+- Proteksi rute: pengunjung diarahkan ke halaman masuk; akun yang belum punya
+  pasangan diarahkan ke halaman penyambungan.
+- Mode lokal tanpa konfigurasi backend, termasuk akun demo. Password lokal
+  disimpan sebagai hash PBKDF2 dengan salt, bukan teks biasa.
+- Mode Supabase opsional untuk autentikasi, profil, dan penyambungan pasangan.
+  Skema menyertakan trigger profil, RPC penyambungan atomik, batas anggota, dan
+  Row Level Security untuk data privat pasangan.
+- Shell responsif, tema terang/gelap, animasi yang menghormati
+  `prefers-reduced-motion`, transisi halaman, serta skeleton saat aplikasi dan
+  rute sedang dimuat.
+- Pada mode Supabase, pesan/PAP (typing, antrean offline, dan tanda dibaca),
+  galeri, jurnal makan, acara, kenangan, bab cerita, countdown, surat berkunci,
+  tempat, perjalanan, notifikasi, mood, privasi, lokasi, dan daftar favorit
+  memakai database bersama serta Supabase Realtime.
+- Quick PAP, foto profil, galeri, foto makanan, dan sampul tempat menerima gambar
+  nyata dari kamera atau galeri lalu mengecilkannya di browser. Tombol kamera
+  menyediakan pratinjau langsung melalui `getUserMedia` serta fallback kamera
+  sistem. Galeri mendukung pemilihan album, filter pemilik foto, serta
+  tambah/edit/hapus kategori album.
+- Food Journal menyimpan foto ke Supabase Storage, mendukung edit rating/catatan,
+  hapus catatan beserta file medianya, dan album makanan dinamis yang dapat
+  ditambah, diubah, atau dihapus.
+- Tempat dapat memakai lokasi perangkat saat ini atau pin yang dipilih langsung
+  pada peta OpenStreetMap, memakai foto sampul, dan dihapus bersama file medianya.
+  Lokasi Langsung memakai Geolocation API serta kanal Realtime dengan polling
+  sebagai cadangan.
+- Laci berkas dapat memakai satu folder Google Drive bersama: buat folder,
+  bagikan ke email pasangan, upload, lihat, dan hapus berkas berukuran sampai 5 MB.
+
+Mode lokal cocok untuk pengembangan dan demo satu perangkat. Ia bukan pengganti
+autentikasi produksi dan datanya tidak berpindah antarperangkat. Konten katalog
+contoh seperti foto lama, kenangan, tempat, perjalanan, dan surat hanya tampil
+pada akun demo; akun biasa dimulai dari empty state dan dapat mengisi datanya
+sendiri. Push notification
+di luar aplikasi masih memerlukan service worker/provider push; notifikasi di
+dalam aplikasi sudah dibuat otomatis oleh aktivitas pasangan.
+
+## Menjalankan aplikasi
+
+Prasyarat: Node.js versi LTS yang masih didukung dan npm.
 
 ```bash
 npm install
-npm run dev       # start the dev server
-npm run build     # typecheck + production build
-npm run lint       # oxlint
-npm run preview    # preview the production build
+npm run dev
+```
 
-# Visual + interaction QA (needs `npm run dev` running in another shell).
-# Drives headless Chromium over every route at 5 viewport widths, exercises
-# the main flows, and fails on any console error. Screenshots land in
-# .qa-screenshots/ for comparison against the approved design.
+Perintah pemeriksaan:
+
+```bash
+npm run build       # typecheck + build produksi
+npm run lint        # pemeriksaan statis
+npm run preview     # pratinjau hasil build
+npm run qa:drive    # QA integrasi Google Drive dengan API yang dimock
+```
+
+Tanpa variabel lingkungan, aplikasi otomatis memakai mode lokal. Pilih
+**Lihat ruang demo** untuk masuk cepat, atau buat dua akun dan hubungkan keduanya
+dengan kode pada perangkat yang sama.
+
+## Mengaktifkan Supabase
+
+1. Buat proyek Supabase dan salin `.env.example` menjadi `.env.local`.
+2. Isi URL proyek dan publishable key untuk browser:
+
+   ```dotenv
+   VITE_SUPABASE_URL=https://PROJECT.supabase.co
+   VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+   ```
+
+   `VITE_SUPABASE_ANON_KEY` tetap diterima sebagai fallback untuk proyek lama.
+   Jangan pernah memasukkan `service_role` key ke aplikasi web.
+
+3. Jalankan seluruh [`supabase/schema.sql`](supabase/schema.sql) pada SQL Editor
+   proyek. Skrip ini membuat tabel, trigger profil pengguna baru, RPC
+   `create_couple_space`, `join_couple_by_code`, dan `refresh_couple_invite`,
+   beserta policy RLS-nya.
+4. Setelah itu jalankan
+   [`supabase/migrations/20260824_realtime_sync.sql`](supabase/migrations/20260824_realtime_sync.sql).
+   Migrasi ini mengaktifkan Realtime seluruh menu bersama, bucket PAP privat,
+   read receipt chat, notifikasi aktivitas, data favorit pasangan, dan reset
+   data uji yang aman.
+5. Jalankan
+   [`supabase/migrations/20260824_media_library.sql`](supabase/migrations/20260824_media_library.sql).
+   Migrasi ini menambahkan album dinamis, koordinat dan foto sampul tempat,
+   bucket `media` privat, policy Storage per ruang pasangan, dan Realtime album.
+6. Jalankan
+   [`supabase/migrations/20260824_full_cloud.sql`](supabase/migrations/20260824_full_cloud.sql).
+   Migrasi ini memindahkan tema, mode warna, level animasi, serta jadwal senyap
+   ke profil Supabase dan memasang RPC reset khusus service role.
+7. Atur Site URL dan redirect URL autentikasi agar mencakup alamat aplikasi,
+   termasuk `/auth?mode=reset` untuk pemulihan password.
+8. Restart server pengembangan setelah mengubah `.env.local`.
+
+Jika skema lama sudah pernah dipasang, jalankan
+[`supabase/migrations/20260824_google_drive.sql`](supabase/migrations/20260824_google_drive.sql)
+untuk menambahkan ID folder Drive, email pasangan bagi undangan editor, dan
+policy akses tanpa membuat ulang tabel.
+
+Saat konfigurasi Supabase dan migrasi sinkronisasi aktif, seluruh fitur interaktif
+yang sudah tersedia memakai ruang pasangan yang sama. Konten bersama, profil,
+preferensi tampilan, dan jadwal senyap bersumber dari Supabase. Hanya izin browser,
+token sesi Supabase, serta antrean pesan offline sementara yang tinggal di perangkat.
+Dalam mode Supabase, file gambar berada di bucket Storage privat dan metadata-nya
+berada di database; browser hanya menerima URL bertanda tangan sementara. Dalam
+mode demo lokal, gambar hanya disimpan pada perangkat untuk keperluan QA.
+
+## Mengosongkan seluruh cloud
+
+Reset admin menghapus **seluruh akun Auth, pasangan, profil, aktivitas, dan objek
+bucket `media`** tanpa menjatuhkan tabel, policy, trigger, atau fungsi. Berkas di
+folder Google Drive tidak ikut dihapus karena berada di layanan Google yang terpisah.
+
+1. Pastikan semua migrasi di atas sudah berhasil.
+2. Salin `.env.admin.example` menjadi `.env.admin.local`, lalu isi secret key
+   proyek. Jangan memakai awalan `VITE_` dan jangan memasukkan key ini ke build.
+3. Jalankan dengan project ref yang tercantum pada URL Supabase:
+
+   ```powershell
+   npm run reset:cloud -- --confirm=PROJECT_REF
+   ```
+
+Skrip mengosongkan Storage melalui API terlebih dahulu, menghapus pengguna lewat
+Auth Admin API, membersihkan seluruh tabel aplikasi, lalu memverifikasi semuanya
+benar-benar kosong. Operasi ini permanen.
+
+## Mengaktifkan Google Drive
+
+Google Drive memerlukan **OAuth 2.0 Web Client ID**, bukan API key atau client
+secret. Integrasi memakai scope terbatas `drive.file`, sehingga KisahKita hanya
+dapat mengakses berkas yang dibuat melalui aplikasi.
+
+1. Di Google Cloud Console, aktifkan **Google Drive API**.
+2. Konfigurasikan OAuth consent screen dan tambahkan scope
+   `https://www.googleapis.com/auth/drive.file`.
+3. Buat OAuth Client ID bertipe **Web application**.
+4. Tambahkan origin pengembangan `http://localhost:5173` dan domain produksi ke
+   **Authorized JavaScript origins**.
+5. Isi `.env.local`, lalu restart server:
+
+   ```dotenv
+   VITE_GOOGLE_DRIVE_CLIENT_ID=xxxxxxxxxxxx.apps.googleusercontent.com
+   ```
+
+Saat pengguna menekan **Hubungkan Google Drive**, KisahKita membuat satu folder,
+menyimpan ID-nya pada ruang pasangan, dan mencoba membagikannya sebagai editor
+ke email akun pasangan. Access token hanya disimpan sementara di memori browser.
+
+## QA visual dan interaksi
+
+Jalankan server dalam **mode lokal** di terminal pertama:
+
+```bash
+npm run dev
+```
+
+Lalu jalankan di terminal kedua:
+
+```bash
+npm run qa:visual
+npm run qa:drive
+```
+
+Untuk smoke test Supabase asli, project harus sudah kosong dan server `5173`
+harus memakai `.env.local` produksi. Skrip membuat dua akun terkonfirmasi,
+melakukan pairing dan CRUD lintas dua browser, lalu menghapus seluruh data QA:
+
+```powershell
+npm run qa:production -- --confirm=PROJECT_REF
+```
+
+Guard project kosong dan argumen `--confirm` mencegah skrip ini menyentuh ruang
+yang sudah berisi data pengguna.
+
+Skrip QA memeriksa pengalihan rute tanpa sesi, pendaftaran dua akun, pembuatan
+dan klaim kode pasangan, penolakan akun ketiga, persistensi setelah reload,
+keluar akun, seluruh rute terproteksi, representasi lima ukuran layar, tema,
+chat/PAP bergambar termasuk regresi overlap mobile, jurnal makan, upload galeri,
+CRUD album umum dan album makanan, foto/catatan Food, penghapusan media, kalender,
+kenangan, cerita, countdown, surat, foto/pin/penghapusan tempat, perjalanan, dan
+ping lokasi.
+Tangkapan layar serta laporan error ditulis ke `.qa-screenshots/`.
+
+Variabel opsional:
+
+```bash
+QA_BASE_URL=http://127.0.0.1:5173 npm run qa:visual
+PLAYWRIGHT_CHROMIUM_PATH=/path/to/chromium npm run qa:visual
+```
+
+Pada PowerShell:
+
+```powershell
+$env:QA_BASE_URL = 'http://127.0.0.1:5173'
+$env:PLAYWRIGHT_CHROMIUM_PATH = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
 npm run qa:visual
 ```
 
-No environment variables are required for Phase 1. `.env.example` documents
-the two variables Phase 2 will need.
+## Struktur penting
 
-## Project structure
-
-```
+```text
 src/
-  types/           domain models (User, Memory, FoodEntry, Message, ...)
-  data/mockData.ts single source of truth for dummy content
-  services/        DataService interface + mock implementation (the seam
-                    a future Supabase-backed implementation plugs into)
-  state/AppState.tsx  app-wide UI state: theme, sheets, toasts, chat draft,
-                       food/mood status, filters, privacy toggles, etc.
-  lib/             design tokens, the pcss() CSS-string→React-style helper,
-                    nav config, and the live in-story clock (appClock.ts)
-  components/
-    layout/        Sidebar, Topbar, BottomTabBar, RightRail, AppShell
-    shared/         reusable atoms: cards, chips, photo viewer, bottom
-                    sheet, toast, empty states, progress bars
-  sheets/          the six bottom-sheet flows (more, PAP capture, mood,
-                    new event, delete confirm, love-note reveal) plus the
-                    food-entry creation sheet
-  pages/           the 22 routed screens
-scripts/
-  visual-qa.mjs    headless-browser QA sweep (npm run qa:visual)
-supabase/
-  schema.sql       target Postgres schema + Row Level Security policies
+  pages/AuthPage.tsx          antarmuka masuk, daftar, dan pemulihan
+  pages/PairingPage.tsx       buat/gabung ruang pasangan
+  services/authService.ts     mode lokal dan adapter Supabase
+  services/syncService.ts     data aktivitas bersama + Supabase Realtime
+  state/AuthState.tsx         sesi serta status pasangan
+  state/AppState.tsx          state UI + hidrasi aktivitas bersama
+  components/                 shell dan komponen bersama
+  pages/                      layar fitur
+  data/mockData.ts            konten contoh yang belum masuk backend
+supabase/schema.sql           skema, RPC, grant, dan RLS
+supabase/migrations/20260824_realtime_sync.sql  Realtime, PAP, notifikasi, reset
+supabase/migrations/20260824_media_library.sql  album, media privat, foto/pin tempat
+supabase/migrations/20260824_full_cloud.sql     preferensi cloud + reset admin
+scripts/visual-qa.mjs         QA browser dan tangkapan layar
+scripts/google-drive-qa.mjs   QA Google Drive tanpa menyentuh Drive asli
+scripts/supabase-production-qa.mjs  QA dua akun pada Supabase asli + cleanup
+scripts/reset-supabase.mjs    reset permanen Auth, database, dan Storage
 ```
 
-### Why `pcss()`?
+Kontrol bersama dan alur utama memakai elemen HTML native, label aksesibel,
+focus ring, dialog yang dapat ditutup dengan Escape, dan mode pengurangan
+animasi. Font Quicksand, Nunito, dan Caveat disimpan lokal di `public/fonts/`
+agar tampilan tidak bergantung pada CDN.
 
-The approved design is authored as literal CSS declaration strings
-(`"display:flex;gap:8px;..."`). `src/lib/pcss.ts` parses those strings into
-React style objects at render time, so screen code can carry the *exact*
-values from the design source instead of a hand-translated (and
-easy-to-drift) object literal per element. This is the main lever for pixel
-fidelity to the approved design.
+## Keamanan dan kesiapan rilis
 
-## Design fidelity
-
-- **Design tokens** (`src/lib/theme.ts`): four accent themes (Sakura Bloom,
-  Midnight Call, Matcha Latte, Taipei Night) × light/dark, each resolving to
-  the same token set (`bg`, `sf`, `sf2`, `ink`, `ink2`, `mut`, `ln`,
-  `shadow`, `pk`, `pki`, `lav`) applied as CSS custom properties at the app
-  root — matching the design's `THEMES`/`tok` objects exactly.
-- **Typography**: Quicksand (headings), Nunito (UI text/labels), Caveat
-  (handwritten captions) — the three families the design specifies,
-  **self-hosted** from `public/fonts/` rather than linked from Google's CDN.
-  Linking the CDN made first paint wait on a third-party round-trip (~12s
-  when that host is unreachable, silently falling back to system-ui and
-  losing the design's typography entirely); self-hosting makes the type
-  render identically everywhere and cut measured first paint from ~12.6s to
-  ~0.3s in a sandboxed environment.
-- **Responsive shell**: the layout reproduces the design's four viewport
-  classes (mobile <768, tablet <1024, laptop <1440, desktop ≥1440) with the
-  same structural changes — sidebar width/collapse, right rail visibility,
-  bottom tab bar vs. sidebar nav — rather than scaling one layout down.
-- **The in-canvas viewport switcher** (📱📗💻🖥️) from the original design
-  is preserved as a real feature (forces a viewport + phone/tablet device
-  frame), since it's part of the exported UI, not just a design-tool
-  artifact.
-- **Real date math**: the mock data is written relative to one in-story
-  "now" — 20 Mei 2026, 15:42 WIB. `src/lib/appClock.ts` anchors a live clock
-  to that instant and derives every countdown and day-difference via actual
-  `Date` arithmetic instead of hardcoding numbers. `daysUntil` rounds up and
-  `daysSince` counts inclusively, which is both the natural human reading
-  ("7 hari lagi", "hari ke-127") and what reproduces the design's own
-  figures exactly.
-
-  One deliberate divergence: the design's static copy labels that date
-  "Selasa" (Tuesday), but 20 May 2026 is really a **Wednesday**. Since the
-  brief calls for genuine date calculations, weekday labels are derived from
-  the real calendar and therefore read "Rabu" — consistently, on Home, the
-  chat day divider, and the right rail. The date itself is unchanged.
-
-## Data model & mock data
-
-`src/types/index.ts` defines the domain models; `src/data/mockData.ts`
-seeds them with realistic content matching the design's own narrative
-(Joshua in Jakarta, Partner in Taipei, 127 days into an LDR that started
-14 Jan 2026). `src/services/dataService.ts` wraps that data behind a
-`DataService` interface — screens that need to read/write (Chat, Food
-Journal, Schedule, Memories, Places) go through it rather than importing
-mock arrays directly, so swapping the implementation is a one-line change.
-
-## Supabase migration plan
-
-| Phase | What changes |
-|---|---|
-| **1. Mock data** *(current)* | `dataService = mockDataService` in `src/services/dataService.ts`. No backend. |
-| **2. Supabase Auth** | Add `@supabase/supabase-js`, create a Supabase project, set `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` (see `.env.example`), replace the onboarding screen's static login/verify steps with real Supabase Auth calls (email/password + magic link or OTP). |
-| **3. PostgreSQL** | Run `supabase/schema.sql` against the project. Implement `supabaseDataService: DataService` alongside `mockDataService` in `src/services/dataService.ts`, backed by `@supabase/supabase-js` queries against the tables in the schema. Flip the `dataService` export once it covers every method. |
-| **4. Storage** | Create the `media` and `files` private Storage buckets (see the comment at the bottom of `schema.sql`). Replace the `PhotoPlaceholder`/repeating-pattern thumbnails with real images loaded from signed Storage URLs; wire the PAP-capture sheet and file uploader to actually upload. |
-| **5. Realtime** | Subscribe `ChatPage` to `messages` inserts via Supabase Realtime for live delivery/typing state instead of the client-only mock; same pattern for `location_pings` on the Live Location screen. |
-| **6. RLS/security hardening** | `schema.sql` already ships Row Level Security policies scoping every couple-private table to its two members via `current_couple_id()`. Before going live: review policies for the "large ask" flows (deleting a couple, transferring a media asset), add storage-object policies keyed by the `couple_id` folder prefix, and confirm no `service_role` key is ever shipped to the client. |
-
-The UI never needs to change shape across these phases — every screen reads
-through `DataService`/`AppState`, never through a hardcoded fetch — only the
-implementations behind those seams do.
-
-## Accessibility
-
-Semantic roles/labels on interactive `div`s that stand in for buttons
-(the design uses styled `div`s throughout, not native `<button>`, to hit its
-exact visual spec), keyboard activation on the photo viewer's open targets,
-visible focus rings (`:focus-visible` in `src/index.css`) layered on top of
-the design's own visual language, and `prefers-reduced-motion` is honored
-both at the OS level and via the in-app "Hemat daya" animation-level toggle
-on the Tema screen.
+- Semua tabel pasangan memakai Row Level Security dan hanya dapat dibaca oleh dua
+  profil dalam ruang yang sama.
+- Bucket `media` bersifat privat; aplikasi membuat signed URL sementara.
+- Secret/service-role key hanya dibaca oleh skrip admin lokal dan dilarang memakai
+  awalan `VITE_`.
+- `.env.local`, `.env.admin.local`, keluaran QA, metadata Supabase CLI, hasil build,
+  dan knowledge graph tidak masuk Git.
+- Sebelum rilis: jalankan `npm run lint`, `npm run build`, `npm run qa:visual`, dan
+  `npm run qa:drive`. Build Android/iOS direncanakan pada tahap berikutnya melalui
+  wrapper native setelah pengujian produksi web selesai.

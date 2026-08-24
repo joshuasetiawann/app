@@ -1,12 +1,14 @@
+import { useState } from 'react';
 import { pcss } from '../lib/pcss';
 import { useAppState } from '../state/AppState';
 import { ScrollColumn } from '../components/shared/ScrollColumn';
-import { HeroSurface } from '../components/shared/Atoms';
+import { EmptyState, HeroSurface } from '../components/shared/Atoms';
+import { QuickCreatePanel } from '../components/shared/QuickCreatePanel';
 import { THEMES } from '../lib/theme';
-import { STORY } from '../data/mockData';
 
 export default function StoryPage() {
-  const { theme } = useAppState();
+  const { theme, storyChapters, addStoryChapter, toast } = useAppState();
+  const [creating, setCreating] = useState(false);
   const heroBg = THEMES[theme].hero;
 
   return (
@@ -14,28 +16,44 @@ export default function StoryPage() {
       <HeroSurface background={heroBg} style={pcss('border-radius:26px;padding:20px;text-align:center')}>
         <div style={pcss("font:700 20px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Buku sejarah kita 🌱</div>
         <div style={pcss("font:500 18px 'Caveat',cursive;color:var(--ink2,#6B5B60);margin-top:4px")}>dari pertama ketemu sampai hari ini</div>
+        <button type="button" onClick={() => setCreating((value) => !value)} aria-expanded={creating} style={pcss("margin-top:13px;padding:9px 14px;border:0;border-radius:100px;background:rgba(255,255,255,.64);color:var(--pki,#E86F87);cursor:pointer;font:800 10.5px 'Nunito',sans-serif")}>+ Tulis bab</button>
       </HeroSurface>
+
+      {creating && (
+        <QuickCreatePanel
+          title="Tulis bab baru"
+          description="Bab ini menjadi bagian linimasa bersama dan tersinkron otomatis."
+          submitLabel="Tambahkan ke cerita 🌱"
+          fields={[
+            { name: 'year', label: 'Tahun / periode', defaultValue: String(new Date().getFullYear()), required: true },
+            { name: 'icon', label: 'Emoji', defaultValue: '🌱' },
+            { name: 'title', label: 'Judul bab', placeholder: 'Hari pertama kita kenal', required: true, wide: true },
+            { name: 'place', label: 'Tempat', placeholder: 'Discord / Jakarta / Taipei' },
+            { name: 'note', label: 'Cerita singkat', type: 'textarea', placeholder: 'Apa yang terjadi waktu itu?', wide: true },
+          ]}
+          onCancel={() => setCreating(false)}
+          onSubmit={(values) => {
+            addStoryChapter({ year: values.year, title: values.title, place: values.place || '', note: values.note || '', icon: values.icon || '' });
+            setCreating(false);
+            toast('Bab baru tersimpan untuk kalian 🌱');
+          }}
+        />
+      )}
+
+      {storyChapters.length === 0 && !creating && <EmptyState tag="CERITA KALIAN" emoji="🌱" title="Bab pertama belum ditulis" body="Tulis awal perjalanan kalian; pasanganmu akan langsung melihatnya." actionLabel="Tulis bab pertama" onAction={() => setCreating(true)} />}
+
       <div style={{ paddingLeft: 6 }}>
-        {STORY.map((st, i) => (
-          <div key={st.id} style={{ display: 'flex', gap: 14 }}>
+        {storyChapters.map((chapter, index) => (
+          <div key={chapter.id} style={{ display: 'flex', gap: 14 }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 'none', width: 34 }}>
-              <div style={pcss('width:34px;height:34px;border-radius:50%;background:var(--sf,#fff);box-shadow:0 3px 10px rgba(120,90,100,.12);display:flex;align-items:center;justify-content:center;font-size:15px')}>
-                {st.icon}
-              </div>
-              {i < STORY.length - 1 && <div style={{ flex: 1, width: 2, background: 'var(--ln,rgba(74,74,74,.12))', marginTop: 4 }} />}
+              <div style={pcss('width:34px;height:34px;border-radius:50%;background:var(--sf,#fff);box-shadow:0 3px 10px rgba(120,90,100,.12);display:flex;align-items:center;justify-content:center;font-size:15px')}>{chapter.icon}</div>
+              {index < storyChapters.length - 1 && <div style={{ flex: 1, width: 2, background: 'var(--ln,rgba(74,74,74,.12))', marginTop: 4 }} />}
             </div>
             <div style={{ flex: 1, paddingBottom: 20, minWidth: 0 }}>
-              <div style={pcss("font:700 9.5px 'Nunito',sans-serif;letter-spacing:.1em;color:var(--pki,#E86F87)")}>{st.year}</div>
-              <div style={pcss("font:700 15px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A);margin-top:3px")}>{st.title}</div>
-              <div style={pcss("font:600 11px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:3px")}>{st.place}</div>
-              <div style={pcss("font:500 16px 'Caveat',cursive;color:var(--ink2,#6B5B60);margin-top:4px")}>{st.note}</div>
-              {st.photoSlot && (
-                <div style={{ marginTop: 10, background: '#fff', padding: 8, borderRadius: 6, boxShadow: '0 6px 16px rgba(120,90,100,.13)', maxWidth: 260 }}>
-                  <div style={pcss("aspect-ratio:16/10;background:repeating-linear-gradient(135deg,#EFE6E2 0 8px,#F8F2EE 8px 16px);display:flex;align-items:center;justify-content:center;font:700 8.5px 'Nunito',sans-serif;color:rgba(74,74,74,.3)")}>
-                    {st.photoSlot}
-                  </div>
-                </div>
-              )}
+              <div style={pcss("font:700 9.5px 'Nunito',sans-serif;letter-spacing:.1em;color:var(--pki,#E86F87)")}>{chapter.year}</div>
+              <div style={pcss("font:700 15px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A);margin-top:3px")}>{chapter.title}</div>
+              <div style={pcss("font:600 11px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:3px")}>{chapter.place}</div>
+              <div style={pcss("font:500 16px 'Caveat',cursive;color:var(--ink2,#6B5B60);margin-top:4px")}>{chapter.note}</div>
             </div>
           </div>
         ))}

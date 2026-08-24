@@ -22,7 +22,7 @@ function FallingPetals() {
 }
 
 export function AppShell() {
-  const { viewport, vpForce, cssVars, theme, offline, reduced } = useAppState();
+  const { viewport, vpForce, cssVars, theme, offline, reduced, animLevel } = useAppState();
   const location = useLocation();
 
   const showSidebar = viewport === 'tablet' || viewport === 'laptop' || viewport === 'desktop';
@@ -32,7 +32,7 @@ export function AppShell() {
   const forced = !!vpForce && (vpForce === 'mobile' || vpForce === 'tablet');
 
   return (
-    <div style={{ ...cssVars, height: '100dvh', fontFamily: "'Quicksand',system-ui,sans-serif" }}>
+    <div className={`kk-motion-${animLevel}`} style={{ ...cssVars, height: '100dvh', fontFamily: "'Quicksand',system-ui,sans-serif" }}>
       <div
         style={pcss(
           `position:relative;height:100%;display:flex;align-items:stretch;justify-content:center;padding:${forced ? '44px 20px 20px' : '0'};background:${forced ? '#EFE4E0' : 'var(--bg,#FDFBF7)'};overflow:hidden`,
@@ -65,9 +65,11 @@ export function AppShell() {
                 </div>
               )}
 
-              <div style={pcss(`flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:${isMobile ? '104px' : '26px'}`)}>
-                <Outlet />
-                <div data-screens-end="1" />
+              <div style={pcss(`flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:${isMobile ? 'calc(104px + env(safe-area-inset-bottom))' : '26px'}`)}>
+                <div className="kk-route-enter" key={location.pathname}>
+                  <Outlet />
+                  <div data-screens-end="1" />
+                </div>
               </div>
 
               {isMobile && <BottomTabBar />}

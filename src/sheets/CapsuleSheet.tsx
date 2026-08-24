@@ -1,10 +1,8 @@
 import { pcss } from '../lib/pcss';
-import { useAppState } from '../state/AppState';
 import { SheetPill } from '../components/shared/BottomSheet';
 import { LOVE_NOTES } from '../data/mockData';
 
 export function CapsuleSheetContent() {
-  const { closeSheet, toast } = useAppState();
   const note = LOVE_NOTES.find((n) => n.state === 'open') ?? LOVE_NOTES.find((n) => n.state === 'done') ?? LOVE_NOTES[0];
 
   return (
@@ -18,14 +16,7 @@ export function CapsuleSheetContent() {
         Ditulis {note.from === 'partner' ? 'Partner' : 'Joshua'} · {note.writtenAt}
       </div>
       <div style={{ marginTop: 16 }}>
-        <SheetPill
-          label="Simpan ke Memories"
-          primary
-          onClick={() => {
-            closeSheet();
-            toast('Disimpan ke Memories 📖');
-          }}
-        />
+        <SheetPill label="Simpan ke Memories · belum tersedia" primary disabled />
       </div>
     </div>
   );

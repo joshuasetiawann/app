@@ -25,13 +25,19 @@ export function BottomTabBar() {
         <nav
           aria-label="Navigasi utama"
           style={pcss(
-            'background:var(--sf,#fff);border-top:1px solid var(--ln,rgba(74,74,74,.08));display:grid;grid-template-columns:repeat(5,1fr);padding:9px 4px 16px;text-align:center;box-shadow:0 -6px 20px rgba(120,90,100,.07)',
+            'background:var(--sf,#fff);border-top:1px solid var(--ln,rgba(74,74,74,.08));display:grid;grid-template-columns:repeat(5,1fr);padding:9px 4px max(16px,env(safe-area-inset-bottom));text-align:center;box-shadow:0 -6px 20px rgba(120,90,100,.07)',
           )}
         >
           {TABS.map((t) => {
             const on = location.pathname === t.path;
             return (
-              <div key={t.path} onClick={() => navigate(t.path)} style={{ cursor: 'pointer' }} role="button" aria-current={on ? 'page' : undefined}>
+              <button
+                key={t.path}
+                type="button"
+                onClick={() => navigate(t.path)}
+                aria-current={on ? 'page' : undefined}
+                style={{ width: '100%', padding: 0, border: 0, background: 'transparent', color: 'inherit', font: 'inherit', cursor: 'pointer' }}
+              >
                 <div
                   style={pcss(
                     `width:40px;height:30px;margin:0 auto;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:15px;background:${on ? 'var(--pk,#FFB7B2)' : 'transparent'};opacity:${on ? '1' : '.5'}`,
@@ -46,7 +52,7 @@ export function BottomTabBar() {
                 >
                   {t.label}
                 </div>
-              </div>
+              </button>
             );
           })}
         </nav>

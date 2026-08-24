@@ -27,6 +27,7 @@ export function ScrollColumn({ children, style, maxWidth = 860 }: { children: Re
 }
 
 /** Matches `homeTwoCol`: two columns on tablet+, single column on mobile. */
+// oxlint-disable-next-line react/only-export-components -- colocated responsive hook is part of this component module.
 export function useTwoColTemplate(): string {
   const { viewport } = useAppState();
   return viewport === 'mobile' ? '1fr' : '1fr 1fr';

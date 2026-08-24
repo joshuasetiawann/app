@@ -1,21 +1,39 @@
 {
   "name": "kisahkita",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Ruang digital privat dan realtime untuk pasangan jarak jauh.",
+  "author": {
+    "name": "Joshua Setiawan",
+    "email": "07joshua2020@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joshuasetiawann/app.git"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "qa:visual": "node scripts/visual-qa.mjs"
+    "qa:visual": "node scripts/visual-qa.mjs",
+    "qa:drive": "node scripts/google-drive-qa.mjs",
+    "qa:production": "node scripts/supabase-production-qa.mjs",
+    "reset:cloud": "node scripts/reset-supabase.mjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.112.3",
+    "leaflet": "^1.9.4",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.2"
   },
   "devDependencies": {
+    "@types/leaflet": "^1.9.22",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
