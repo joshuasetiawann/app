@@ -1,9 +1,17 @@
+import { Capacitor } from '@capacitor/core';
+import { SocialLogin } from '@capgo/capacitor-social-login';
+
 const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 const GIS_SCRIPT_ID = 'google-identity-services';
 const GIS_SCRIPT_URL = 'https://accounts.google.com/gsi/client';
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_DRIVE_CLIENT_ID?.trim();
+const GOOGLE_IOS_CLIENT_ID = import.meta.env.VITE_GOOGLE_DRIVE_IOS_CLIENT_ID?.trim();
+const nativePlatform = Capacitor.getPlatform();
+const isNative = Capacitor.isNativePlatform();
 
-export const googleDriveConfigured = Boolean(GOOGLE_CLIENT_ID);
+export const googleDriveConfigured = Boolean(
+  GOOGLE_CLIENT_ID && (nativePlatform !== 'ios' || GOOGLE_IOS_CLIENT_ID),
+);
 export const MAX_DRIVE_UPLOAD_BYTES = 5 * 1024 * 1024;
 
 export interface GoogleDriveFile {
@@ -43,15 +51,36 @@ declare global {
 }
 
 let scriptPromise: Promise<void> | null = null;
+let nativeInitialization: Promise<void> | null = null;
 let accessToken = '';
 let tokenExpiresAt = 0;
 
 function configurationError() {
+  if (nativePlatform === 'ios' && !GOOGLE_IOS_CLIENT_ID) {
+    return new Error('Google Drive untuk iOS belum dikonfigurasi. Isi VITE_GOOGLE_DRIVE_IOS_CLIENT_ID lalu sinkronkan ulang aplikasi.');
+  }
   return new Error('Google Drive belum dikonfigurasi. Isi VITE_GOOGLE_DRIVE_CLIENT_ID lalu restart aplikasi.');
 }
 
 export function prepareGoogleDrive() {
   if (!GOOGLE_CLIENT_ID) return Promise.reject(configurationError());
+  if (isNative) {
+    if (nativePlatform === 'ios' && !GOOGLE_IOS_CLIENT_ID) return Promise.reject(configurationError());
+    if (!nativeInitialization) {
+      nativeInitialization = SocialLogin.initialize({
+        google: {
+          webClientId: GOOGLE_CLIENT_ID,
+          iOSClientId: GOOGLE_IOS_CLIENT_ID,
+          iOSServerClientId: GOOGLE_CLIENT_ID,
+          mode: 'online',
+        },
+      }).catch((error) => {
+        nativeInitialization = null;
+        throw error;
+      });
+    }
+    return nativeInitialization;
+  }
   if (window.google?.accounts.oauth2) return Promise.resolve();
   if (scriptPromise) return scriptPromise;
 
@@ -83,6 +112,29 @@ export function hasGoogleDriveSession() {
 
 export async function connectGoogleDrive(loginHint?: string) {
   await prepareGoogleDrive();
+  if (isNative) {
+    try {
+      const { result } = await SocialLogin.login({
+        provider: 'google',
+        options: { scopes: [DRIVE_SCOPE], forceRefreshToken: true },
+      });
+      if (result.responseType !== 'online' || !result.accessToken?.token) {
+        throw new Error('Google belum memberikan token akses Drive. Periksa konfigurasi OAuth Android/iOS dan izinnya.');
+      }
+      accessToken = result.accessToken.token;
+      const expires = result.accessToken.expires ? Date.parse(result.accessToken.expires) : Number.NaN;
+      tokenExpiresAt = Number.isFinite(expires) ? expires : Date.now() + 3_600_000;
+      return;
+    } catch (error) {
+      const code = error && typeof error === 'object' && 'code' in error ? String(error.code) : '';
+      if (code === 'USER_CANCELLED') throw new Error('Pemilihan akun Google dibatalkan.');
+      const message = error instanceof Error ? error.message : '';
+      if (/10|developer_error|configuration/i.test(message)) {
+        throw new Error('OAuth Google native belum cocok. Periksa package/bundle ID serta SHA-1 aplikasi di Google Cloud Console.');
+      }
+      throw error;
+    }
+  }
   if (!GOOGLE_CLIENT_ID || !window.google?.accounts.oauth2) throw configurationError();
   const oauth2 = window.google.accounts.oauth2;
 
@@ -116,6 +168,10 @@ export function disconnectGoogleDrive() {
   const token = accessToken;
   accessToken = '';
   tokenExpiresAt = 0;
+  if (isNative) {
+    void SocialLogin.logout({ provider: 'google' }).catch(() => undefined);
+    return;
+  }
   if (token && window.google?.accounts.oauth2) window.google.accounts.oauth2.revoke(token);
 }
 

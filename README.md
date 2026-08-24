@@ -2,8 +2,9 @@
 
 [![CI](https://github.com/joshuasetiawann/app/actions/workflows/ci.yml/badge.svg)](https://github.com/joshuasetiawann/app/actions/workflows/ci.yml)
 
-> Kandidat rilis web produksi untuk pasangan LDR, dengan autentikasi, data privat,
-> sinkronisasi dua arah, media cloud, lokasi, dan Google Drive.
+> Kandidat rilis produksi web, Android, dan iOS untuk pasangan LDR, dengan
+> autentikasi, data privat, sinkronisasi dua arah, media cloud, lokasi, dan
+> Google Drive.
 
 KisahKita adalah rumah digital privat untuk satu pasangan jarak jauh. Dua orang
 membuat akun masing-masing, terhubung dengan satu kode undangan, lalu memakai
@@ -44,6 +45,9 @@ kecil sehari-hari.
   sebagai cadangan.
 - Laci berkas dapat memakai satu folder Google Drive bersama: buat folder,
   bagikan ke email pasangan, upload, lihat, dan hapus berkas berukuran sampai 5 MB.
+- Wrapper native Capacitor untuk Android/iOS sudah tersedia, lengkap dengan ikon
+  dan splash screen, safe area, deep link pemulihan akun, izin kamera/lokasi/
+  notifikasi, notifikasi lokal, dan login Google Drive native.
 
 Mode lokal cocok untuk pengembangan dan demo satu perangkat. Ia bukan pengganti
 autentikasi produksi dan datanya tidak berpindah antarperangkat. Konten katalog
@@ -106,7 +110,8 @@ dengan kode pada perangkat yang sama.
    Migrasi ini memindahkan tema, mode warna, level animasi, serta jadwal senyap
    ke profil Supabase dan memasang RPC reset khusus service role.
 7. Atur Site URL dan redirect URL autentikasi agar mencakup alamat aplikasi,
-   termasuk `/auth?mode=reset` untuk pemulihan password.
+   termasuk `/auth?mode=reset` untuk web dan `kisahkita://auth**` untuk aplikasi
+   Android/iOS.
 8. Restart server pengembangan setelah mengubah `.env.local`.
 
 Jika skema lama sudah pernah dipasang, jalankan
@@ -162,6 +167,71 @@ dapat mengakses berkas yang dibuat melalui aplikasi.
 Saat pengguna menekan **Hubungkan Google Drive**, KisahKita membuat satu folder,
 menyimpan ID-nya pada ruang pasangan, dan mencoba membagikannya sebagai editor
 ke email akun pasangan. Access token hanya disimpan sementara di memori browser.
+
+Untuk APK Android, buat satu OAuth Client ID tambahan bertipe **Android** pada
+project Google Cloud yang sama:
+
+- Package name: `com.joshuasetiawan.kisahkita`
+- SHA-1 debug saat ini: `DC:49:F7:0F:3A:41:6C:47:D1:D7:EE:F3:26:82:43:08:06:D9:10:8E`
+
+Client ID Android tidak dimasukkan ke `.env.local`; aplikasi tetap memakai Web
+Client ID melalui `VITE_GOOGLE_DRIVE_CLIENT_ID`. Saat membuat keystore rilis,
+tambahkan juga OAuth Client Android dengan SHA-1 sertifikat **release**, karena
+nilainya berbeda dari debug.
+
+Untuk iOS, buat OAuth Client ID bertipe **iOS** dengan bundle ID
+`com.joshuasetiawan.kisahkita`, lalu isi dan terapkan konfigurasinya:
+
+```dotenv
+VITE_GOOGLE_DRIVE_IOS_CLIENT_ID=xxxxxxxxxxxx.apps.googleusercontent.com
+```
+
+```bash
+npm run ios:configure-google
+npm run ios:sync
+```
+
+Skrip tersebut memasang `GIDClientID`, server client ID, dan reversed client-ID
+URL scheme ke `Info.plist`. Jangan memakai popup OAuth web di aplikasi native;
+KisahKita otomatis memakai SDK login Google native pada Android/iOS.
+
+## Android APK dan proyek iOS
+
+Prasyarat Android: JDK 21, Android SDK/API 36, dan Android Studio. Buat APK debug
+yang dapat langsung dipasang dengan:
+
+```bash
+npm run android:apk
+```
+
+Hasilnya disalin ke `artifacts/KisahKita-1.0.0-debug.apk`. Untuk menjalankan lewat
+USB/emulator atau membuka project native:
+
+```bash
+npm run android:run
+npm run android:open
+```
+
+APK debug cocok untuk pengujian perangkat sendiri, belum untuk Play Store.
+Publikasi produksi memerlukan keystore milik aplikasi dan build Android App Bundle
+(`.aab`) bertanda tangan; jangan commit file keystore atau password-nya.
+
+Project iOS berada di `ios/App` dan sudah disinkronkan beserta Swift Package,
+privacy manifest, permission description, ikon, splash, dan deep link. Build
+`.ipa` harus dilakukan di macOS dengan Xcode 26 atau lebih baru, Apple Developer
+Team, bundle ID yang sudah didaftarkan, serta signing/provisioning profile:
+
+```bash
+npm run ios:sync
+npm run ios:open
+```
+
+Di Xcode pilih target **App → Signing & Capabilities**, pilih Team, uji pada
+iPhone, lalu gunakan **Product → Archive** untuk TestFlight/App Store. Kamera,
+album foto, geolokasi, dan notifikasi akan meminta izin native ketika dipakai.
+Notifikasi aktivitas ketika aplikasi benar-benar tertutup masih membutuhkan
+push provider (APNs/FCM); implementasi saat ini mencakup notifikasi dalam aplikasi
+dan notifikasi lokal native.
 
 ## QA visual dan interaksi
 
@@ -232,8 +302,12 @@ supabase/migrations/20260824_media_library.sql  album, media privat, foto/pin te
 supabase/migrations/20260824_full_cloud.sql     preferensi cloud + reset admin
 scripts/visual-qa.mjs         QA browser dan tangkapan layar
 scripts/google-drive-qa.mjs   QA Google Drive tanpa menyentuh Drive asli
+scripts/build-android.mjs     build APK debug + salin ke artifacts
+scripts/configure-ios-google.mjs  pasang kredensial OAuth iOS ke Info.plist
 scripts/supabase-production-qa.mjs  QA dua akun pada Supabase asli + cleanup
 scripts/reset-supabase.mjs    reset permanen Auth, database, dan Storage
+android/                      project native Android
+ios/                          project native iOS
 ```
 
 Kontrol bersama dan alur utama memakai elemen HTML native, label aksesibel,
@@ -250,6 +324,7 @@ agar tampilan tidak bergantung pada CDN.
   awalan `VITE_`.
 - `.env.local`, `.env.admin.local`, keluaran QA, metadata Supabase CLI, hasil build,
   dan knowledge graph tidak masuk Git.
-- Sebelum rilis: jalankan `npm run lint`, `npm run build`, `npm run qa:visual`, dan
-  `npm run qa:drive`. Build Android/iOS direncanakan pada tahap berikutnya melalui
-  wrapper native setelah pengujian produksi web selesai.
+- Sebelum rilis: jalankan `npm run lint`, `npm run build`, `npm run qa:visual`,
+  `npm run qa:drive`, serta `npm run android:apk`. Android/iOS sekarang memakai
+  wrapper native; store release tetap memerlukan signing milik Joshua serta
+  pengujian pada perangkat fisik.

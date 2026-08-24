@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="kk-grad" x1="128" y1="96" x2="896" y2="928" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFB7B2"/>
+      <stop offset="1" stop-color="#E3D7F7"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="288" fill="#FDFBF7"/>
+  <rect x="96" y="96" width="832" height="832" rx="272" fill="url(#kk-grad)"/>
+  <path d="M512 760c-10 0-20-4-28-10-72-57-134-111-180-162-51-56-80-110-80-167 0-84 66-149 148-149 48 0 92 23 120 59 7 8 20 8 27 0 28-36 72-59 120-59 82 0 148 65 148 149 0 57-29 111-80 167-46 51-108 105-180 162-8 6-18 10-28 10z" fill="#fff"/>
+</svg>

@@ -58,7 +58,7 @@ export function AuthStateProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>('loading');
   const [snapshot, setSnapshot] = useState<AuthSnapshot | null>(null);
   const [bootError, setBootError] = useState('');
-  const [recovery, setRecovery] = useState(false);
+  const [recovery, setRecovery] = useState(() => new URLSearchParams(window.location.search).get('mode') === 'reset');
 
   const commit = useCallback((next: AuthSnapshot | null) => {
     setSnapshot(next);
@@ -94,11 +94,17 @@ export function AuthStateProvider({ children }: { children: ReactNode }) {
       void load();
     });
     const onFocus = () => void load();
+    const onMobileRecovery = () => {
+      setRecovery(true);
+      void load();
+    };
     window.addEventListener('focus', onFocus);
+    window.addEventListener('kk-auth-recovery', onMobileRecovery);
     return () => {
       active = false;
       unsubscribe();
       window.removeEventListener('focus', onFocus);
+      window.removeEventListener('kk-auth-recovery', onMobileRecovery);
     };
   }, [commit]);
 

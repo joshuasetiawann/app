@@ -1,10 +1,15 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { pcss } from '../lib/pcss';
 import { useAppState } from '../state/AppState';
 import { useAuthState } from '../state/AuthState';
 import { ScrollColumn } from '../components/shared/ScrollColumn';
 import { THEMES } from '../lib/theme';
+import {
+  enableDeviceNotifications,
+  getDeviceNotificationPermission,
+  type DeviceNotificationPermission,
+} from '../lib/native';
 
 interface SettingRow {
   icon: string;
@@ -36,7 +41,7 @@ export default function SettingsPage() {
   const [logoutError, setLogoutError] = useState('');
   const [resetPending, setResetPending] = useState(false);
   const [resetError, setResetError] = useState('');
-  const [pushPermission, setPushPermission] = useState<NotificationPermission | 'unsupported'>(() => 'Notification' in window ? Notification.permission : 'unsupported');
+  const [pushPermission, setPushPermission] = useState<DeviceNotificationPermission>('default');
   const [quietOpen, setQuietOpen] = useState(false);
   const [quietDraft, setQuietDraft] = useState(quietHours);
   const startedAt = auth.couple?.startedAt;
@@ -44,18 +49,19 @@ export default function SettingsPage() {
     ? new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(`${startedAt}T00:00:00`))
     : 'Belum diatur';
 
+  useEffect(() => {
+    void getDeviceNotificationPermission().then(setPushPermission).catch(() => setPushPermission('unsupported'));
+  }, []);
+
   const enableNotifications = async () => {
-    if (!('Notification' in window)) {
-      toast('Browser ini belum mendukung notifikasi perangkat');
-      return;
-    }
-    const permission = await Notification.requestPermission();
-    setPushPermission(permission);
-    if (permission === 'granted') {
-      try { new Notification('KisahKita siap 💗', { body: 'Notifikasi perangkat sudah diizinkan.' }); } catch { /* Some mobile browsers require an installed PWA. */ }
-      toast('Izin notifikasi perangkat aktif 🔔');
-    } else {
-      toast(permission === 'denied' ? 'Izin notifikasi diblokir di pengaturan browser' : 'Izin notifikasi belum diberikan');
+    try {
+      const permission = await enableDeviceNotifications();
+      setPushPermission(permission);
+      if (permission === 'granted') toast('Izin notifikasi perangkat aktif 🔔');
+      else toast(permission === 'denied' ? 'Izin notifikasi diblokir di pengaturan perangkat' : 'Izin notifikasi belum diberikan');
+    } catch {
+      setPushPermission('unsupported');
+      toast('Pengaturan notifikasi perangkat belum dapat dibuka');
     }
   };
 
@@ -103,7 +109,7 @@ export default function SettingsPage() {
       title: 'NOTIFIKASI',
       rows: [
         { icon: '🔔', label: 'Pusat notifikasi', value: unreadCount ? `${unreadCount} belum dibaca` : 'Semua terbaca', onClick: () => navigate('/notif') },
-        { icon: '📲', label: 'Izin notifikasi perangkat', value: pushPermission === 'granted' ? 'Aktif' : pushPermission === 'denied' ? 'Diblokir browser' : pushPermission === 'unsupported' ? 'Tidak didukung' : 'Ketuk untuk aktifkan', onClick: () => void enableNotifications() },
+        { icon: '📲', label: 'Izin notifikasi perangkat', value: pushPermission === 'granted' ? 'Aktif' : pushPermission === 'denied' ? 'Diblokir perangkat' : pushPermission === 'unsupported' ? 'Tidak didukung' : 'Ketuk untuk aktifkan', onClick: () => void enableNotifications() },
         { icon: '🌙', label: 'Jadwal senyap', value: `${quietHours.from}–${quietHours.to}`, onClick: () => { setQuietDraft(quietHours); setQuietOpen((value) => !value); } },
       ],
     },

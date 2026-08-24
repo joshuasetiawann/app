@@ -1,4 +1,5 @@
 import { createClient, type User } from '@supabase/supabase-js';
+import { Capacitor } from '@capacitor/core';
 
 export type AuthMode = 'local' | 'supabase';
 
@@ -526,9 +527,37 @@ export async function signOut() {
 export async function resetPassword(email: string, newPassword?: string) {
   if (!supabase) return localResetPassword(email, newPassword);
   const { error } = await supabase.auth.resetPasswordForEmail(normalizeEmail(email), {
-    redirectTo: `${window.location.origin}/auth?mode=reset`,
+    redirectTo: Capacitor.isNativePlatform()
+      ? 'kisahkita://auth?mode=reset'
+      : `${window.location.origin}/auth?mode=reset`,
   });
   throwRemoteError(error);
+}
+
+export async function completeMobileAuthRedirect(callbackUrl: string) {
+  if (!supabase) return false;
+  const url = new URL(callbackUrl);
+  if (url.protocol !== 'kisahkita:' || url.hostname !== 'auth') return false;
+
+  const params = new URLSearchParams(url.search);
+  const fragment = new URLSearchParams(url.hash.replace(/^#/, ''));
+  const read = (key: string) => params.get(key) || fragment.get(key);
+  const code = read('code');
+  const accessToken = read('access_token');
+  const refreshToken = read('refresh_token');
+  const recovery = read('type') === 'recovery' || params.get('mode') === 'reset';
+
+  if (code) {
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    throwRemoteError(error);
+  } else if (accessToken && refreshToken) {
+    const { error } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+    throwRemoteError(error);
+  }
+
+  window.history.replaceState(null, '', recovery ? '/auth?mode=reset' : '/auth');
+  window.dispatchEvent(new PopStateEvent('popstate'));
+  return recovery;
 }
 
 export async function updatePassword(password: string) {

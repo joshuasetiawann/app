@@ -483,6 +483,18 @@ textarea:focus-visible,
   font-family: 'Nunito', sans-serif;
 }
 
+@supports (padding: max(0px)) {
+  .kk-auth-page {
+    padding-top: max(clamp(14px, 3vw, 38px), env(safe-area-inset-top));
+    padding-bottom: max(clamp(14px, 3vw, 38px), env(safe-area-inset-bottom));
+  }
+
+  .kk-pair-page {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: max(56px, env(safe-area-inset-bottom));
+  }
+}
+
 .kk-auth-page button,
 .kk-pair-page button {
   font: inherit;
@@ -927,7 +939,7 @@ textarea:focus-visible,
 .kk-pair-success .kk-pair-text-button { display: block; margin: 12px auto 0; }
 
 @media (max-width: 900px) {
-  .kk-auth-page { padding: 0; place-items: stretch; overflow: auto; }
+  .kk-auth-page { padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); place-items: stretch; overflow: auto; }
   .kk-auth-shell { display: block; min-height: 100dvh; border: 0; border-radius: 0; box-shadow: none; }
   .kk-auth-story { min-height: 245px; padding: 27px 24px 31px; }
   .kk-auth-story-copy { margin-top: 42px; }

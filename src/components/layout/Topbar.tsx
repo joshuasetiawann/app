@@ -78,7 +78,7 @@ export function Topbar() {
   return (
     <header
       style={pcss(
-        `display:flex;align-items:center;justify-content:space-between;gap:12px;padding:${isMobile ? '14px 16px 10px' : '18px 22px 12px'};flex:none`,
+        `display:flex;align-items:center;justify-content:space-between;gap:12px;padding:${isMobile ? 'calc(14px + env(safe-area-inset-top)) 16px 10px' : '18px 22px 12px'};flex:none`,
       )}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 11, minWidth: 0 }}>
