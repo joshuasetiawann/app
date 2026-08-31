@@ -1,0 +1,8 @@
+android
+ios
+artifacts
+.qa-*
+scripts
+supabase
+README.md
+.env*

@@ -37,3 +37,4 @@ supabase/.temp/
 .env
 .env.local
 .env.*.local
+.vercel
