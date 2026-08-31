@@ -1,5 +1,7 @@
 import { createClient, type User } from '@supabase/supabase-js';
 import { Capacitor } from '@capacitor/core';
+import { SocialLogin } from '@capgo/capacitor-social-login';
+import { prepareNativeGoogle } from './googleIdentityService';
 
 export type AuthMode = 'local' | 'supabase';
 
@@ -422,6 +424,7 @@ function friendlyError(message: string) {
   if (/space name must contain/i.test(message)) return 'Nama ruang perlu berisi 1–80 karakter.';
   if (/authentication required/i.test(message)) return 'Sesi sudah berakhir. Silakan masuk lagi.';
   if (/profile not found/i.test(message)) return 'Profil akun belum siap. Muat ulang lalu coba lagi.';
+  if (/provider.*(disabled|enabled|unsupported)/i.test(message)) return 'Login Google belum diaktifkan di Supabase.';
   return message;
 }
 
@@ -513,6 +516,47 @@ export async function signIn(email: string, password: string) {
   const { data, error } = await supabase.auth.signInWithPassword({ email: normalizeEmail(email), password });
   throwRemoteError(error);
   return remoteSnapshot(data.user ?? undefined);
+}
+
+export async function signInWithGoogle() {
+  if (!supabase) throw new Error('Login Google membutuhkan koneksi Supabase.');
+
+  if (!Capacitor.isNativePlatform()) {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth`,
+        queryParams: { prompt: 'select_account' },
+      },
+    });
+    throwRemoteError(error);
+    return null;
+  }
+
+  await prepareNativeGoogle();
+  try {
+    const { result } = await SocialLogin.login({
+      provider: 'google',
+      options: { scopes: ['email', 'profile'] },
+    });
+    if (result.responseType !== 'online' || !result.idToken) {
+      throw new Error('Google tidak mengirim identitas akun. Coba pilih akun lagi.');
+    }
+    const { data, error } = await supabase.auth.signInWithIdToken({
+      provider: 'google',
+      token: result.idToken,
+    });
+    throwRemoteError(error);
+    return remoteSnapshot(data.user ?? undefined);
+  } catch (error) {
+    const code = error && typeof error === 'object' && 'code' in error ? String(error.code) : '';
+    if (code === 'USER_CANCELLED') throw new Error('Pemilihan akun Google dibatalkan.');
+    const message = error instanceof Error ? error.message : '';
+    if (/28444|developer_error|configuration/i.test(message)) {
+      throw new Error('OAuth Google Android belum cocok. Periksa package name, SHA-1, dan Web Client ID.');
+    }
+    throw error;
+  }
 }
 
 export async function signOut() {

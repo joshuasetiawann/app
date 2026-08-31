@@ -1,16 +1,20 @@
 import { Capacitor } from '@capacitor/core';
 import { SocialLogin } from '@capgo/capacitor-social-login';
+import {
+  GOOGLE_IOS_CLIENT_ID,
+  GOOGLE_WEB_CLIENT_ID,
+  googleNativeConfigurationError,
+  prepareNativeGoogle,
+} from './googleIdentityService';
 
 const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 const GIS_SCRIPT_ID = 'google-identity-services';
 const GIS_SCRIPT_URL = 'https://accounts.google.com/gsi/client';
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_DRIVE_CLIENT_ID?.trim();
-const GOOGLE_IOS_CLIENT_ID = import.meta.env.VITE_GOOGLE_DRIVE_IOS_CLIENT_ID?.trim();
 const nativePlatform = Capacitor.getPlatform();
 const isNative = Capacitor.isNativePlatform();
 
 export const googleDriveConfigured = Boolean(
-  GOOGLE_CLIENT_ID && (nativePlatform !== 'ios' || GOOGLE_IOS_CLIENT_ID),
+  GOOGLE_WEB_CLIENT_ID && (nativePlatform !== 'ios' || GOOGLE_IOS_CLIENT_ID),
 );
 export const MAX_DRIVE_UPLOAD_BYTES = 5 * 1024 * 1024;
 
@@ -51,35 +55,18 @@ declare global {
 }
 
 let scriptPromise: Promise<void> | null = null;
-let nativeInitialization: Promise<void> | null = null;
 let accessToken = '';
 let tokenExpiresAt = 0;
 
 function configurationError() {
-  if (nativePlatform === 'ios' && !GOOGLE_IOS_CLIENT_ID) {
-    return new Error('Google Drive untuk iOS belum dikonfigurasi. Isi VITE_GOOGLE_DRIVE_IOS_CLIENT_ID lalu sinkronkan ulang aplikasi.');
-  }
-  return new Error('Google Drive belum dikonfigurasi. Isi VITE_GOOGLE_DRIVE_CLIENT_ID lalu restart aplikasi.');
+  return googleNativeConfigurationError()
+    ?? new Error('Google Drive belum dikonfigurasi. Isi VITE_GOOGLE_DRIVE_CLIENT_ID lalu restart aplikasi.');
 }
 
 export function prepareGoogleDrive() {
-  if (!GOOGLE_CLIENT_ID) return Promise.reject(configurationError());
+  if (!GOOGLE_WEB_CLIENT_ID) return Promise.reject(configurationError());
   if (isNative) {
-    if (nativePlatform === 'ios' && !GOOGLE_IOS_CLIENT_ID) return Promise.reject(configurationError());
-    if (!nativeInitialization) {
-      nativeInitialization = SocialLogin.initialize({
-        google: {
-          webClientId: GOOGLE_CLIENT_ID,
-          iOSClientId: GOOGLE_IOS_CLIENT_ID,
-          iOSServerClientId: GOOGLE_CLIENT_ID,
-          mode: 'online',
-        },
-      }).catch((error) => {
-        nativeInitialization = null;
-        throw error;
-      });
-    }
-    return nativeInitialization;
+    return prepareNativeGoogle();
   }
   if (window.google?.accounts.oauth2) return Promise.resolve();
   if (scriptPromise) return scriptPromise;
@@ -135,7 +122,7 @@ export async function connectGoogleDrive(loginHint?: string) {
       throw error;
     }
   }
-  if (!GOOGLE_CLIENT_ID || !window.google?.accounts.oauth2) throw configurationError();
+  if (!GOOGLE_WEB_CLIENT_ID || !window.google?.accounts.oauth2) throw configurationError();
   const oauth2 = window.google.accounts.oauth2;
 
   return new Promise<void>((resolve, reject) => {
@@ -145,7 +132,7 @@ export async function connectGoogleDrive(loginHint?: string) {
       action();
     };
     const client = oauth2.initTokenClient({
-      client_id: GOOGLE_CLIENT_ID,
+      client_id: GOOGLE_WEB_CLIENT_ID,
       scope: DRIVE_SCOPE,
       callback: (response) => {
         if (response.error || !response.access_token) {

@@ -17,6 +17,17 @@ function HeartMark() {
   );
 }
 
+function GoogleMark() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="#4285F4" d="M21.6 12.2c0-.7-.1-1.4-.2-2.1H12v4h5.4a4.6 4.6 0 0 1-2 3v2.6h3.2c1.9-1.7 3-4.3 3-7.5Z" />
+      <path fill="#34A853" d="M12 22c2.7 0 5-.9 6.6-2.3l-3.2-2.6c-.9.6-2 1-3.4 1a5.8 5.8 0 0 1-5.5-4H3.2v2.7A10 10 0 0 0 12 22Z" />
+      <path fill="#FBBC05" d="M6.5 14a6 6 0 0 1 0-4V7.3H3.2a10 10 0 0 0 0 9.4L6.5 14Z" />
+      <path fill="#EA4335" d="M12 5.9c1.5 0 2.8.5 3.8 1.5l2.9-2.8A9.7 9.7 0 0 0 3.2 7.3L6.5 10A5.8 5.8 0 0 1 12 5.9Z" />
+    </svg>
+  );
+}
+
 export default function AuthPage() {
   const auth = useAuthState();
   const navigate = useNavigate();
@@ -119,6 +130,20 @@ export default function AuthPage() {
     }
   };
 
+  const continueWithGoogle = async () => {
+    setBusy(true);
+    setError('');
+    setSuccess('');
+    try {
+      const snapshot = await auth.signInWithGoogleAccount();
+      if (snapshot) navigate(destination(!!snapshot.partner), { replace: true });
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Login Google belum berhasil.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const formTitle = view === 'signup'
     ? 'Bikin akunmu'
     : view === 'forgot'
@@ -178,6 +203,16 @@ export default function AuthPage() {
             <h2>{formTitle}</h2>
             <p>{formCopy}</p>
           </div>
+
+          {auth.mode === 'supabase' && (view === 'login' || view === 'signup') && (
+            <>
+              <button className="kk-google-auth" type="button" onClick={continueWithGoogle} disabled={busy}>
+                {busy ? <span className="kk-mini-spinner" aria-hidden="true" /> : <GoogleMark />}
+                Lanjutkan dengan Google
+              </button>
+              <div className="kk-auth-divider"><span>atau dengan email</span></div>
+            </>
+          )}
 
           <form className="kk-auth-form" onSubmit={submit} noValidate>
             {view === 'signup' && (

@@ -94,7 +94,10 @@ as $$
 declare
   profile_name text;
 begin
-  profile_name := nullif(pg_catalog.btrim(new.raw_user_meta_data ->> 'name'), '');
+  profile_name := coalesce(
+    nullif(pg_catalog.btrim(new.raw_user_meta_data ->> 'name'), ''),
+    nullif(pg_catalog.btrim(new.raw_user_meta_data ->> 'full_name'), '')
+  );
   profile_name := coalesce(
     profile_name,
     nullif(pg_catalog.split_part(coalesce(new.email, ''), '@', 1), ''),

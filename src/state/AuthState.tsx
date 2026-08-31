@@ -8,6 +8,7 @@ import {
   resetPassword,
   restoreAuth,
   signIn,
+  signInWithGoogle,
   signOut,
   signUp,
   subscribeToAccountData,
@@ -37,6 +38,7 @@ interface AuthStateApi {
   refresh: () => Promise<void>;
   signUpAccount: (email: string, password: string, name: string) => Promise<SignUpOutcome>;
   signInAccount: (email: string, password: string) => Promise<AuthSnapshot>;
+  signInWithGoogleAccount: () => Promise<AuthSnapshot | null>;
   signOutAccount: () => Promise<void>;
   requestPasswordReset: (email: string, newPassword?: string) => Promise<void>;
   completePasswordRecovery: (password: string) => Promise<void>;
@@ -142,6 +144,11 @@ export function AuthStateProvider({ children }: { children: ReactNode }) {
       const next = await signIn(email, password);
       if (!next) throw new Error('Sesi belum tersedia. Coba masuk lagi.');
       commit(next);
+      return next;
+    },
+    signInWithGoogleAccount: async () => {
+      const next = await signInWithGoogle();
+      if (next) commit(next);
       return next;
     },
     signOutAccount: async () => {

@@ -793,6 +793,29 @@ textarea:focus-visible,
 .kk-form-error { border: 1px solid rgba(170, 73, 91, .16); color: #9a4658; background: #fbecee; }
 .kk-form-success { border: 1px solid rgba(67, 126, 94, .14); color: #3f7759; background: #edf6f0; }
 
+.kk-google-auth {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+  width: 100%;
+  min-height: 50px;
+  border: 1px solid var(--auth-line);
+  border-radius: 14px;
+  color: #594b51;
+  background: #fffdfb;
+  cursor: pointer;
+  font: 800 13px 'Nunito', sans-serif;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+.kk-google-auth:hover { border-color: rgba(170, 92, 110, .38); box-shadow: 0 8px 20px rgba(74, 53, 62, .08); transform: translateY(-1px); }
+.kk-google-auth:active { transform: translateY(0); }
+.kk-google-auth:disabled { cursor: wait; opacity: .68; }
+.kk-google-auth svg { width: 19px; height: 19px; flex: 0 0 auto; }
+.kk-auth-divider { display: flex; align-items: center; gap: 12px; margin: 17px 0; color: #ad9fa5; font: 700 10px 'Nunito', sans-serif; }
+.kk-auth-divider::before,
+.kk-auth-divider::after { height: 1px; flex: 1; background: var(--auth-line); content: ''; }
+
 .kk-auth-submit,
 .kk-pair-primary,
 .kk-pair-secondary {
