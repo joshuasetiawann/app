@@ -304,6 +304,7 @@ scripts/visual-qa.mjs         QA browser dan tangkapan layar
 scripts/google-drive-qa.mjs   QA Google Drive tanpa menyentuh Drive asli
 scripts/build-android.mjs     build APK debug + salin ke artifacts
 scripts/configure-ios-google.mjs  pasang kredensial OAuth iOS ke Info.plist
+scripts/fix-ios-package-paths.mjs normalisasi path Swift Package untuk macOS
 scripts/supabase-production-qa.mjs  QA dua akun pada Supabase asli + cleanup
 scripts/reset-supabase.mjs    reset permanen Auth, database, dan Storage
 android/                      project native Android
