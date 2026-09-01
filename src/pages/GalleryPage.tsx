@@ -22,7 +22,7 @@ export default function GalleryPage() {
     toast, reduced, syncStatus, addGalleryPhoto, addAlbum, updateAlbum, removeAlbum,
   } = useAppState();
   const isMobile = viewport === 'mobile';
-  const partnerLabel = partner?.name || 'Pasangan';
+  const partnerLabel = partner?.name || 'Partner';
   const [addingPhoto, setAddingPhoto] = useState(false);
   const [managingAlbums, setManagingAlbums] = useState(false);
   const [uploadBusy, setUploadBusy] = useState(false);
@@ -36,13 +36,13 @@ export default function GalleryPage() {
   const [editIcon, setEditIcon] = useState('');
   const [confirmDeleteId, setConfirmDeleteId] = useState('');
 
-  const filters = [...new Set(['Semua', 'Kamu', partnerLabel, 'Foto', 'Video', ...albums.map((album) => album.title)])];
+  const filters = [...new Set(['All', 'You', partnerLabel, 'Photos', 'Videos', ...albums.map((album) => album.title)])];
   const visiblePhotos = photos.filter((photo) => {
-    if (galleryFilter === 'Semua') return true;
-    if (galleryFilter === 'Kamu') return photo.by === 'me';
+    if (galleryFilter === 'All' || galleryFilter === 'Semua') return true;
+    if (galleryFilter === 'You' || galleryFilter === 'Kamu') return photo.by === 'me';
     if (galleryFilter === partnerLabel) return photo.by === 'partner';
-    if (galleryFilter === 'Foto') return !photo.slotLabel.startsWith('VIDEO');
-    if (galleryFilter === 'Video') return photo.slotLabel.startsWith('VIDEO') || photo.tags.includes('Video');
+    if (galleryFilter === 'Photos' || galleryFilter === 'Foto') return !photo.slotLabel.startsWith('VIDEO');
+    if (galleryFilter === 'Videos' || galleryFilter === 'Video') return photo.slotLabel.startsWith('VIDEO') || photo.tags.includes('Video');
     return photo.album === galleryFilter || photo.tags.includes(galleryFilter);
   });
 
@@ -57,11 +57,11 @@ export default function GalleryPage() {
           : fileCaption(file);
         addGalleryPhoto({ caption: chosenCaption, dataUrl, album: targetAlbum || undefined });
       }
-      toast(`${Math.min(files.length, 12)} foto ditambahkan ke ruang kalian`);
+      toast(`${Math.min(files.length, 12)} picture${files.length === 1 ? '' : 's'} added to your space`);
       setAddingPhoto(false);
       setCaption('');
     } catch (error) {
-      setUploadError(error instanceof Error ? error.message : 'Foto belum bisa diproses.');
+      setUploadError(error instanceof Error ? error.message : 'The pictures could not be processed.');
     } finally {
       setUploadBusy(false);
     }
@@ -94,55 +94,55 @@ export default function GalleryPage() {
     <ScrollColumn>
       <ChipRow items={filters} active={galleryFilter} onSelect={setGalleryFilter} />
 
-      <SectionHeader title="Album kita" action={addingPhoto ? 'Tutup' : '+ Tambah foto'} onAction={() => setAddingPhoto((value) => !value)} />
+      <SectionHeader title="Our albums" action={addingPhoto ? 'Close' : '+ Add pictures'} onAction={() => setAddingPhoto((value) => !value)} />
       {addingPhoto && (
         <section style={pcss('padding:16px;border-radius:21px;background:var(--sf2,#FFF4F1);border:1px solid var(--ln,rgba(74,74,74,.1));animation:kk-soft-in .25s ease')}>
-          <strong style={pcss("display:block;font:800 14px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Tambah dari kamera atau galeri</strong>
-          <small style={pcss("display:block;margin:4px 0 12px;font:600 10.5px/1.45 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>Kamera mengambil satu foto. Galeri dapat memilih sampai 12 foto sekaligus.</small>
+          <strong style={pcss("display:block;font:800 14px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Add from camera or photo library</strong>
+          <small style={pcss("display:block;margin:4px 0 12px;font:600 10.5px/1.45 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>Take one picture in the app, or select up to 12 pictures from your library.</small>
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 9, marginBottom: 10 }}>
-            <input value={caption} onChange={(event) => setCaption(event.target.value)} placeholder="Caption opsional" aria-label="Caption foto galeri" maxLength={120} style={inputStyle} />
-            <select value={targetAlbum} onChange={(event) => setTargetAlbum(event.target.value)} aria-label="Pilih album tujuan" style={inputStyle}>
-              <option value="">Tanpa album</option>
+            <input value={caption} onChange={(event) => setCaption(event.target.value)} placeholder="Optional caption" aria-label="Gallery picture caption" maxLength={120} style={inputStyle} />
+            <select value={targetAlbum} onChange={(event) => setTargetAlbum(event.target.value)} aria-label="Choose destination album" style={inputStyle}>
+              <option value="">No album</option>
               {albums.map((album) => <option key={album.id} value={album.title}>{album.icon} {album.title}</option>)}
             </select>
           </div>
-          <ImageSourcePicker busy={uploadBusy} multiple onFiles={upload} cameraAriaLabel="Ambil foto galeri dengan kamera" galleryAriaLabel="Pilih banyak foto untuk galeri" />
-          {uploadBusy && <div aria-live="polite" style={pcss("margin-top:10px;font:700 10.5px 'Nunito',sans-serif;color:var(--pki,#E86F87)")}>Mengoptimalkan foto untuk HP…</div>}
+          <ImageSourcePicker busy={uploadBusy} multiple onFiles={upload} cameraAriaLabel="Take a gallery picture" galleryAriaLabel="Choose multiple pictures for the gallery" />
+          {uploadBusy && <div aria-live="polite" style={pcss("margin-top:10px;font:700 10.5px 'Nunito',sans-serif;color:var(--pki,#E86F87)")}>Optimizing pictures for mobile…</div>}
           {uploadError && <div role="alert" style={pcss("margin-top:10px;font:700 10.5px 'Nunito',sans-serif;color:#B5485D")}>{uploadError}</div>}
         </section>
       )}
 
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <button type="button" onClick={() => setManagingAlbums((value) => !value)} aria-expanded={managingAlbums} style={tinyButton}>{managingAlbums ? 'Selesai kelola' : '⚙️ Kelola album'}</button>
+        <button type="button" onClick={() => setManagingAlbums((value) => !value)} aria-expanded={managingAlbums} style={tinyButton}>{managingAlbums ? 'Done' : '⚙️ Manage albums'}</button>
       </div>
 
       {managingAlbums && (
         <section style={pcss('padding:15px;border-radius:20px;background:var(--sf2,#FFF4F1);border:1px solid var(--ln,rgba(74,74,74,.1))')}>
           <form onSubmit={createAlbum} style={{ display: 'grid', gridTemplateColumns: '64px 1fr auto', gap: 7 }}>
-            <input value={albumIcon} onChange={(event) => setAlbumIcon(event.target.value)} aria-label="Ikon album baru" maxLength={8} style={inputStyle} />
-            <input value={albumTitle} onChange={(event) => setAlbumTitle(event.target.value)} aria-label="Nama album baru" placeholder="Nama album baru" maxLength={48} required style={inputStyle} />
-            <button type="submit" style={tinyButton}>Tambah</button>
+            <input value={albumIcon} onChange={(event) => setAlbumIcon(event.target.value)} aria-label="New album icon" maxLength={8} style={inputStyle} />
+            <input value={albumTitle} onChange={(event) => setAlbumTitle(event.target.value)} aria-label="New album name" placeholder="New album name" maxLength={48} required style={inputStyle} />
+            <button type="submit" style={tinyButton}>Add</button>
           </form>
           <div style={{ display: 'grid', gap: 8, marginTop: 12 }}>
             {albums.map((album) => editingAlbumId === album.id ? (
               <form key={album.id} onSubmit={finishEdit} style={{ display: 'grid', gridTemplateColumns: '58px 1fr auto', gap: 7 }}>
-                <input value={editIcon} onChange={(event) => setEditIcon(event.target.value)} aria-label={`Ikon ${album.title}`} maxLength={8} style={inputStyle} />
-                <input value={editTitle} onChange={(event) => setEditTitle(event.target.value)} aria-label={`Ubah nama ${album.title}`} maxLength={48} required style={inputStyle} />
-                <button type="submit" style={tinyButton}>Simpan</button>
+                <input value={editIcon} onChange={(event) => setEditIcon(event.target.value)} aria-label={`${album.title} icon`} maxLength={8} style={inputStyle} />
+                <input value={editTitle} onChange={(event) => setEditTitle(event.target.value)} aria-label={`Rename ${album.title}`} maxLength={48} required style={inputStyle} />
+                <button type="submit" style={tinyButton}>Save</button>
               </form>
             ) : (
               <div key={album.id} data-album-id={album.id} style={{ display: 'flex', alignItems: 'center', gap: 8, minHeight: 38 }}>
                 <span style={{ fontSize: 18 }}>{album.icon}</span>
                 <strong style={pcss("flex:1;min-width:0;font:800 11px 'Nunito',sans-serif;color:var(--ink,#4A4A4A);overflow-wrap:anywhere")}>{album.title}</strong>
-                <button type="button" style={tinyButton} onClick={() => beginEdit(album.id)}>Ubah</button>
+                <button type="button" style={tinyButton} onClick={() => beginEdit(album.id)}>Edit</button>
                 {confirmDeleteId === album.id ? (
-                  <button type="button" style={{ ...tinyButton, color: '#B5485D' }} onClick={() => { removeAlbum(album.id); setConfirmDeleteId(''); }}>Yakin hapus</button>
+                  <button type="button" style={{ ...tinyButton, color: '#B5485D' }} onClick={() => { removeAlbum(album.id); setConfirmDeleteId(''); }}>Confirm delete</button>
                 ) : (
-                  <button type="button" style={{ ...tinyButton, color: '#B5485D' }} onClick={() => setConfirmDeleteId(album.id)}>Hapus</button>
+                  <button type="button" style={{ ...tinyButton, color: '#B5485D' }} onClick={() => setConfirmDeleteId(album.id)}>Delete</button>
                 )}
               </div>
             ))}
-            {!albums.length && <small style={pcss("font:600 10.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>Belum ada album. Foto tetap bisa disimpan tanpa album.</small>}
+            {!albums.length && <small style={pcss("font:600 10.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>No albums yet. Pictures can still be saved without one.</small>}
           </div>
         </section>
       )}
@@ -159,7 +159,7 @@ export default function GalleryPage() {
                   <span style={{ position: 'relative', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,.24))' }}>{album.icon}</span>
                 </div>
                 <div style={pcss("font:700 11.5px 'Nunito',sans-serif;color:var(--ink,#4A4A4A);margin-top:7px")}>{album.title}</div>
-                <div style={pcss("font:600 10px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>{albumPhotos.length} foto</div>
+                <div style={pcss("font:600 10px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>{albumPhotos.length} pictures</div>
               </button>
             );
           })}
@@ -168,25 +168,25 @@ export default function GalleryPage() {
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 4 }}>
         <div>
-          <div style={pcss("font:700 15px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Momen {profile?.name ?? 'Kamu'} &amp; {partnerLabel}</div>
-          <div style={pcss("font:600 10.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:2px")}>{visiblePhotos.length} media · filter {galleryFilter}</div>
+          <div style={pcss("font:700 15px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>{profile?.name ?? 'You'} &amp; {partnerLabel}'s moments</div>
+          <div style={pcss("font:600 10.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:2px")}>{visiblePhotos.length} items · {galleryFilter}</div>
         </div>
         <div style={{ display: 'flex', gap: 3, padding: 3, borderRadius: 11, background: 'var(--sf2,#FFF4F1)' }}>
-          <button type="button" style={{ ...viewBtnStyle(galleryView === 'grid'), border: 0 }} onClick={() => setGalleryView('grid')} aria-pressed={galleryView === 'grid'} aria-label="Tampilan grid">▦</button>
-          <button type="button" style={{ ...viewBtnStyle(galleryView === 'polaroid'), border: 0 }} onClick={() => setGalleryView('polaroid')} aria-pressed={galleryView === 'polaroid'} aria-label="Tampilan polaroid">🖼️</button>
-          <button type="button" style={{ ...viewBtnStyle(galleryView === 'timeline'), border: 0 }} onClick={() => setGalleryView('timeline')} aria-pressed={galleryView === 'timeline'} aria-label="Tampilan timeline">☰</button>
+          <button type="button" style={{ ...viewBtnStyle(galleryView === 'grid'), border: 0 }} onClick={() => setGalleryView('grid')} aria-pressed={galleryView === 'grid'} aria-label="Grid view">▦</button>
+          <button type="button" style={{ ...viewBtnStyle(galleryView === 'polaroid'), border: 0 }} onClick={() => setGalleryView('polaroid')} aria-pressed={galleryView === 'polaroid'} aria-label="Polaroid view">🖼️</button>
+          <button type="button" style={{ ...viewBtnStyle(galleryView === 'timeline'), border: 0 }} onClick={() => setGalleryView('timeline')} aria-pressed={galleryView === 'timeline'} aria-label="Timeline view">☰</button>
         </div>
       </div>
 
       {!photos.length && !addingPhoto ? (
-        <EmptyState tag="GALERI BARU" emoji="📷" title="Belum ada foto di ruang kalian" body="Ambil lewat kamera atau pilih beberapa foto dari galeri perangkat." actionLabel="Tambah foto pertama" onAction={() => setAddingPhoto(true)} />
+        <EmptyState tag="YOUR FIRST MOMENT" emoji="📷" title="No pictures in your shared space yet" body="Use the in-app camera or choose several pictures from your photo library." actionLabel="Add your first pictures" onAction={() => setAddingPhoto(true)} />
       ) : (
-        <div style={galleryView === 'polaroid' ? { display: 'flex', flexWrap: 'wrap', gap: 16 } : galleryView === 'timeline' ? { display: 'flex', flexDirection: 'column', gap: 10 } : { display: 'grid', gridTemplateColumns: `repeat(${isMobile ? 3 : 5},1fr)`, gap: 8 }}>
+        <div style={galleryView === 'polaroid' ? { display: 'flex', flexWrap: 'wrap', gap: 16 } : galleryView === 'timeline' ? { display: 'flex', flexDirection: 'column', gap: 10 } : { display: 'grid', gridTemplateColumns: `repeat(${isMobile ? 2 : 5},1fr)`, gap: 10 }}>
           {visiblePhotos.map((photo, index) => {
             const polaroid = galleryView === 'polaroid';
             const timeline = galleryView === 'timeline';
             const viewerIndex = photos.findIndex((item) => item.id === photo.id);
-            const owner = photo.by === 'me' ? 'Kamu' : partnerLabel;
+            const owner = photo.by === 'me' ? 'You' : partnerLabel;
             if (timeline) return (
               <PhotoOpenTarget key={photo.id} index={viewerIndex} style={pcss('display:flex;align-items:center;gap:12px;background:var(--sf,#fff);border-radius:16px;padding:9px;box-shadow:var(--shadow,0 8px 24px rgba(0,0,0,.04))')}>
                 <div style={pcss('width:58px;height:58px;border-radius:12px;flex:none;background:var(--sf2,#FFF4F1);display:flex;align-items:center;justify-content:center;overflow:hidden')}>
@@ -211,13 +211,13 @@ export default function GalleryPage() {
         </div>
       )}
 
-      {photos.length > 0 && visiblePhotos.length === 0 && <div style={pcss("border-radius:20px;background:var(--sf,#fff);padding:24px;text-align:center;font:600 12px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>Belum ada media untuk filter {galleryFilter}.</div>}
+      {photos.length > 0 && visiblePhotos.length === 0 && <div style={pcss("border-radius:20px;background:var(--sf,#fff);padding:24px;text-align:center;font:600 12px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>No media matches {galleryFilter}.</div>}
 
       <div style={pcss('display:flex;align-items:center;gap:12px;border-radius:22px;background:var(--sf,#fff);padding:15px 17px;box-shadow:var(--shadow,0 8px 24px rgba(0,0,0,.04))')}>
         <span style={{ fontSize: 26 }}>{mode === 'supabase' ? '☁️' : '📱'}</span>
         <div style={{ flex: 1 }}>
-          <div style={pcss("display:flex;justify-content:space-between;gap:10px;font:700 12px 'Nunito',sans-serif;color:var(--ink,#4A4A4A)")}><span>{mode === 'supabase' ? 'Supabase Storage privat' : 'Penyimpanan demo perangkat'}</span><span style={{ color: 'var(--mut,#A99A9E)' }}>{syncStatus === 'synced' ? 'Realtime aktif' : mode === 'supabase' ? 'Menyambungkan…' : 'Lokal'}</span></div>
-          <div style={pcss("font:500 15px 'Caveat',cursive;color:var(--mut,#A99A9E);margin-top:6px")}>{mode === 'supabase' ? 'File tidak disimpan di localStorage; pasangan menerima perubahan otomatis.' : 'Mode demo memang hanya tersimpan di browser ini.'}</div>
+          <div style={pcss("display:flex;justify-content:space-between;gap:10px;font:700 12px 'Nunito',sans-serif;color:var(--ink,#4A4A4A)")}><span>{mode === 'supabase' ? 'Private Supabase Storage' : 'On-device demo storage'}</span><span style={{ color: 'var(--mut,#A99A9E)' }}>{syncStatus === 'synced' ? 'Realtime active' : mode === 'supabase' ? 'Connecting…' : 'Local'}</span></div>
+          <div style={pcss("font:500 15px 'Caveat',cursive;color:var(--mut,#A99A9E);margin-top:6px")}>{mode === 'supabase' ? 'Files are stored in your private cloud space and updates reach your partner automatically.' : 'Demo mode is stored only in this browser.'}</div>
         </div>
       </div>
     </ScrollColumn>

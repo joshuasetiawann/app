@@ -14,8 +14,8 @@ function PhotoActions({ photo }: { photo: Photo }) {
     <div style={{ padding: '16px 20px 24px' }} onClick={(event) => event.stopPropagation()}>
       {editing && (
         <div style={pcss('max-width:520px;margin:0 auto 12px;padding:12px;border-radius:16px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px)')}>
-          <input value={caption} onChange={(event) => setCaption(event.target.value)} aria-label="Ubah caption foto" maxLength={120} style={pcss("width:100%;min-height:40px;padding:9px 12px;border:0;border-radius:11px;background:#fff;color:#4A4A4A;font:700 11px 'Nunito',sans-serif;outline:none")} />
-          <select value={album} onChange={(event) => setAlbum(event.target.value)} aria-label="Pindahkan foto ke album" style={pcss("width:100%;min-height:40px;margin-top:8px;padding:0 12px;border:0;border-radius:11px;background:#fff;color:#4A4A4A;font:700 11px 'Nunito',sans-serif;outline:none")}>
+          <input value={caption} onChange={(event) => setCaption(event.target.value)} aria-label="Edit picture caption" maxLength={120} style={pcss("width:100%;min-height:40px;padding:9px 12px;border:0;border-radius:11px;background:#fff;color:#4A4A4A;font:700 11px 'Nunito',sans-serif;outline:none")} />
+          <select value={album} onChange={(event) => setAlbum(event.target.value)} aria-label="Move picture to album" style={pcss("width:100%;min-height:40px;margin-top:8px;padding:0 12px;border:0;border-radius:11px;background:#fff;color:#4A4A4A;font:700 11px 'Nunito',sans-serif;outline:none")}>
             <option value="">Tanpa album</option>
             {albums.map((item) => <option key={item.id} value={item.title}>{item.icon} {item.title}</option>)}
           </select>
@@ -23,15 +23,15 @@ function PhotoActions({ photo }: { photo: Photo }) {
       )}
       <div style={{ display: 'flex', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
         {editing ? (
-          <button type="button" onClick={() => { updatePhoto(photo.id, { caption, album }); setEditing(false); toast('Detail foto diperbarui'); }} style={pcss("padding:10px 16px;border:0;border-radius:100px;background:#fff;color:#4A4A4A;font:700 11px 'Nunito',sans-serif;cursor:pointer")}>Simpan perubahan</button>
+          <button type="button" onClick={() => { updatePhoto(photo.id, { caption, album }); setEditing(false); toast('Picture details updated'); }} style={pcss("padding:10px 16px;border:0;border-radius:100px;background:#fff;color:#4A4A4A;font:700 11px 'Nunito',sans-serif;cursor:pointer")}>Save perubahan</button>
         ) : (
           <button type="button" onClick={() => setEditing(true)} style={pcss("padding:10px 16px;border:0;border-radius:100px;background:#fff;color:#4A4A4A;font:700 11px 'Nunito',sans-serif;cursor:pointer")}>✏️ Edit</button>
         )}
-        {photo.imageUrl && <a href={photo.imageUrl} download={`kisahkita-${photo.id}.jpg`} target="_blank" rel="noreferrer" style={pcss("padding:10px 16px;border:0;border-radius:100px;background:rgba(255,255,255,.16);color:#fff;text-decoration:none;font:700 11px 'Nunito',sans-serif")}>⬇️ Simpan</a>}
+        {photo.imageUrl && <a href={photo.imageUrl} download={`kisahkita-${photo.id}.jpg`} target="_blank" rel="noreferrer" style={pcss("padding:10px 16px;border:0;border-radius:100px;background:rgba(255,255,255,.16);color:#fff;text-decoration:none;font:700 11px 'Nunito',sans-serif")}>⬇️ Save</a>}
         {confirmDelete ? (
-          <button type="button" onClick={() => { removePhoto(photo.id); toast('Foto dihapus dari ruang kalian'); }} style={pcss("padding:10px 16px;border:0;border-radius:100px;background:#F9D4DA;color:#8B3045;font:800 11px 'Nunito',sans-serif;cursor:pointer")}>Yakin hapus</button>
+          <button type="button" onClick={() => { removePhoto(photo.id); toast('Picture deleted from your shared space'); }} style={pcss("padding:10px 16px;border:0;border-radius:100px;background:#F9D4DA;color:#8B3045;font:800 11px 'Nunito',sans-serif;cursor:pointer")}>Confirm delete</button>
         ) : (
-          <button type="button" onClick={() => setConfirmDelete(true)} style={pcss("padding:10px 16px;border:0;border-radius:100px;background:rgba(255,255,255,.16);color:#fff;font:700 11px 'Nunito',sans-serif;cursor:pointer")}>🗑️ Hapus</button>
+          <button type="button" onClick={() => setConfirmDelete(true)} style={pcss("padding:10px 16px;border:0;border-radius:100px;background:rgba(255,255,255,.16);color:#fff;font:700 11px 'Nunito',sans-serif;cursor:pointer")}>🗑️ Delete</button>
         )}
       </div>
     </div>
@@ -83,7 +83,7 @@ export function PhotoViewer() {
       }}
       role="dialog"
       aria-modal="true"
-      aria-label="Pratinjau foto"
+      aria-label="Picture preview"
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 20px', color: '#fff' }}>
         <div>
@@ -95,7 +95,7 @@ export function PhotoViewer() {
           type="button"
           onClick={closeViewer}
           style={pcss('width:34px;height:34px;padding:0;border:0;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer')}
-          aria-label="Tutup"
+          aria-label="Close"
         >
           ✕
         </button>

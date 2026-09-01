@@ -29,11 +29,11 @@ export function ProfileAvatar({
   };
 
   if (profile?.avatarUrl) {
-    return <img className={className} src={profile.avatarUrl} alt={`Foto profil ${profile.name}`} style={shared} />;
+    return <img className={className} src={profile.avatarUrl} alt={`Profile picture ${profile.name}`} style={shared} />;
   }
 
   return (
-    <span className={className} role="img" aria-label={`Avatar ${profile?.name || 'pengguna'}`} style={{ ...shared, display: 'grid', placeItems: 'center', fontSize: size * 0.43 }}>
+    <span className={className} role="img" aria-label={`${profile?.name || 'User'} avatar`} style={{ ...shared, display: 'grid', placeItems: 'center', fontSize: size * 0.43 }}>
       {profile?.avatarEmoji || '🙂'}
     </span>
   );

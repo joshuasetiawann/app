@@ -27,14 +27,14 @@ kecil sehari-hari.
 - Shell responsif, tema terang/gelap, animasi yang menghormati
   `prefers-reduced-motion`, transisi halaman, serta skeleton saat aplikasi dan
   rute sedang dimuat.
-- Pada mode Supabase, pesan/PAP (typing, antrean offline, dan tanda dibaca),
+- Pada mode Supabase, pesan dan Send a Picture (typing, antrean offline, dan tanda dibaca),
   galeri, jurnal makan, acara, kenangan, bab cerita, countdown, surat berkunci,
   tempat, perjalanan, notifikasi, mood, privasi, lokasi, dan daftar favorit
   memakai database bersama serta Supabase Realtime.
-- Quick PAP, foto profil, galeri, foto makanan, dan sampul tempat menerima gambar
+- Send a Picture, foto profil, galeri, foto makanan, dan sampul tempat menerima gambar
   nyata dari kamera atau galeri lalu mengecilkannya di browser. Tombol kamera
-  menyediakan pratinjau langsung melalui `getUserMedia` serta fallback kamera
-  sistem. Galeri mendukung pemilihan album, filter pemilik foto, serta
+  menyediakan pratinjau langsung melalui `getUserMedia`, pergantian kamera
+  depan/belakang, dan pilihan photo library. Galeri mendukung pemilihan album, filter pemilik foto, serta
   tambah/edit/hapus kategori album.
 - Food Journal menyimpan foto ke Supabase Storage, mendukung edit rating/catatan,
   hapus catatan beserta file medianya, dan album makanan dinamis yang dapat

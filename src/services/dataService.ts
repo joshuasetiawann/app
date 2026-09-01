@@ -60,7 +60,7 @@ export const mockDataService: DataService = {
   getAlbums: () => delay(mock.ALBUMS),
   getMessages: () => delay(messages),
   sendMessage: (text: string) => {
-    const msg: Message = { id: nextId('m'), from: 'me', text, time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) };
+    const msg: Message = { id: nextId('m'), from: 'me', text, time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) };
     messages = [...messages, msg];
     return delay(msg, 60);
   },

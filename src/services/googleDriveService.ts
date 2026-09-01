@@ -60,7 +60,7 @@ let tokenExpiresAt = 0;
 
 function configurationError() {
   return googleNativeConfigurationError()
-    ?? new Error('Google Drive belum dikonfigurasi. Isi VITE_GOOGLE_DRIVE_CLIENT_ID lalu restart aplikasi.');
+    ?? new Error('Google Drive is not configured. Set VITE_GOOGLE_DRIVE_CLIENT_ID, then restart the app.');
 }
 
 export function prepareGoogleDrive() {
@@ -76,9 +76,9 @@ export function prepareGoogleDrive() {
     const script = existing ?? document.createElement('script');
     const loaded = () => window.google?.accounts.oauth2
       ? resolve()
-      : reject(new Error('Google Identity Services belum siap. Coba muat ulang.'));
+      : reject(new Error('Google Identity Services is not ready. Reload and try again.'));
     script.addEventListener('load', loaded, { once: true });
-    script.addEventListener('error', () => reject(new Error('Layanan Google belum dapat dimuat. Periksa koneksi internet.')), { once: true });
+    script.addEventListener('error', () => reject(new Error('Google services could not be loaded. Check your internet connection.')), { once: true });
     if (!existing) {
       script.id = GIS_SCRIPT_ID;
       script.src = GIS_SCRIPT_URL;
@@ -106,7 +106,7 @@ export async function connectGoogleDrive(loginHint?: string) {
         options: { scopes: [DRIVE_SCOPE], forceRefreshToken: true },
       });
       if (result.responseType !== 'online' || !result.accessToken?.token) {
-        throw new Error('Google belum memberikan token akses Drive. Periksa konfigurasi OAuth Android/iOS dan izinnya.');
+        throw new Error('Google did not return a Drive access token. Check the Android/iOS OAuth setup and permissions.');
       }
       accessToken = result.accessToken.token;
       const expires = result.accessToken.expires ? Date.parse(result.accessToken.expires) : Number.NaN;
@@ -114,10 +114,10 @@ export async function connectGoogleDrive(loginHint?: string) {
       return;
     } catch (error) {
       const code = error && typeof error === 'object' && 'code' in error ? String(error.code) : '';
-      if (code === 'USER_CANCELLED') throw new Error('Pemilihan akun Google dibatalkan.');
+      if (code === 'USER_CANCELLED') throw new Error('Google account selection was cancelled.');
       const message = error instanceof Error ? error.message : '';
       if (/10|developer_error|configuration/i.test(message)) {
-        throw new Error('OAuth Google native belum cocok. Periksa package/bundle ID serta SHA-1 aplikasi di Google Cloud Console.');
+        throw new Error('Native Google OAuth does not match. Check the package or bundle ID and app SHA-1 in Google Cloud Console.');
       }
       throw error;
     }
@@ -126,7 +126,7 @@ export async function connectGoogleDrive(loginHint?: string) {
   const oauth2 = window.google.accounts.oauth2;
 
   return new Promise<void>((resolve, reject) => {
-    const timeout = window.setTimeout(() => reject(new Error('Jendela Google tidak selesai. Coba hubungkan lagi.')), 120_000);
+    const timeout = window.setTimeout(() => reject(new Error('The Google window did not finish. Try connecting again.')), 120_000);
     const finish = (action: () => void) => {
       window.clearTimeout(timeout);
       action();
@@ -136,7 +136,7 @@ export async function connectGoogleDrive(loginHint?: string) {
       scope: DRIVE_SCOPE,
       callback: (response) => {
         if (response.error || !response.access_token) {
-          finish(() => reject(new Error(response.error_description || 'Izin Google Drive belum diberikan.')));
+          finish(() => reject(new Error(response.error_description || 'Google Drive permission was not granted.')));
           return;
         }
         accessToken = response.access_token;
@@ -144,8 +144,8 @@ export async function connectGoogleDrive(loginHint?: string) {
         finish(resolve);
       },
       error_callback: (error) => finish(() => reject(new Error(error.type === 'popup_closed'
-        ? 'Jendela Google ditutup sebelum selesai.'
-        : 'Google Drive belum dapat dihubungkan.'))),
+        ? 'The Google window was closed before setup finished.'
+        : 'Google Drive could not be connected.'))),
     });
     client.requestAccessToken({ prompt: accessToken ? '' : 'consent', hint: loginHint });
   });
@@ -175,9 +175,9 @@ async function driveError(response: Response) {
     tokenExpiresAt = 0;
     return new Error('Sesi Google Drive berakhir. Hubungkan kembali.');
   }
-  if (response.status === 403) return new Error(detail || 'Akun Google ini belum memiliki izin ke folder pasangan.');
-  if (response.status === 404) return new Error('Folder Google Drive tidak ditemukan atau sudah dipindahkan.');
-  return new Error(detail || `Google Drive gagal merespons (${response.status}).`);
+  if (response.status === 403) return new Error(detail || 'This Google account does not have access to the shared folder.');
+  if (response.status === 404) return new Error('The Google Drive folder was not found or has been moved.');
+  return new Error(detail || `Google Drive returned an error (${response.status}).`);
 }
 
 async function driveFetch<T>(url: string, init?: RequestInit): Promise<T> {
@@ -196,7 +196,7 @@ export async function createGoogleDriveFolder(spaceName: string) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      name: `KisahKita — ${spaceName.trim() || 'Ruang Kita'}`,
+      name: `KisahKita — ${spaceName.trim() || 'Our Space'}`,
       mimeType: 'application/vnd.google-apps.folder',
     }),
   });
@@ -215,7 +215,7 @@ export async function listGoogleDriveFiles(folderId: string) {
 }
 
 export async function uploadGoogleDriveFile(file: File, folderId: string) {
-  if (file.size > MAX_DRIVE_UPLOAD_BYTES) throw new Error('Ukuran maksimal upload langsung adalah 5 MB. Gunakan Google Drive untuk berkas yang lebih besar.');
+  if (file.size > MAX_DRIVE_UPLOAD_BYTES) throw new Error('Direct uploads are limited to 5 MB. Use Google Drive for larger files.');
   const boundary = `kisahkita_${crypto.randomUUID()}`;
   const body = new Blob([
     `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n`,

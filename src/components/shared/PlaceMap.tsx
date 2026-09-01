@@ -76,11 +76,11 @@ export function PlaceMap({
       points.push(point);
       L.circleMarker(point, { radius: 10, color: '#c95270', fillColor: '#ffb7c3', fillOpacity: 0.9, weight: 3 })
         .addTo(layer)
-        .bindTooltip('Lokasi yang dipilih', { permanent: true, direction: 'top' });
+        .bindTooltip('Selected location', { permanent: true, direction: 'top' });
     }
     if (points.length === 1) map.flyTo(points[0], 15, { duration: 0.6 });
     if (points.length > 1) map.fitBounds(L.latLngBounds(points), { padding: [42, 42], maxZoom: 15, animate: true });
   }, [draftPoint, places, selectedId, onSelect]);
 
-  return <div ref={elementRef} className={`kk-place-map${picking ? ' is-picking' : ''}`} aria-label={picking ? 'Peta pemilih lokasi, ketuk untuk memilih' : 'Peta tempat berdua'} />;
+  return <div ref={elementRef} className={`kk-place-map${picking ? ' is-picking' : ''}`} aria-label={picking ? 'Location picker map, tap to choose' : 'Shared places map'} />;
 }

@@ -17,38 +17,38 @@ export default function CountdownPage() {
     .sort((a, b) => a.targetDate.localeCompare(b.targetDate))[0] ?? countdowns.at(-1);
   const featured = featuredTarget ? countdownParts(featuredTarget.targetDate, now) : null;
   const flipDigits = featured ? [
-    { value: pad2(featured.days), label: 'HARI' },
-    { value: pad2(featured.hours), label: 'JAM' },
-    { value: pad2(featured.minutes), label: 'MENIT' },
-    { value: pad2(featured.seconds), label: 'DETIK' },
+    { value: pad2(featured.days), label: 'DAYS' },
+    { value: pad2(featured.hours), label: 'HOURS' },
+    { value: pad2(featured.minutes), label: 'MINUTES' },
+    { value: pad2(featured.seconds), label: 'SECONDS' },
   ] : [];
 
   return (
     <ScrollColumn>
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <button type="button" onClick={() => setCreating((value) => !value)} aria-expanded={creating} style={pcss("padding:9px 14px;border:0;border-radius:100px;background:var(--sf2,#FFF4F1);color:var(--pki,#E86F87);cursor:pointer;font:800 10.5px 'Nunito',sans-serif")}>+ Hitung mundur</button>
+        <button type="button" onClick={() => setCreating((value) => !value)} aria-expanded={creating} style={pcss("padding:9px 14px;border:0;border-radius:100px;background:var(--sf2,#FFF4F1);color:var(--pki,#E86F87);cursor:pointer;font:800 10.5px 'Nunito',sans-serif")}>+ Countdown</button>
       </div>
 
       {creating && (
         <QuickCreatePanel
-          title="Momen apa yang kalian tunggu?"
-          description="Penghitungnya berjalan mengikuti waktu perangkat dan muncul realtime untuk pasangan."
-          submitLabel="Mulai menghitung ⏳"
+          title="What are you looking forward to?"
+          description="The countdown follows device time and updates for your partner in real time."
+          submitLabel="Start countdown ⏳"
           fields={[
-            { name: 'title', label: 'Nama momen', placeholder: 'Ketemu lagi', required: true },
+            { name: 'title', label: 'Moment name', placeholder: 'See each other again', required: true },
             { name: 'icon', label: 'Emoji', defaultValue: '✈️' },
-            { name: 'targetAt', label: 'Tanggal & waktu', type: 'datetime-local', defaultValue: defaultTarget, required: true, wide: true },
+            { name: 'targetAt', label: 'Date & time', type: 'datetime-local', defaultValue: defaultTarget, required: true, wide: true },
           ]}
           onCancel={() => setCreating(false)}
           onSubmit={(values) => {
             addCountdown({ title: values.title, targetAt: values.targetAt, icon: values.icon || '' });
             setCreating(false);
-            toast('Hitung mundur aktif untuk kalian ⏳');
+            toast('Countdown is live for both of you ⏳');
           }}
         />
       )}
 
-      {!featuredTarget && !creating && <EmptyState tag="MENUNGGU MOMEN" emoji="⏳" title="Belum ada hitung mundur" body="Tambahkan pertemuan, ulang tahun, atau momen penting pertama kalian." actionLabel="Buat hitung mundur" onAction={() => setCreating(true)} />}
+      {!featuredTarget && !creating && <EmptyState tag="WAITING FOR A MOMENT" emoji="⏳" title="No countdowns yet" body="Add your next meeting, anniversary, or another important moment." actionLabel="Create countdown" onAction={() => setCreating(true)} />}
 
       {featuredTarget && featured && (
         <div style={pcss('border-radius:26px;padding:22px 20px;background:linear-gradient(155deg,#4A3B45,#2E2530);color:#FFF6F3;box-shadow:0 10px 28px rgba(60,45,52,.28);text-align:center')}>
@@ -61,7 +61,7 @@ export default function CountdownPage() {
               </div>
             ))}
           </div>
-          <div style={pcss("font:500 19px 'Caveat',cursive;color:rgba(255,246,243,.85);margin-top:16px")}>{featured.passed ? 'Momen ini sudah lewat' : `${daysUntil(featuredTarget.targetDate, now)} hari lagi menuju momen ini ✨`}</div>
+          <div style={pcss("font:500 19px 'Caveat',cursive;color:rgba(255,246,243,.85);margin-top:16px")}>{featured.passed ? 'This moment has passed' : `${daysUntil(featuredTarget.targetDate, now)} days until this moment ✨`}</div>
         </div>
       )}
 
@@ -77,7 +77,7 @@ export default function CountdownPage() {
               </div>
               <div style={{ textAlign: 'right', flex: 'none' }}>
                 <div style={pcss("font:700 20px 'Quicksand',sans-serif;color:var(--pki,#E86F87)")}>{countdown.passed ? '✓' : daysUntil(countdownItem.targetDate, now)}</div>
-                <div style={pcss("font:700 8.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>{countdown.passed ? 'SELESAI' : 'HARI'}</div>
+                <div style={pcss("font:700 8.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>{countdown.passed ? 'DONE' : 'DAYS'}</div>
               </div>
             </div>
           );

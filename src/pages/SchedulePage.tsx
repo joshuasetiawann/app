@@ -4,10 +4,10 @@ import { useAppState } from '../state/AppState';
 import { ScrollColumn } from '../components/shared/ScrollColumn';
 import { BigButton, Card } from '../components/shared/Atoms';
 
-const AGENDA_TABS = ['Hari', 'Minggu', 'Bulan', 'Agenda'] as const;
-const WEEKDAY_LETTERS = ['S', 'S', 'R', 'K', 'J', 'S', 'M'];
-const MONTH_FORMATTER = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' });
-const DAY_FORMATTER = new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+const AGENDA_TABS = ['Day', 'Week', 'Month', 'Agenda'] as const;
+const WEEKDAY_LETTERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+const MONTH_FORMATTER = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' });
+const DAY_FORMATTER = new Intl.DateTimeFormat('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
 function agBtnStyle(active: boolean) {
   return pcss(
@@ -50,11 +50,11 @@ export default function SchedulePage() {
     return events
       .filter((event) => {
         if (agendaView === 'Agenda') return true;
-        if (!event.startsAt) return agendaView === 'Hari' ? event.when.toLocaleLowerCase().startsWith('hari ini') : true;
+        if (!event.startsAt) return agendaView === 'Day' ? /today|hari ini/i.test(event.when) : true;
         const startsAt = new Date(event.startsAt);
         if (Number.isNaN(startsAt.getTime())) return false;
-        if (agendaView === 'Hari') return startsAt.getTime() >= dayStart && startsAt.getTime() < dayEnd;
-        if (agendaView === 'Minggu') return startsAt.getTime() >= dayStart && startsAt.getTime() < weekEnd;
+        if (agendaView === 'Day') return startsAt.getTime() >= dayStart && startsAt.getTime() < dayEnd;
+        if (agendaView === 'Week') return startsAt.getTime() >= dayStart && startsAt.getTime() < weekEnd;
         return sameMonth(startsAt, year, month);
       })
       .slice()
@@ -122,10 +122,10 @@ export default function SchedulePage() {
         </div>
         <div style={{ display: 'flex', gap: 14, marginTop: 14, flexWrap: 'wrap' }}>
           <span style={pcss("display:flex;align-items:center;gap:6px;font:600 10px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--pk,#FFB7B2)' }} />Berdua
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--pk,#FFB7B2)' }} />Shared
           </span>
           <span style={pcss("display:flex;align-items:center;gap:6px;font:600 10px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#B5EAD7' }} />Pribadi kamu
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#B5EAD7' }} />Personal
           </span>
         </div>
       </Card>
@@ -166,12 +166,12 @@ export default function SchedulePage() {
         ))}
         {visibleEvents.length === 0 && (
           <div style={pcss("padding:24px;border-radius:20px;background:var(--sf,#fff);text-align:center;font:600 12px/1.5 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>
-            Tidak ada acara untuk tampilan {agendaView.toLocaleLowerCase('id-ID')} ini.
+            No events in this {agendaView.toLocaleLowerCase('en-US')} view.
           </div>
         )}
       </div>
 
-      <BigButton label="+ Bikin acara baru" onClick={() => openSheet('event')} />
+      <BigButton label="+ Add event" onClick={() => openSheet('event')} />
     </ScrollColumn>
   );
 }

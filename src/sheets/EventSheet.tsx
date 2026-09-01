@@ -25,7 +25,7 @@ function eventDate(dateValue: string, timeValue: string) {
 }
 
 function formatInZone(date: Date, timeZone: string) {
-  return new Intl.DateTimeFormat('id-ID', {
+  return new Intl.DateTimeFormat('en-US', {
     weekday: 'short',
     day: 'numeric',
     month: 'short',
@@ -64,17 +64,17 @@ export function EventSheetContent() {
     event.preventDefault();
     const cleanTitle = title.trim();
     if (!cleanTitle) {
-      setError('Judul acara wajib diisi.');
+      setError('Event title is required.');
       return;
     }
     if (!date || !time) {
-      setError('Pilih tanggal dan waktu acara.');
+      setError('Choose an event date and time.');
       return;
     }
 
     const startsAt = eventDate(date, time);
     if (Number.isNaN(startsAt.getTime())) {
-      setError('Tanggal atau waktu acara tidak valid.');
+      setError('The event date or time is invalid.');
       return;
     }
 
@@ -93,15 +93,15 @@ export function EventSheetContent() {
     });
     setAgendaView('Agenda');
     closeSheet();
-    toast(`Acara “${cleanTitle}” tersimpan ✓`);
+    toast(`Event “${cleanTitle}” saved ✓`);
   };
 
   return (
     <form onSubmit={submit} noValidate>
-      <SheetHeading title="Acara baru 🗓️" sub="Berdua atau pribadi" />
+      <SheetHeading title="New event 🗓️" sub="Shared or personal" />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <label style={labelStyle}>
-          Judul acara
+          Event title
           <input
             type="text"
             value={title}
@@ -109,8 +109,8 @@ export function EventSheetContent() {
               setTitle(event.target.value);
               setError('');
             }}
-            placeholder="Contoh: Video call malam"
-            aria-label="Judul acara"
+            placeholder="e.g. Evening video call"
+            aria-label="Event title"
             autoFocus
             maxLength={80}
             required
@@ -119,24 +119,24 @@ export function EventSheetContent() {
         </label>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           <label style={labelStyle}>
-            Tanggal
-            <input type="date" value={date} onChange={(event) => setDate(event.target.value)} aria-label="Tanggal acara" required style={fieldStyle} />
+            Date
+            <input type="date" value={date} onChange={(event) => setDate(event.target.value)} aria-label="Event date" required style={fieldStyle} />
           </label>
           <label style={labelStyle}>
-            Waktu
-            <input type="time" value={time} onChange={(event) => setTime(event.target.value)} aria-label="Waktu acara" required style={fieldStyle} />
+            Time
+            <input type="time" value={time} onChange={(event) => setTime(event.target.value)} aria-label="Event time" required style={fieldStyle} />
           </label>
         </div>
         <div style={pcss("padding:12px 14px;border-radius:16px;background:var(--sf2,#FFF4F1);font:600 11px/1.55 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>
-          <div>Zona perangkat: {deviceZone}</div>
+          <div>Device time zone: {deviceZone}</div>
           {preview && partner?.timezone && (
             <div style={{ color: 'var(--pki,#E86F87)', marginTop: 2 }}>
-              Di zona {partner.nickname || partner.name}: {preview.partner} ({partner.timezone})
+              In {partner.nickname || partner.name}'s zone: {preview.partner} ({partner.timezone})
             </div>
           )}
         </div>
         <label style={labelStyle}>
-          Penanda
+          Label
           <select value={tag} onChange={(event) => setTag(event.target.value)} style={fieldStyle}>
             {EVENT_TAGS.map((item) => (
               <option key={item.label} value={item.label}>{item.icon} {item.label}</option>
@@ -144,7 +144,7 @@ export function EventSheetContent() {
           </select>
         </label>
         <fieldset style={{ margin: 0, padding: 0, border: 0 }}>
-          <legend style={pcss("font:700 10.5px 'Nunito',sans-serif;color:var(--ink2,#6B5B60);margin-bottom:6px")}>Siapa yang bisa melihat?</legend>
+          <legend style={pcss("font:700 10.5px 'Nunito',sans-serif;color:var(--ink2,#6B5B60);margin-bottom:6px")}>Who can see this?</legend>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9 }}>
             {(['Pribadi', 'Berdua'] as const).map((value) => (
               <label
@@ -154,15 +154,15 @@ export function EventSheetContent() {
                 )}
               >
                 <input type="radio" name="event-scope" value={value} checked={scope === value} onChange={() => setScope(value)} />
-                {value}
+                {value === 'Pribadi' ? 'Personal' : 'Shared'}
               </label>
             ))}
           </div>
         </fieldset>
         {error && <div role="alert" style={pcss("font:700 11px 'Nunito',sans-serif;color:#C94F68;text-align:center")}>{error}</div>}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9, marginTop: 4 }}>
-          <button type="button" onClick={closeSheet} style={pcss("padding:13px 18px;border:0;border-radius:100px;background:var(--sf2,#FFF4F1);font:700 13px 'Nunito',sans-serif;color:var(--ink2,#6B5B60);cursor:pointer")}>Batal</button>
-          <button type="submit" style={pcss("padding:13px 18px;border:0;border-radius:100px;background:var(--pk,#FFB7B2);font:700 13px 'Nunito',sans-serif;color:#5C3A42;cursor:pointer")}>Simpan acara</button>
+          <button type="button" onClick={closeSheet} style={pcss("padding:13px 18px;border:0;border-radius:100px;background:var(--sf2,#FFF4F1);font:700 13px 'Nunito',sans-serif;color:var(--ink2,#6B5B60);cursor:pointer")}>Cancel</button>
+          <button type="submit" style={pcss("padding:13px 18px;border:0;border-radius:100px;background:var(--pk,#FFB7B2);font:700 13px 'Nunito',sans-serif;color:#5C3A42;cursor:pointer")}>Save event</button>
         </div>
       </div>
     </form>

@@ -14,33 +14,33 @@ export default function StoryPage() {
   return (
     <ScrollColumn>
       <HeroSurface background={heroBg} style={pcss('border-radius:26px;padding:20px;text-align:center')}>
-        <div style={pcss("font:700 20px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Buku sejarah kita 🌱</div>
-        <div style={pcss("font:500 18px 'Caveat',cursive;color:var(--ink2,#6B5B60);margin-top:4px")}>dari pertama ketemu sampai hari ini</div>
-        <button type="button" onClick={() => setCreating((value) => !value)} aria-expanded={creating} style={pcss("margin-top:13px;padding:9px 14px;border:0;border-radius:100px;background:rgba(255,255,255,.64);color:var(--pki,#E86F87);cursor:pointer;font:800 10.5px 'Nunito',sans-serif")}>+ Tulis bab</button>
+        <div style={pcss("font:700 20px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Our storybook 🌱</div>
+        <div style={pcss("font:500 18px 'Caveat',cursive;color:var(--ink2,#6B5B60);margin-top:4px")}>from the first hello to today</div>
+        <button type="button" onClick={() => setCreating((value) => !value)} aria-expanded={creating} style={pcss("margin-top:13px;padding:9px 14px;border:0;border-radius:100px;background:rgba(255,255,255,.64);color:var(--pki,#E86F87);cursor:pointer;font:800 10.5px 'Nunito',sans-serif")}>+ Write chapter</button>
       </HeroSurface>
 
       {creating && (
         <QuickCreatePanel
-          title="Tulis bab baru"
-          description="Bab ini menjadi bagian linimasa bersama dan tersinkron otomatis."
-          submitLabel="Tambahkan ke cerita 🌱"
+          title="Write a new chapter"
+          description="This chapter joins your shared timeline and syncs automatically."
+          submitLabel="Add to our story 🌱"
           fields={[
-            { name: 'year', label: 'Tahun / periode', defaultValue: String(new Date().getFullYear()), required: true },
+            { name: 'year', label: 'Year / period', defaultValue: String(new Date().getFullYear()), required: true },
             { name: 'icon', label: 'Emoji', defaultValue: '🌱' },
-            { name: 'title', label: 'Judul bab', placeholder: 'Hari pertama kita kenal', required: true, wide: true },
-            { name: 'place', label: 'Tempat', placeholder: 'Discord / Jakarta / Taipei' },
-            { name: 'note', label: 'Cerita singkat', type: 'textarea', placeholder: 'Apa yang terjadi waktu itu?', wide: true },
+            { name: 'title', label: 'Chapter title', placeholder: 'The day we first met', required: true, wide: true },
+            { name: 'place', label: 'Place', placeholder: 'Discord / Jakarta / Taipei' },
+            { name: 'note', label: 'Short story', type: 'textarea', placeholder: 'What happened that day?', wide: true },
           ]}
           onCancel={() => setCreating(false)}
           onSubmit={(values) => {
             addStoryChapter({ year: values.year, title: values.title, place: values.place || '', note: values.note || '', icon: values.icon || '' });
             setCreating(false);
-            toast('Bab baru tersimpan untuk kalian 🌱');
+            toast('New chapter saved for both of you 🌱');
           }}
         />
       )}
 
-      {storyChapters.length === 0 && !creating && <EmptyState tag="CERITA KALIAN" emoji="🌱" title="Bab pertama belum ditulis" body="Tulis awal perjalanan kalian; pasanganmu akan langsung melihatnya." actionLabel="Tulis bab pertama" onAction={() => setCreating(true)} />}
+      {storyChapters.length === 0 && !creating && <EmptyState tag="YOUR STORY" emoji="🌱" title="Your first chapter has not been written" body="Write the beginning of your journey and your partner will see it immediately." actionLabel="Write the first chapter" onAction={() => setCreating(true)} />}
 
       <div style={{ paddingLeft: 6 }}>
         {storyChapters.map((chapter, index) => (

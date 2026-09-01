@@ -7,11 +7,11 @@ import { HeroSurface } from '../components/shared/Atoms';
 import { THEMES } from '../lib/theme';
 
 const UPCOMING_PRIVACY = [
-  { icon: '🟢', label: 'Status online', sub: 'Presence real-time belum diaktifkan; status terhubung hanya berarti kedua akun sudah dipasangkan.' },
-  { icon: '🕒', label: 'Terakhir dilihat', sub: 'Waktu aktif belum dilacak atau dibagikan ke pasangan.' },
-  { icon: '🌤️', label: 'Aktivitas & mood', sub: 'Perubahan saat ini tersimpan lokal dan belum dikirim ke perangkat pasangan.' },
-  { icon: '🖼️', label: 'Izin galeri pasangan', sub: 'Galeri bersama belum memiliki izin tambah foto per akun.' },
-  { icon: '🌙', label: 'Mode me-time', sub: 'Belum terhubung ke push notification maupun presence.' },
+  { icon: '🟢', label: 'Online status', sub: 'Realtime presence is not active yet; connected only means both accounts are paired.' },
+  { icon: '🕒', label: 'Last seen', sub: 'Active time is not tracked or shared with your partner yet.' },
+  { icon: '🌤️', label: 'Activity & mood', sub: 'This preference currently stays local and is not sent to your partner.' },
+  { icon: '🖼️', label: 'Partner gallery permission', sub: 'Per-account picture permissions are not available yet.' },
+  { icon: '🌙', label: 'Me-time mode', sub: 'Push notifications and presence are not connected yet.' },
 ];
 
 export default function PrivacyPage() {
@@ -23,9 +23,9 @@ export default function PrivacyPage() {
   return (
     <ScrollColumn>
       <HeroSurface background={heroBg} style={pcss('border-radius:24px;padding:18px')}>
-        <div style={pcss("font:700 18px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Ruang privat kalian 🔒</div>
+        <div style={pcss("font:700 18px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Your private space 🔒</div>
         <div style={pcss("font:500 18px 'Caveat',cursive;color:var(--ink2,#6B5B60);margin-top:3px")}>
-          {auth.mode === 'supabase' ? 'akses cloud memakai akun yang terhubung.' : 'data tetap di browser perangkat ini.'}
+          {auth.mode === 'supabase' ? 'Cloud access uses your connected account.' : 'Data stays in this device browser.'}
         </div>
       </HeroSurface>
 
@@ -34,13 +34,13 @@ export default function PrivacyPage() {
           <span style={pcss('width:36px;height:36px;border-radius:13px;display:flex;align-items:center;justify-content:center;background:var(--sf2,#FFF4F1);font-size:16px;flex:none')}>📍</span>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={pcss("display:flex;align-items:center;gap:7px;font:700 12.5px 'Nunito',sans-serif;color:var(--ink,#4A4A4A)")}>
-              Berbagi lokasi
+              Location sharing
               <span style={pcss(`padding:3px 7px;border-radius:100px;background:${locationOn ? '#D7EFE2' : 'var(--sf2,#FFF4F1)'};font:800 8.5px 'Nunito',sans-serif;color:${locationOn ? '#376858' : 'var(--mut,#A99A9E)'}`)}>
-                {locationOn ? 'PREFERENSI AKTIF' : 'PREFERENSI MATI'}
+                {locationOn ? 'ACTIVE' : 'OFF'}
               </span>
             </div>
             <div style={pcss("font:600 10px/1.45 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:3px")}>
-              Kelola izin perangkat dan lihat status pengiriman sebenarnya di halaman Lokasi.
+              Manage device permission and actual sharing status from Distance Between Us.
             </div>
           </div>
           <button
@@ -48,7 +48,7 @@ export default function PrivacyPage() {
             onClick={() => navigate('/location')}
             style={pcss("padding:8px 11px;border:0;border-radius:100px;background:var(--pk,#FFB7B2);font:800 10px 'Nunito',sans-serif;color:#5C3A42;cursor:pointer;flex:none")}
           >
-            Kelola
+            Manage
           </button>
         </div>
 
@@ -62,22 +62,22 @@ export default function PrivacyPage() {
             <button
               type="button"
               disabled
-              aria-label={`${item.label}, belum tersedia`}
+              aria-label={`${item.label}, not available yet`}
               style={pcss("padding:6px 9px;border:0;border-radius:100px;background:var(--sf2,#FFF4F1);font:800 8.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E);flex:none;opacity:1")}
             >
-              SEGERA
+              SOON
             </button>
           </div>
         ))}
       </div>
 
       <div style={pcss('border-radius:22px;background:var(--sf2,#FFF4F1);padding:16px 17px;border:1px dashed rgba(232,111,135,.35)')}>
-        <div style={pcss("font:700 12.5px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Perlindungan ruang 🔐</div>
+        <div style={pcss("font:700 12.5px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Space protection 🔐</div>
         <div style={pcss("font:600 10.5px/1.55 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:5px")}>
           {auth.mode === 'supabase'
-            ? 'Sesi akun, profil, ruang pasangan, dan lokasi live memakai Supabase dengan pembatasan akses per ruang. Konten lainnya masih tersimpan lokal di browser ini.'
-            : 'Mode lokal menyimpan akun, ruang pasangan, lokasi, dan konten di browser ini. Data tidak dikirim ke server KisahKita.'}
-          {' '}Enkripsi end-to-end belum diaktifkan.
+            ? 'Account sessions, profiles, couple space, and live location use Supabase with per-space access rules. Shared content is synced through the same private space.'
+            : 'Local mode stores accounts, couple space, location, and content in this browser. Data is not sent to KisahKita servers.'}
+          {' '}End-to-end encryption is not enabled.
         </div>
       </div>
     </ScrollColumn>

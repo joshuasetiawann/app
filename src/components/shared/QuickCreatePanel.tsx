@@ -18,7 +18,7 @@ export function QuickCreatePanel({
   title,
   description,
   fields,
-  submitLabel = 'Simpan',
+  submitLabel = 'Save',
   onSubmit,
   onCancel,
 }: {
@@ -68,7 +68,7 @@ export function QuickCreatePanel({
         })}
       </div>
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 15 }}>
-        <button type="button" onClick={onCancel} style={pcss("min-height:40px;padding:0 14px;border:0;border-radius:12px;color:var(--ink2,#6B5B60);background:var(--sf,#fff);cursor:pointer;font:800 10.5px 'Nunito',sans-serif")}>Batal</button>
+        <button type="button" onClick={onCancel} style={pcss("min-height:40px;padding:0 14px;border:0;border-radius:12px;color:var(--ink2,#6B5B60);background:var(--sf,#fff);cursor:pointer;font:800 10.5px 'Nunito',sans-serif")}>Cancel</button>
         <button type="submit" style={pcss("min-height:40px;padding:0 16px;border:0;border-radius:12px;color:#5C3A42;background:var(--pk,#FFB7B2);cursor:pointer;box-shadow:0 6px 16px rgba(255,140,150,.2);font:800 10.5px 'Nunito',sans-serif")}>{submitLabel}</button>
       </div>
     </form>

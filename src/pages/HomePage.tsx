@@ -10,18 +10,18 @@ import { PhotoOpenTarget } from '../components/shared/PhotoOpenTarget';
 import { useAuthState } from '../state/AuthState';
 
 function foodStatusLabel(status: string) {
-  if (status === 'ate') return 'sudah makan';
-  if (status === 'now') return 'lagi makan';
-  if (status === 'not') return 'belum makan';
-  return 'belum check-in';
+  if (status === 'ate') return 'already ate';
+  if (status === 'now') return 'eating now';
+  if (status === 'not') return 'has not eaten';
+  return 'no check-in yet';
 }
 
 function foodLine(status: string, partnerStatus: string) {
-  return `Kamu: ${foodStatusLabel(status)} · Pasangan: ${foodStatusLabel(partnerStatus)}`;
+  return `You: ${foodStatusLabel(status)} · Partner: ${foodStatusLabel(partnerStatus)}`;
 }
 
 function zoneAbbreviation(date: Date, timeZone: string) {
-  return new Intl.DateTimeFormat('id-ID', { timeZone, timeZoneName: 'short' })
+  return new Intl.DateTimeFormat('en-US', { timeZone, timeZoneName: 'short' })
     .formatToParts(date)
     .find((part) => part.type === 'timeZoneName')?.value ?? timeZone;
 }
@@ -52,10 +52,10 @@ export default function HomePage() {
   const isDemo = profile?.email.endsWith('@demo.kisahkita') ?? false;
   const myZone = profile?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
   const partnerZone = partner?.timezone || myZone;
-  const myCity = profile?.city || 'Kota kamu';
-  const partnerCity = partner?.city || 'Kota pasangan';
+  const myCity = profile?.city || 'Your city';
+  const partnerCity = partner?.city || "Partner's city";
   const zoneDifference = Math.abs(zoneOffsetMinutes(now, partnerZone) - zoneOffsetMinutes(now, myZone)) / 60;
-  const zoneDifferenceLabel = zoneDifference === 0 ? 'ZONA WAKTU SAMA' : `BEDA ${Number.isInteger(zoneDifference) ? zoneDifference : zoneDifference.toFixed(1)} JAM ⏳`;
+  const zoneDifferenceLabel = zoneDifference === 0 ? 'SAME TIME ZONE' : `${Number.isInteger(zoneDifference) ? zoneDifference : zoneDifference.toFixed(1)} HOURS APART ⏳`;
   const daysTogether = Math.max(1, daysSince(couple?.startedAt || RELATIONSHIP.startedAt, now));
   const nextCountdown = [...COUNTDOWNS]
     .filter((countdown) => new Date(countdown.targetDate).getTime() > now.getTime())
@@ -85,20 +85,20 @@ export default function HomePage() {
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 16, position: 'relative' }}>
           <div style={pcss('background:rgba(255,255,255,.72);border-radius:16px;padding:11px 12px')}>
-            <div style={pcss("font:700 9.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>{(profile?.nickname || profile?.name || 'KAMU').toUpperCase()}</div>
+            <div style={pcss("font:700 9.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>{(profile?.nickname || profile?.name || 'YOU').toUpperCase()}</div>
             <div style={pcss("font:700 12.5px 'Nunito',sans-serif;color:var(--ink,#4A4A4A);margin-top:4px")}>{mood} · {activity}</div>
           </div>
           <div style={pcss('background:rgba(255,255,255,.72);border-radius:16px;padding:11px 12px')}>
-            <div style={pcss("font:700 9.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>{(partner?.nickname || partner?.name || 'PASANGAN').toUpperCase()}</div>
+            <div style={pcss("font:700 9.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>{(partner?.nickname || partner?.name || 'PARTNER').toUpperCase()}</div>
             <div style={pcss("font:700 12.5px 'Nunito',sans-serif;color:var(--ink,#4A4A4A);margin-top:4px")}>{partnerMood} · {partnerActivity}</div>
           </div>
         </div>
         <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px dashed rgba(255,255,255,.85)', textAlign: 'center', position: 'relative' }}>
           <div style={pcss("font:700 26px/1 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>
-            Udah <span style={{ color: 'var(--pki,#E86F87)' }}>{daysTogether} Hari</span> Bareng!
+            <span style={{ color: 'var(--pki,#E86F87)' }}>{daysTogether} days</span> together!
           </div>
           <div style={pcss("font:500 18px 'Caveat',cursive;color:var(--ink2,#6B5B60);margin-top:5px")}>
-            Sejak {new Intl.DateTimeFormat('id-ID', { dateStyle: 'long' }).format(new Date(`${couple?.startedAt || RELATIONSHIP.startedAt}T00:00:00`))} 💗
+            Since {new Intl.DateTimeFormat('en-US', { dateStyle: 'long' }).format(new Date(`${couple?.startedAt || RELATIONSHIP.startedAt}T00:00:00`))} 💗
           </div>
         </div>
       </HeroSurface>
@@ -107,15 +107,15 @@ export default function HomePage() {
       <Card>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
           <div>
-            <div style={pcss("font:700 16px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Udah makan belum sayang?</div>
+            <div style={pcss("font:700 16px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Have you eaten yet?</div>
             <div style={pcss("font:600 11px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:3px")}>{foodLine(foodStatus, partnerFoodStatus)}</div>
           </div>
           <span style={{ fontSize: 22, animation: 'kk-float 3s ease-in-out infinite' }}>🍜</span>
         </div>
         <div style={{ display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap' }}>
-          <button type="button" style={foodBtnStyle(foodStatus === 'ate')} onClick={() => { setFoodStatus('ate'); toast('Makan tercatat · udah kenyang 😋'); }} aria-pressed={foodStatus === 'ate'}>Udah kenyang! 😋</button>
-          <button type="button" style={foodBtnStyle(foodStatus === 'now')} onClick={() => { setFoodStatus('now'); toast('Selamat makan sayang 🍜'); }} aria-pressed={foodStatus === 'now'}>Lagi makan 🍜</button>
-          <button type="button" style={foodBtnStyle(foodStatus === 'not')} onClick={() => { setFoodStatus('not'); toast('Jangan lupa makan ya 🥺'); }} aria-pressed={foodStatus === 'not'}>Belum nih 🥺</button>
+          <button type="button" style={foodBtnStyle(foodStatus === 'ate')} onClick={() => { setFoodStatus('ate'); toast('Meal saved · feeling full 😋'); }} aria-pressed={foodStatus === 'ate'}>I already ate 😋</button>
+          <button type="button" style={foodBtnStyle(foodStatus === 'now')} onClick={() => { setFoodStatus('now'); toast('Enjoy your meal 🍜'); }} aria-pressed={foodStatus === 'now'}>Eating now 🍜</button>
+          <button type="button" style={foodBtnStyle(foodStatus === 'not')} onClick={() => { setFoodStatus('not'); toast('Remember to eat something 🥺'); }} aria-pressed={foodStatus === 'not'}>Not yet 🥺</button>
         </div>
       </Card>
 
@@ -124,7 +124,7 @@ export default function HomePage() {
         <Card>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={pcss("font:700 11px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>{isDemo ? 'CONTOH JARAK' : 'JARAK KITA'}</span>
-            <button type="button" style={pcss("border:0;background:transparent;padding:4px;font:700 10px 'Nunito',sans-serif;color:var(--pki,#E86F87);cursor:pointer")} onClick={() => navigate('/location')}>Buka lokasi 📍</button>
+            <button type="button" style={pcss("border:0;background:transparent;padding:4px;font:700 10px 'Nunito',sans-serif;color:var(--pki,#E86F87);cursor:pointer")} onClick={() => navigate('/location')}>Open distance map 📍</button>
           </div>
           <div style={pcss("font:700 24px/1 'Quicksand',sans-serif;color:var(--ink,#4A4A4A);margin-top:8px")}>
             {isDemo ? '8.421' : '—'} <span style={{ fontSize: 12, color: 'var(--mut,#A99A9E)' }}>km</span>
@@ -149,29 +149,29 @@ export default function HomePage() {
         <div style={pcss('border-radius:24px;padding:16px 17px;background:linear-gradient(155deg,#4A3B45,#2E2530);color:#FFF6F3;box-shadow:0 8px 22px rgba(60,45,52,.25)')}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={pcss("font:700 11px 'Nunito',sans-serif;color:rgba(255,246,243,.6)")}>{isDemo && nextCountdown ? nextCountdown.title.toUpperCase() : 'MOMEN BERIKUTNYA'} {isDemo && nextCountdown ? nextCountdown.icon : '✨'}</span>
-            <span style={pcss("font:700 10px 'Nunito',sans-serif;color:#FFB7B2")}>{isDemo && nextCountdown ? new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short' }).format(new Date(nextCountdown.targetDate)) : 'Belum diatur'}</span>
+            <span style={pcss("font:700 10px 'Nunito',sans-serif;color:#FFB7B2")}>{isDemo && nextCountdown ? new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'short' }).format(new Date(nextCountdown.targetDate)) : 'Not set'}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, marginTop: 10 }}>
             <span style={pcss("font:700 38px/.9 'Quicksand',sans-serif;color:#FFB7B2")}>{isDemo && nextCountdown ? daysToNext : '—'}</span>
-            <span style={pcss("font:500 17px 'Caveat',cursive;color:rgba(255,246,243,.8);padding-bottom:4px")}>{isDemo && nextCountdown ? 'hari lagi' : 'buat hitung mundur pertama'}</span>
+            <span style={pcss("font:500 17px 'Caveat',cursive;color:rgba(255,246,243,.8);padding-bottom:4px")}>{isDemo && nextCountdown ? 'days left' : 'create your first countdown'}</span>
           </div>
           <div style={{ height: 6, borderRadius: 6, background: 'rgba(255,255,255,.16)', marginTop: 14 }}>
             <div style={{ width: '64%', height: 6, borderRadius: 6, background: 'linear-gradient(90deg,#FFB7B2,#E3D7F7)' }} />
           </div>
-          <div style={pcss("font:600 10px 'Nunito',sans-serif;color:rgba(255,246,243,.6);margin-top:9px")}>{isDemo && nextCountdown ? nextCountdown.when : 'Tambahkan momen penting agar muncul di sini.'}</div>
+          <div style={pcss("font:600 10px 'Nunito',sans-serif;color:rgba(255,246,243,.6);margin-top:9px")}>{isDemo && nextCountdown ? nextCountdown.when : 'Add an important moment to see it here.'}</div>
           <button
             type="button"
             style={pcss('width:100%;border:0;color:inherit;margin-top:12px;padding:9px 0;text-align:center;border-radius:100px;background:rgba(255,255,255,.14);font:700 11.5px "Nunito",sans-serif;cursor:pointer')}
             onClick={() => navigate('/countdown')}
           >
-            Lihat semua countdown
+            View all countdown
           </button>
         </div>
       </div>
 
       {/* Recent photos */}
       <div>
-        <SectionHeader title="Foto terbaru 📸" action="Lihat semua" onAction={() => navigate('/gallery')} />
+        <SectionHeader title="Latest pictures 📸" action="View all" onAction={() => navigate('/gallery')} />
         <div style={{ display: 'flex', gap: 14, overflowX: 'auto', padding: '6px 2px 14px' }}>
           {photos.slice(0, 4).map((p, i) => (
             <PhotoOpenTarget
@@ -194,7 +194,7 @@ export default function HomePage() {
               onClick={() => navigate('/chat')}
               style={pcss("width:100%;padding:24px;border:1px dashed var(--ln,rgba(74,74,74,.14));border-radius:20px;background:var(--sf,#fff);font:600 11.5px/1.5 'Nunito',sans-serif;color:var(--mut,#A99A9E);cursor:pointer")}
             >
-              Belum ada foto di ruang ini. Tambahkan PAP pertama dari Chat 📸
+              No pictures in this space yet. Send your first picture from Chat 📷
             </button>
           )}
         </div>
@@ -204,7 +204,7 @@ export default function HomePage() {
       <div style={{ display: 'grid', gridTemplateColumns: twoCol, gap: 12 }}>
         <Card>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={pcss("font:700 15px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Jadwal terdekat</span>
+            <span style={pcss("font:700 15px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Coming up</span>
             <button type="button" style={pcss("border:0;background:transparent;padding:4px;font:700 10.5px 'Nunito',sans-serif;color:var(--pki,#E86F87);cursor:pointer")} onClick={() => navigate('/schedule')}>Kalender</button>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 11, marginTop: 13 }}>
@@ -220,19 +220,19 @@ export default function HomePage() {
               />
             ))}
             {events.length === 0 && (
-              <div style={pcss("font:600 11px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>Belum ada jadwal. Tambahkan dari Kalender.</div>
+              <div style={pcss("font:600 11px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>No plans yet. Add one from Schedule.</div>
             )}
           </div>
         </Card>
         <button type="button" style={pcss('border-radius:24px;background:var(--sf2,#FFF4F1);border:1px dashed rgba(232,111,135,.45);padding:16px 17px;cursor:pointer;text-align:left;color:inherit')} onClick={() => navigate('/notes')}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <span style={pcss("font:700 10px 'Nunito',sans-serif;letter-spacing:.12em;color:var(--pki,#E86F87)")}>SURAT TERSEGEL 💌</span>
+            <span style={pcss("font:700 10px 'Nunito',sans-serif;letter-spacing:.12em;color:var(--pki,#E86F87)")}>SEALED NOTE 💌</span>
             <span style={{ fontSize: 17, display: 'inline-block', animation: 'kk-wiggle 2.2s ease-in-out infinite' }}>🔒</span>
           </div>
-          <div style={pcss("font:600 21px/1.2 'Caveat',cursive;color:var(--ink,#4A4A4A);margin-top:8px")}>&ldquo;{isDemo ? 'Buka kalau kamu kangen banget sama aku 🥺' : 'Belum ada surat tersegel di ruang ini.'}&rdquo;</div>
-          <div style={pcss("font:600 11px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:8px")}>{isDemo ? 'dari Pasangan · 2 surat menunggu' : 'Buka halaman Surat Cinta untuk melihat fitur ini.'}</div>
+          <div style={pcss("font:600 21px/1.2 'Caveat',cursive;color:var(--ink,#4A4A4A);margin-top:8px")}>&ldquo;{isDemo ? 'Open when you really miss me 🥺' : 'There are no sealed notes in this space yet.'}&rdquo;</div>
+          <div style={pcss("font:600 11px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:8px")}>{isDemo ? 'from Partner · 2 notes waiting' : 'Open Love Notes to see this feature.'}</div>
           <div style={pcss("margin-top:12px;display:inline-block;padding:8px 15px;border-radius:100px;background:var(--sf,#fff);font:700 11.5px 'Nunito',sans-serif;color:var(--pki,#E86F87)")}>
-            {isDemo ? 'Eits, sabar belum waktunya 🤫' : 'Lihat Surat Cinta'}
+            {isDemo ? 'Not yet—this one is still sealed 🤫' : 'View love note'}
           </div>
         </button>
       </div>

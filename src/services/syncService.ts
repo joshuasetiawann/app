@@ -216,6 +216,11 @@ interface ProfileSettingsRow {
 }
 
 const CATEGORY_ICON: Record<string, string> = {
+  Breakfast: '🍳',
+  Lunch: '🍛',
+  Dinner: '🍽️',
+  Snacks: '🍪',
+  Drinks: '🧋',
   Sarapan: '🍳',
   'Makan Siang': '🍛',
   'Makan Malam': '🍽️',
@@ -225,7 +230,7 @@ const CATEGORY_ICON: Record<string, string> = {
 };
 
 function client() {
-  if (!supabaseClient) throw new Error('Supabase belum dikonfigurasi.');
+  if (!supabaseClient) throw new Error('Supabase has not been configured.');
   return supabaseClient;
 }
 
@@ -234,7 +239,7 @@ function assertRemote(error: { message: string } | null) {
 }
 
 function formatTime(value: string, timeZone: string) {
-  return new Intl.DateTimeFormat('id-ID', {
+  return new Intl.DateTimeFormat('en-US', {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
@@ -243,7 +248,7 @@ function formatTime(value: string, timeZone: string) {
 }
 
 function formatEvent(value: string, timeZone: string) {
-  return new Intl.DateTimeFormat('id-ID', {
+  return new Intl.DateTimeFormat('en-US', {
     weekday: 'short',
     day: 'numeric',
     month: 'short',
@@ -261,7 +266,7 @@ async function conversationId(coupleId: string) {
     .eq('couple_id', coupleId)
     .maybeSingle<{ id: string }>();
   assertRemote(error);
-  if (!data) throw new Error('Percakapan pasangan belum tersedia. Jalankan migrasi sinkronisasi Supabase.');
+  if (!data) throw new Error('The shared conversation is unavailable. Run the Supabase sync migration.');
   return data.id;
 }
 
@@ -298,11 +303,11 @@ function mapFood(row: FoodRow, context: SyncContext, urls: Map<string, string>):
     name: row.name,
     time: formatTime(row.eaten_at, context.timeZone),
     by: row.logged_by === context.userId ? 'me' : 'partner',
-    location: row.location ?? 'Lokasi belum diisi',
+    location: row.location ?? 'Location not set',
     category: row.category,
     price: row.price_label ?? 'Gratis',
     rating: row.rating ?? 0,
-    note: row.note ?? 'Belum ada catatan',
+    note: row.note ?? 'No notes yet',
     date: row.eaten_at.slice(0, 10),
   };
 }
@@ -338,13 +343,13 @@ function mapPhoto(row: MediaRow, context: SyncContext, urls: Map<string, string>
   return {
     id: row.id,
     imageUrl: urls.get(row.id) || undefined,
-    slotLabel: row.kind === 'video' ? 'VIDEO' : 'FOTO',
-    caption: row.caption ?? 'Momen baru 💗',
+    slotLabel: row.kind === 'video' ? 'VIDEO' : 'PHOTO',
+    caption: row.caption ?? 'A new moment 💗',
     meta: `${formatEvent(row.created_at, context.timeZone)}${row.location ? ` · ${row.location}` : ''}`,
     takenAt: row.taken_at ?? row.created_at,
     location: row.location ?? undefined,
     by: row.uploaded_by === context.userId ? 'me' : 'partner',
-    tags: [row.kind === 'video' ? 'Video' : 'Foto', row.album].filter(Boolean) as string[],
+    tags: [row.kind === 'video' ? 'Video' : 'Photos', row.album].filter(Boolean) as string[],
     album: row.album ?? undefined,
   };
 }
@@ -355,7 +360,7 @@ function mapAlbum(row: AlbumRow): Album {
 
 function formatDay(value: string, timeZone: string) {
   const date = value.includes('T') ? new Date(value) : new Date(`${value}T12:00:00Z`);
-  return new Intl.DateTimeFormat('id-ID', {
+  return new Intl.DateTimeFormat('en-US', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
@@ -368,9 +373,9 @@ function mapMemory(row: MemoryRow, context: SyncContext, media: MediaRow[]): Mem
     id: row.id,
     date: formatDay(row.occurred_on, context.timeZone).toUpperCase(),
     title: row.title,
-    meta: row.location || (row.author_id === context.userId ? 'Ditulis oleh kamu' : 'Ditulis oleh pasangan'),
+    meta: row.location || (row.author_id === context.userId ? 'Written by you' : 'Written by your partner'),
     mood: row.mood_emoji || '💗',
-    story: row.story || 'Belum ada cerita tambahan.',
+    story: row.story || 'No additional story yet.',
     photoIds: media.filter((asset) => asset.memory_id === row.id).map((asset) => asset.id),
   };
 }
@@ -380,8 +385,8 @@ function mapStory(row: StoryRow): StoryChapter {
     id: row.id,
     year: row.year,
     title: row.title,
-    place: row.place || 'Tempat belum diisi',
-    note: row.note || 'Belum ada catatan.',
+    place: row.place || 'Place not set',
+    note: row.note || 'No notes yet.',
     icon: row.icon || '🌱',
   };
 }
@@ -405,9 +410,9 @@ function mapLoveNote(row: LoveNoteRow, context: SyncContext): LoveNote {
   const locked = unlocksAt > now;
   return {
     id: row.id,
-    tag: locked ? `BUKA ${formatDay(row.unlock_at!, context.timeZone).toUpperCase()}` : 'SURAT UNTUKMU',
+    tag: locked ? `OPENS ${formatDay(row.unlock_at!, context.timeZone).toUpperCase()}` : 'A NOTE FOR YOU',
     preview: row.preview,
-    meta: `${row.author_id === context.userId ? 'Dari kamu' : 'Dari pasangan'} · ${formatDay(row.created_at, context.timeZone)}`,
+    meta: `${row.author_id === context.userId ? 'From you' : 'From your partner'} · ${formatDay(row.created_at, context.timeZone)}`,
     state: locked ? 'lock' : row.opened_at ? 'done' : 'open',
     from: row.author_id === context.userId ? 'me' : 'partner',
     body: row.body,
@@ -421,10 +426,10 @@ function mapPlace(row: PlaceRow, context: SyncContext, urls: Map<string, string>
     id: row.id,
     icon: category.match(/\p{Extended_Pictographic}/u)?.[0] || '📍',
     title: row.title,
-    meta: row.visited_on ? `Dikunjungi ${formatDay(row.visited_on, context.timeZone)}` : 'Wishlist berdua',
+    meta: row.visited_on ? `Visited ${formatDay(row.visited_on, context.timeZone)}` : 'Shared wishlist',
     category,
     rating: row.rating || 0,
-    note: row.note || 'Belum ada catatan.',
+    note: row.note || 'No notes yet.',
     latitude: row.lat ?? undefined,
     longitude: row.lng ?? undefined,
     imageUrl: row.cover_media_id ? urls.get(row.cover_media_id) || undefined : undefined,
@@ -442,7 +447,7 @@ function mapTrip(row: TripRow, context: SyncContext, itinerary: TripItineraryRow
   return {
     id: row.id,
     title: row.title,
-    meta: dateLabel || 'Tanggal belum diisi',
+    meta: dateLabel || 'Date not set',
     coverGradient: upcoming
       ? 'linear-gradient(145deg,#DDE8F4,#F0D9E4)'
       : 'linear-gradient(145deg,#F2DED8,#DDE8E2)',
@@ -535,7 +540,7 @@ export async function loadSharedData(context: SyncContext): Promise<SharedSnapsh
     .map<Album>((title) => ({ id: `legacy-${title}`, title, icon: '🖼️' }));
   const profile = profileResult.data?.find((item) => item.id === context.userId);
   const partnerProfile = profileResult.data?.find((item) => item.id !== context.userId);
-  if (!profile) throw new Error('Preferensi profil belum dapat dimuat.');
+  if (!profile) throw new Error('Profile preferences could not be loaded.');
   const statusRows = statusResult.data ?? [];
   return {
     photos: allMediaRows.map((row) => mapPhoto(row, context, urls)),
@@ -553,10 +558,10 @@ export async function loadSharedData(context: SyncContext): Promise<SharedSnapsh
     notifications: (notificationsResult.data ?? []).map((row) => mapNotification(row, context)),
     foodStatus: statusRows.find((item) => item.profile_id === context.userId)?.status ?? '',
     partnerFoodStatus: statusRows.find((item) => item.profile_id !== context.userId)?.status ?? '',
-    mood: profile.mood ?? 'Belum diatur',
-    activity: profile.activity ?? 'Belum diatur',
-    partnerMood: partnerProfile?.mood ?? 'Belum ada update',
-    partnerActivity: partnerProfile?.activity_visible ? partnerProfile.activity ?? 'Belum diatur' : 'Disembunyikan',
+    mood: profile.mood ?? 'Not set',
+    activity: profile.activity ?? 'Not set',
+    partnerMood: partnerProfile?.mood ?? 'No update yet',
+    partnerActivity: partnerProfile?.activity_visible ? partnerProfile.activity ?? 'Not set' : 'Hidden',
     locationOn: profile.location_sharing,
     privacy: {
       onlineOn: profile.online_visible,
@@ -660,7 +665,7 @@ export async function sendSharedMessage(context: SyncContext, text: string) {
     body: text.trim(),
   }).select('id,sender_id,body,media_id,reaction,read_at,created_at').single<MessageRow>();
   assertRemote(error);
-  if (!data) throw new Error('Pesan belum berhasil dikirim.');
+  if (!data) throw new Error('The message could not be sent.');
   return mapMessage(data, context, new Map());
 }
 
@@ -703,7 +708,7 @@ async function createSharedPhotoAsset(context: SyncContext, photo: SharedPhotoIn
     album: photo.album?.trim() || null,
     kind: 'photo',
     storage_path: path,
-    caption: photo.caption.trim() || 'Momen baru 💗',
+    caption: photo.caption.trim() || 'A new moment 💗',
     location: photo.location?.trim() || null,
     taken_at: new Date().toISOString(),
   });
@@ -744,13 +749,13 @@ export async function sendSharedPhoto(
     await db.storage.from('media').remove([path]);
     assertRemote(error);
   }
-  if (!data) throw new Error('PAP belum berhasil dikirim.');
+  if (!data) throw new Error('The picture could not be sent.');
   return mapMessage(data, context, new Map([[assetId, photo.dataUrl]]));
 }
 
 export async function updateSharedPhoto(context: SyncContext, id: string, patch: { caption?: string; album?: string }) {
   const payload: Record<string, string | null> = {};
-  if (patch.caption !== undefined) payload.caption = patch.caption.trim() || 'Momen baru 💗';
+  if (patch.caption !== undefined) payload.caption = patch.caption.trim() || 'A new moment 💗';
   if (patch.album !== undefined) payload.album = patch.album.trim() || null;
   const { error } = await client().from('media_assets').update(payload).eq('id', id).eq('couple_id', context.coupleId);
   assertRemote(error);
@@ -760,7 +765,7 @@ export async function deleteSharedPhoto(context: SyncContext, id: string) {
   const db = client();
   const { data, error } = await db.from('media_assets').select('storage_path').eq('id', id).eq('couple_id', context.coupleId).single<{ storage_path: string }>();
   assertRemote(error);
-  if (!data) throw new Error('Foto tidak ditemukan.');
+  if (!data) throw new Error('Picture not found.');
   await removeSharedPhotoAsset(context, id, data.storage_path);
 }
 
@@ -797,7 +802,7 @@ export async function addSharedFood(context: SyncContext, entry: Omit<FoodEntry,
     ? await createSharedPhotoAsset(context, {
         caption: entry.name,
         dataUrl: entry.imageUrl,
-        album: `Makanan · ${entry.category}`,
+        album: `Food · ${entry.category}`,
         location: entry.location,
       })
     : null;

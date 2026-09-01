@@ -53,7 +53,7 @@ interface AuthStateApi {
 const AuthStateContext = createContext<AuthStateApi | null>(null);
 
 function errorMessage(error: unknown) {
-  return error instanceof Error ? error.message : 'Terjadi gangguan. Coba lagi.';
+  return error instanceof Error ? error.message : 'Something went wrong. Try again.';
 }
 
 export function AuthStateProvider({ children }: { children: ReactNode }) {
@@ -142,7 +142,7 @@ export function AuthStateProvider({ children }: { children: ReactNode }) {
     },
     signInAccount: async (email, password) => {
       const next = await signIn(email, password);
-      if (!next) throw new Error('Sesi belum tersedia. Coba masuk lagi.');
+      if (!next) throw new Error('Your session is unavailable. Sign in again.');
       commit(next);
       return next;
     },
@@ -163,7 +163,7 @@ export function AuthStateProvider({ children }: { children: ReactNode }) {
     },
     updateProfile: async (patch) => {
       const next = await updateAccountProfile(patch);
-      if (!next) throw new Error('Profil belum dapat dimuat.');
+      if (!next) throw new Error('Your profile could not be loaded.');
       commit(next);
       return next;
     },

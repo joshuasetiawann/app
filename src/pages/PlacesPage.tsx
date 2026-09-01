@@ -22,13 +22,13 @@ export default function PlacesPage() {
   const [photoBusy, setPhotoBusy] = useState(false);
   const [formError, setFormError] = useState('');
   const [geoBusy, setGeoBusy] = useState(false);
-  const visible = placeCategory === 'Semua' ? places : places.filter((place) => place.category === placeCategory);
+  const visible = placeCategory === 'All' ? places : places.filter((place) => place.category === placeCategory);
   const selectedPlace = places.find((place) => place.id === selectedPlaceId);
   const today = new Date().toISOString().slice(0, 10);
 
   const selectPlace = useCallback((id: string) => {
     setSelectedPlaceId(id);
-    setPlaceCategory('Semua');
+    setPlaceCategory('All');
   }, [setPlaceCategory]);
 
   const resetDraft = () => {
@@ -47,7 +47,7 @@ export default function PlacesPage() {
     try {
       setPhotoDataUrl(await imageDataUrl(file, { maxSide: 1_600, quality: 0.82 }));
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : 'Foto tempat belum bisa diproses.');
+      setFormError(error instanceof Error ? error.message : 'The place picture could not be processed.');
     } finally {
       setPhotoBusy(false);
     }
@@ -56,7 +56,7 @@ export default function PlacesPage() {
   const useCurrentLocation = () => {
     setFormError('');
     if (!navigator.geolocation) {
-      setFormError('Perangkat ini belum menyediakan akses lokasi.');
+      setFormError('This device does not provide location access.');
       return;
     }
     setGeoBusy(true);
@@ -65,11 +65,11 @@ export default function PlacesPage() {
         setDraftPoint({ latitude: position.coords.latitude, longitude: position.coords.longitude });
         setPickMode(false);
         setGeoBusy(false);
-        toast('Lokasi perangkat dipakai untuk pin ini');
+        toast('Current device location selected for this pin');
       },
       (error) => {
         setGeoBusy(false);
-        setFormError(error.code === error.PERMISSION_DENIED ? 'Izin lokasi ditolak. Aktifkan dari pengaturan situs lalu coba lagi.' : 'Lokasi perangkat belum dapat dibaca.');
+        setFormError(error.code === error.PERMISSION_DENIED ? 'Location permission is blocked. Enable it in site settings and try again.' : 'The device location could not be read.');
       },
       { enableHighAccuracy: true, maximumAge: 30_000, timeout: 12_000 },
     );
@@ -86,7 +86,7 @@ export default function PlacesPage() {
     const values = new FormData(event.currentTarget);
     const title = String(values.get('title') ?? '').trim();
     if (!title) {
-      setFormError('Nama tempat wajib diisi.');
+      setFormError('Place name is required.');
       return;
     }
     addPlace({
@@ -100,7 +100,7 @@ export default function PlacesPage() {
       photoDataUrl: photoDataUrl || undefined,
     });
     resetDraft();
-    toast('Tempat tersimpan untuk kalian 📍');
+    toast('Place saved for both of you 📍');
   };
 
   return (
@@ -113,71 +113,71 @@ export default function PlacesPage() {
             draftPoint={draftPoint}
             picking={pickMode}
             onSelect={selectPlace}
-            onPick={pickMode ? (point) => { setDraftPoint(point); setPickMode(false); toast('Pin dipasang di lokasi pilihan'); } : undefined}
+            onPick={pickMode ? (point) => { setDraftPoint(point); setPickMode(false); toast('Pin placed at the selected location'); } : undefined}
           />
-          <div style={pcss(`position:absolute;z-index:500;left:13px;top:13px;max-width:72%;padding:8px 11px;border-radius:13px;background:rgba(255,255,255,.94);box-shadow:0 5px 16px rgba(70,55,61,.15);font:700 9.5px/1.4 'Nunito',sans-serif;color:${pickMode ? '#B5485D' : '#65585D'}`)}>{pickMode ? 'Ketuk titik di peta untuk memasang pin' : selectedPlace ? `${selectedPlace.icon} ${selectedPlace.title}` : places.some((place) => place.latitude != null) ? 'Ketuk pin untuk melihat tempat' : 'Peta nyata siap untuk pin pertama'}</div>
+          <div style={pcss(`position:absolute;z-index:500;left:13px;top:13px;max-width:72%;padding:8px 11px;border-radius:13px;background:rgba(255,255,255,.94);box-shadow:0 5px 16px rgba(70,55,61,.15);font:700 9.5px/1.4 'Nunito',sans-serif;color:${pickMode ? '#B5485D' : '#65585D'}`)}>{pickMode ? 'Tap the map to place a pin' : selectedPlace ? `${selectedPlace.icon} ${selectedPlace.title}` : places.some((place) => place.latitude != null) ? 'Tap a pin to view the place' : 'The map is ready for your first pin'}</div>
         </div>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <div style={{ flex: 1, minWidth: 0 }}><ChipRow items={PLACE_CATS} active={placeCategory} onSelect={setPlaceCategory} /></div>
-        <button type="button" onClick={() => creating ? resetDraft() : setCreating(true)} aria-expanded={creating} style={pcss("flex:none;padding:9px 13px;border:0;border-radius:100px;background:var(--sf2,#FFF4F1);color:var(--pki,#E86F87);cursor:pointer;font:800 10.5px 'Nunito',sans-serif")}>{creating ? 'Tutup' : '+ Tempat'}</button>
+        <button type="button" onClick={() => creating ? resetDraft() : setCreating(true)} aria-expanded={creating} style={pcss("flex:none;padding:9px 13px;border:0;border-radius:100px;background:var(--sf2,#FFF4F1);color:var(--pki,#E86F87);cursor:pointer;font:800 10.5px 'Nunito',sans-serif")}>{creating ? 'Close' : '+ Add place'}</button>
       </div>
 
       {creating && (
         <form onSubmit={submit} style={pcss('padding:17px;border:1px solid var(--ln,rgba(74,74,74,.1));border-radius:22px;background:var(--sf2,#FFF4F1);box-shadow:0 10px 26px rgba(90,65,75,.07);animation:kk-soft-in .28s ease')}>
-          <strong style={pcss("display:block;color:var(--ink,#4A4A4A);font:800 15px 'Quicksand',sans-serif")}>Simpan tempat berdua</strong>
-          <span style={pcss("display:block;margin-top:4px;color:var(--mut,#A99A9E);font:600 10.5px/1.5 'Nunito',sans-serif")}>Tambahkan foto dan pin lokasi agar tempat mudah dikenali pasanganmu.</span>
+          <strong style={pcss("display:block;color:var(--ink,#4A4A4A);font:800 15px 'Quicksand',sans-serif")}>Save a shared place</strong>
+          <span style={pcss("display:block;margin-top:4px;color:var(--mut,#A99A9E);font:600 10.5px/1.5 'Nunito',sans-serif")}>Add a picture and map pin so your partner can recognize it instantly.</span>
           <div style={{ marginTop: 13 }}>
-            {photoDataUrl && <img src={photoDataUrl} alt="Pratinjau foto tempat" style={{ width: '100%', maxHeight: 210, objectFit: 'cover', borderRadius: 16, marginBottom: 9 }} />}
-            <ImageSourcePicker busy={photoBusy} onFiles={choosePhoto} cameraAriaLabel="Ambil foto tempat dengan kamera" galleryAriaLabel="Pilih foto tempat dari galeri" />
+            {photoDataUrl && <img src={photoDataUrl} alt="Place picture preview" style={{ width: '100%', maxHeight: 210, objectFit: 'cover', borderRadius: 16, marginBottom: 9 }} />}
+            <ImageSourcePicker busy={photoBusy} onFiles={choosePhoto} cameraAriaLabel="Take a place picture" galleryAriaLabel="Choose a place picture" />
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 12, marginTop: 14 }}>
-            <label style={pcss("font:800 10px 'Nunito',sans-serif;color:var(--ink2,#6B5B60)")}>Nama tempat<input name="title" aria-label="Nama tempat" placeholder="Kedai kopi dekat kampus" required maxLength={80} style={fieldStyle} /></label>
-            <label style={pcss("font:800 10px 'Nunito',sans-serif;color:var(--ink2,#6B5B60)")}>Kategori<select name="category" aria-label="Kategori tempat" defaultValue="❤️ Dates" style={fieldStyle}>{PLACE_CATS.filter((item) => item !== 'Semua').map((item) => <option key={item}>{item}</option>)}</select></label>
-            <label style={pcss("font:800 10px 'Nunito',sans-serif;color:var(--ink2,#6B5B60)")}>Tanggal dikunjungi<input name="visitedOn" aria-label="Tanggal dikunjungi" type="date" max={today} style={fieldStyle} /></label>
-            <label style={pcss("font:800 10px 'Nunito',sans-serif;color:var(--ink2,#6B5B60)")}>Rating 1–5<input name="rating" aria-label="Rating tempat" type="number" min="1" max="5" defaultValue="5" style={fieldStyle} /></label>
-            <label style={pcss("grid-column:1/-1;font:800 10px 'Nunito',sans-serif;color:var(--ink2,#6B5B60)")}>Catatan<textarea name="note" aria-label="Catatan tempat" placeholder="Apa yang spesial dari tempat ini?" rows={3} style={{ ...fieldStyle, resize: 'vertical' }} /></label>
+            <label style={pcss("font:800 10px 'Nunito',sans-serif;color:var(--ink2,#6B5B60)")}>Place name<input name="title" aria-label="Place name" placeholder="Coffee shop near campus" required maxLength={80} style={fieldStyle} /></label>
+            <label style={pcss("font:800 10px 'Nunito',sans-serif;color:var(--ink2,#6B5B60)")}>Category<select name="category" aria-label="Place category" defaultValue="❤️ Dates" style={fieldStyle}>{PLACE_CATS.filter((item) => item !== 'All').map((item) => <option key={item}>{item}</option>)}</select></label>
+            <label style={pcss("font:800 10px 'Nunito',sans-serif;color:var(--ink2,#6B5B60)")}>Date visited<input name="visitedOn" aria-label="Date visited" type="date" max={today} style={fieldStyle} /></label>
+            <label style={pcss("font:800 10px 'Nunito',sans-serif;color:var(--ink2,#6B5B60)")}>Rating 1–5<input name="rating" aria-label="Place rating" type="number" min="1" max="5" defaultValue="5" style={fieldStyle} /></label>
+            <label style={pcss("grid-column:1/-1;font:800 10px 'Nunito',sans-serif;color:var(--ink2,#6B5B60)")}>Notes<textarea name="note" aria-label="Place note" placeholder="What makes this place special?" rows={3} style={{ ...fieldStyle, resize: 'vertical' }} /></label>
           </div>
           <div style={{ marginTop: 13 }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              <button type="button" disabled={geoBusy} onClick={useCurrentLocation} style={actionStyle}>{geoBusy ? 'Mencari GPS…' : '⌖ Lokasi saya'}</button>
-              <button type="button" aria-pressed={pickMode} onClick={startPicking} style={actionStyle}>🗺️ Pilih di peta</button>
+              <button type="button" disabled={geoBusy} onClick={useCurrentLocation} style={actionStyle}>{geoBusy ? 'Finding GPS…' : '⌖ My current location'}</button>
+              <button type="button" aria-pressed={pickMode} onClick={startPicking} style={actionStyle}>🗺️ Pick on map</button>
             </div>
-            <div aria-live="polite" style={pcss("margin-top:8;padding:9px 11px;border-radius:11px;background:var(--sf,#fff);font:700 9.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>{draftPoint ? `Pin: ${draftPoint.latitude.toFixed(5)}, ${draftPoint.longitude.toFixed(5)}` : 'Lokasi opsional · belum ada pin'}</div>
+            <div aria-live="polite" style={pcss("margin-top:8;padding:9px 11px;border-radius:11px;background:var(--sf,#fff);font:700 9.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>{draftPoint ? `Pin: ${draftPoint.latitude.toFixed(5)}, ${draftPoint.longitude.toFixed(5)}` : 'Location optional · no pin yet'}</div>
           </div>
           {formError && <div role="alert" style={pcss("margin-top:10px;font:700 10.5px/1.45 'Nunito',sans-serif;color:#B5485D")}>{formError}</div>}
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 15 }}>
-            <button type="button" onClick={resetDraft} style={actionStyle}>Batal</button>
-            <button type="submit" style={{ ...actionStyle, border: 0, background: 'var(--pk,#FFB7B2)', color: '#5C3A42' }}>Simpan pin 📍</button>
+            <button type="button" onClick={resetDraft} style={actionStyle}>Cancel</button>
+            <button type="submit" style={{ ...actionStyle, border: 0, background: 'var(--pk,#FFB7B2)', color: '#5C3A42' }}>Save pin 📍</button>
           </div>
         </form>
       )}
 
-      {visible.length === 0 && !creating && <EmptyState tag="PETA PRIBADI" emoji="📍" title={places.length ? 'Tidak ada tempat di kategori ini' : 'Belum ada tempat yang disimpan'} body="Tambahkan tempat pertama atau ganti filter kategori." actionLabel="Tambah tempat" onAction={() => setCreating(true)} />}
+      {visible.length === 0 && !creating && <EmptyState tag="OUR PRIVATE MAP" emoji="📍" title={places.length ? 'No places in this category' : 'No saved places yet'} body="Add your first place or choose another category." actionLabel="Add place" onAction={() => setCreating(true)} />}
 
       {visible.map((place) => {
         const selected = selectedPlaceId === place.id;
         return (
           <article key={place.id} style={pcss(`border-radius:22px;background:var(--sf,#fff);box-shadow:var(--shadow,0 8px 24px rgba(0,0,0,.04));border:${selected ? '2px solid var(--pk,#FFB7B2)' : '2px solid transparent'};overflow:hidden`)}>
             <button type="button" aria-pressed={selected} onClick={() => selectPlace(place.id)} style={pcss('width:100%;display:flex;gap:13px;text-align:left;color:inherit;padding:13px;border:0;background:transparent;cursor:pointer')}>
-              <div style={pcss('width:84px;height:84px;border-radius:16px;flex:none;background:var(--sf2,#FFF4F1);display:flex;align-items:center;justify-content:center;font-size:22px;overflow:hidden')}>{place.imageUrl ? <img src={place.imageUrl} alt={`Foto ${place.title}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : place.icon}</div>
+              <div style={pcss('width:84px;height:84px;border-radius:16px;flex:none;background:var(--sf2,#FFF4F1);display:flex;align-items:center;justify-content:center;font-size:22px;overflow:hidden')}>{place.imageUrl ? <img src={place.imageUrl} alt={`Picture of ${place.title}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : place.icon}</div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}><span style={pcss("font:700 13.5px 'Nunito',sans-serif;color:var(--ink,#4A4A4A)")}>{place.title}</span><Stars rating={place.rating} /></div>
-                <div style={pcss("font:600 10.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:3px")}>{place.meta}{place.latitude != null ? ' · Ada pin' : ' · Tanpa pin'}</div>
+                <div style={pcss("font:600 10.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:3px")}>{place.meta}{place.latitude != null ? ' · Pin saved' : ' · No pin'}</div>
                 <div style={pcss("font:500 16px 'Caveat',cursive;color:var(--ink2,#6B5B60);margin-top:3px")}>{place.note}</div>
               </div>
             </button>
             {selected && (
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '0 13px 12px' }}>
-                <button type="button" disabled={place.latitude == null} onClick={() => document.querySelector('.kk-place-map')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} style={{ ...actionStyle, opacity: place.latitude == null ? 0.5 : 1 }}>Lihat pin</button>
+                <button type="button" disabled={place.latitude == null} onClick={() => document.querySelector('.kk-place-map')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} style={{ ...actionStyle, opacity: place.latitude == null ? 0.5 : 1 }}>View pin</button>
                 <button type="button" onClick={() => {
                   if (confirmDeleteId !== place.id) { setConfirmDeleteId(place.id); return; }
                   removePlace(place.id);
                   setSelectedPlaceId(null);
                   setConfirmDeleteId('');
-                  toast('Tempat dan foto sampulnya dihapus');
-                }} style={{ ...actionStyle, color: '#B5485D', background: '#FFF0F2' }}>{confirmDeleteId === place.id ? 'Yakin hapus' : '🗑️ Hapus'}</button>
+                  toast('Place and cover picture deleted');
+                }} style={{ ...actionStyle, color: '#B5485D', background: '#FFF0F2' }}>{confirmDeleteId === place.id ? 'Confirm delete' : '🗑️ Delete'}</button>
               </div>
             )}
           </article>

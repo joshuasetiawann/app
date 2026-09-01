@@ -26,11 +26,11 @@ function distanceKm(a: LocationPing | null, b: LocationPing | null) {
 }
 
 function relativeUpdate(value: string | null, now: number) {
-  if (!value) return 'Belum ada';
+  if (!value) return 'Not available';
   const seconds = Math.max(0, Math.floor((now - new Date(value).getTime()) / 1_000));
-  if (seconds < 60) return `${seconds} dtk lalu`;
-  if (seconds < 3_600) return `${Math.floor(seconds / 60)} mnt lalu`;
-  return `${Math.floor(seconds / 3_600)} jam lalu`;
+  if (seconds < 60) return `${seconds}s ago`;
+  if (seconds < 3_600) return `${Math.floor(seconds / 60)}m ago`;
+  return `${Math.floor(seconds / 3_600)}h ago`;
 }
 
 function locationError(error: GeolocationPositionError) {
@@ -58,7 +58,7 @@ export default function LocationPage() {
       setCurrentTime(Date.now());
       return true;
     } catch (error) {
-      setSyncError(error instanceof Error ? error.message : 'Status lokasi belum bisa dimuat.');
+      setSyncError(error instanceof Error ? error.message : 'Location status could not be loaded.');
       return false;
     }
   }, []);
@@ -96,7 +96,7 @@ export default function LocationPage() {
         lastPublishRef.current = Date.now();
         void publishLocationPing(next)
           .then(() => refreshPings())
-          .catch((error) => setSyncError(error instanceof Error ? error.message : 'Lokasi belum bisa dibagikan.'));
+          .catch((error) => setSyncError(error instanceof Error ? error.message : 'Your location could not be shared.'));
       },
       (error) => {
         setGeoStatus(locationError(error));
@@ -109,7 +109,7 @@ export default function LocationPage() {
 
   const distance = useMemo(() => distanceKm(mine, partnerPing), [mine, partnerPing]);
   const partnerFresh = !!partnerPing && currentTime - new Date(partnerPing.recordedAt).getTime() < 5 * 60_000;
-  const partnerName = auth.partner?.name || 'Pasangan';
+  const partnerName = auth.partner?.name || 'Partner';
 
   const enableLocation = () => {
     setSyncError('');
@@ -119,13 +119,13 @@ export default function LocationPage() {
     }
     setGeoStatus('requesting');
     setLocation(true);
-    toast('Konfirmasi izin lokasi di perangkatmu 📍');
+    toast('Confirm location permission on this device 📍');
   };
 
   const disableLocation = () => {
     setGeoStatus('idle');
     setLocation(false);
-    toast('Berbagi lokasi dihentikan 👻');
+    toast('Location sharing stopped 👻');
   };
 
   return (
@@ -136,32 +136,32 @@ export default function LocationPage() {
           {!mine && !partnerPing && (
             <div className="kk-map-empty">
               <span>📍</span>
-              <strong>Peta siap dipakai</strong>
-              <small>Nyalakan lokasi agar posisi kalian muncul di sini.</small>
+              <strong>Your shared map is ready</strong>
+              <small>Turn on location sharing on both phones to calculate the distance.</small>
             </div>
           )}
           <button
             type="button"
             className="kk-map-refresh"
-            aria-label="Perbarui lokasi pasangan"
-            onClick={() => void refreshPings().then((refreshed) => refreshed && toast('Status lokasi diperbarui'))}
+            aria-label="Refresh partner location"
+            onClick={() => void refreshPings().then((refreshed) => refreshed && toast('Location refreshed'))}
           >
             ↻
           </button>
         </div>
         <div style={{ padding: '16px 17px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={pcss("font:700 15px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>{partnerPing ? `Lokasi ${partnerName}` : `Menunggu ${partnerName}`}</span>
+            <span style={pcss("font:700 15px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>{partnerPing ? `${partnerName}'s location` : `Waiting for ${partnerName}`}</span>
             <span style={pcss(`font:700 10px 'Nunito',sans-serif;padding:4px 9px;border-radius:100px;color:${partnerFresh ? '#377452' : 'var(--mut,#A99A9E)'};background:${partnerFresh ? '#E4F5EB' : 'var(--sf2,#FFF4F1)'}`)}>
-              {partnerFresh ? 'LIVE' : partnerPing ? 'TERAKHIR' : 'BELUM ADA'}
+              {partnerFresh ? 'LIVE' : partnerPing ? 'LAST SEEN' : 'NO LOCATION'}
             </span>
           </div>
           <div className="kk-location-stats">
             {[
-              ['JARAK', distance == null ? '—' : `${distance < 10 ? distance.toFixed(1) : Math.round(distance)} km`],
-              ['KECEPATAN', partnerPing?.speedKmh == null ? '—' : `${partnerPing.speedKmh.toFixed(1)} km/j`],
-              ['AKURASI', partnerPing?.accuracyM == null ? '—' : `±${Math.round(partnerPing.accuracyM)} m`],
-              ['UPDATE', relativeUpdate(partnerPing?.recordedAt ?? null, currentTime)],
+              ['DISTANCE', distance == null ? 'Waiting for both devices' : `${distance < 10 ? distance.toFixed(1) : Math.round(distance)} km apart`],
+              ['SPEED', partnerPing?.speedKmh == null ? '—' : `${partnerPing.speedKmh.toFixed(1)} km/h`],
+              ['ACCURACY', partnerPing?.accuracyM == null ? '—' : `±${Math.round(partnerPing.accuracyM)} m`],
+              ['UPDATED', relativeUpdate(partnerPing?.recordedAt ?? null, currentTime)],
             ].map(([label, value]) => (
               <div key={label}>
                 <div style={pcss("font:700 9px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>{label}</div>
@@ -175,9 +175,9 @@ export default function LocationPage() {
       <div style={pcss('border-radius:22px;background:var(--sf,#fff);padding:16px 17px;box-shadow:var(--shadow,0 8px 24px rgba(0,0,0,.04))')}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14 }}>
           <div>
-            <div style={pcss("font:700 13.5px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Bagikan lokasi perangkat ini</div>
+            <div style={pcss("font:700 13.5px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Share this device's location</div>
             <div style={pcss("font:600 10.5px/1.45 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:2px")}>
-              {geoStatus === 'ready' ? `Aktif · akurasi ±${Math.round(mine?.accuracyM ?? 0)} m` : locationOn ? 'Meminta posisi dari perangkat…' : 'Mati · tidak ada posisi baru yang dikirim'}
+              {geoStatus === 'ready' ? `Active · accurate to ±${Math.round(mine?.accuracyM ?? 0)} m` : locationOn ? 'Getting your current position…' : 'Off · no new location is being shared'}
             </div>
           </div>
           <button
@@ -185,40 +185,40 @@ export default function LocationPage() {
             style={pcss(`width:48px;height:28px;border:0;border-radius:100px;cursor:pointer;padding:3px;display:flex;flex:none;justify-content:${locationOn ? 'flex-end' : 'flex-start'};background:${locationOn ? 'var(--pk,#FFB7B2)' : 'var(--ln,rgba(74,74,74,.16))'};transition:background .2s`)}
             onClick={locationOn ? disableLocation : enableLocation}
             aria-pressed={locationOn}
-            aria-label="Bagikan lokasi"
+            aria-label="Share location"
           >
             <span style={{ width: 22, height: 22, borderRadius: '50%', background: '#fff', boxShadow: '0 2px 6px rgba(0,0,0,.16)' }} />
           </button>
         </div>
         {mine && (
           <div style={pcss("margin-top:13px;padding:11px 13px;border-radius:14px;background:var(--sf2,#FFF4F1);font:600 10.5px/1.5 'Nunito',sans-serif;color:var(--ink2,#6B5B60)")}>
-            Posisi terakhir perangkatmu: {mine.latitude.toFixed(4)}, {mine.longitude.toFixed(4)} · {relativeUpdate(mine.recordedAt, currentTime)}
+            Last location from this device: {mine.latitude.toFixed(4)}, {mine.longitude.toFixed(4)} · {relativeUpdate(mine.recordedAt, currentTime)}
           </div>
         )}
       </div>
 
       {geoStatus !== 'ready' && (
         <div style={pcss('border-radius:22px;background:var(--sf2,#FFF4F1);border:1px dashed rgba(232,111,135,.4);padding:16px 17px')}>
-          <div style={pcss("font:700 13px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Izin lokasi tetap di tanganmu 📍</div>
+          <div style={pcss("font:700 13px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>You control location access 📍</div>
           <div style={pcss("font:600 11px/1.5 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:5px")}>
             {geoStatus === 'denied'
-              ? 'Izin ditolak oleh perangkat. Aktifkan kembali dari pengaturan situs atau aplikasi bila kamu berubah pikiran.'
+              ? 'Location permission is blocked. You can enable it again in your browser or app settings.'
               : geoStatus === 'unavailable'
-                ? 'Perangkat atau browser ini belum menyediakan posisi yang bisa dibaca.'
-                : 'KisahKita baru membaca dan membagikan posisi setelah kamu menyalakan kontrol di atas.'}
+                ? 'This device or browser cannot provide a readable location.'
+                : 'KisahKita only reads and shares your position after you turn on the control above.'}
           </div>
           {!locationOn && geoStatus !== 'unavailable' && (
             <button type="button" style={pcss("margin-top:13px;padding:10px 16px;border:0;border-radius:100px;background:var(--pk,#FFB7B2);color:#5C3A42;font:700 11.5px 'Nunito',sans-serif;cursor:pointer")} onClick={enableLocation}>
-              Izinkan &amp; bagikan
+              Allow &amp; share
             </button>
           )}
         </div>
       )}
 
       <div style={pcss('border-radius:22px;background:var(--sf,#fff);padding:16px 17px;box-shadow:var(--shadow,0 8px 24px rgba(0,0,0,.04))')}>
-        <div style={pcss("font:700 13.5px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Status sinkronisasi</div>
+        <div style={pcss("font:700 13.5px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>How distance sync works</div>
         <div style={pcss("font:600 10.5px/1.55 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:6px")}>
-          Posisi hanya tersimpan di ruang pasanganmu. Saat Supabase aktif, kebijakan akses database membatasi data ini ke dua akun yang sudah terhubung; mode lokal menyimpannya hanya di perangkat ini.
+          Each phone shares its latest position with your private couple space. Supabase access rules limit this data to the two connected accounts, and the map updates automatically as either phone moves.
         </div>
         {syncError && <div role="alert" style={pcss("margin-top:10px;font:700 10.5px/1.45 'Nunito',sans-serif;color:#B5485D")}>{syncError}</div>}
       </div>

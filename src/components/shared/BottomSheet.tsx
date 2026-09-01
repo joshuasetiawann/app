@@ -119,14 +119,14 @@ export function BottomSheet() {
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
-        aria-label="Panel tindakan"
+        aria-label="Action panel"
       >
         <div style={pcss('width:44px;height:5px;border-radius:5px;background:var(--ln,rgba(74,74,74,.16));margin:0 auto 14px')} />
         <button
           ref={closeButtonRef}
           type="button"
           onClick={closeSheet}
-          aria-label="Tutup panel"
+          aria-label="Close panel"
           style={pcss("position:absolute;top:10px;right:14px;width:34px;height:34px;padding:0;border:0;border-radius:50%;background:var(--sf2,#FFF4F1);color:var(--ink2,#6B5B60);font:700 14px 'Nunito',sans-serif;cursor:pointer")}
         >
           ✕

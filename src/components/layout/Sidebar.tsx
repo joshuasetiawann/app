@@ -38,7 +38,7 @@ export function Sidebar() {
   const { profile, partner, couple } = useAuthState();
   const isTablet = viewport === 'tablet';
   const open = !isTablet;
-  const coupleNames = `${profile?.name || 'Kamu'} & ${partner?.name || 'Pasangan'}`;
+  const coupleNames = `${profile?.name || 'You'} & ${partner?.name || 'Partner'}`;
 
   return (
     <aside
@@ -62,7 +62,7 @@ export function Sidebar() {
         )}
       </div>
 
-      {open && <div style={pcss('font:700 9.5px "Nunito",sans-serif;letter-spacing:.14em;color:var(--mut,#A99A9E);padding:4px 10px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis')}>❤️ {couple?.spaceName || 'RUANG KITA'}</div>}
+      {open && <div style={pcss('font:700 9.5px "Nunito",sans-serif;letter-spacing:.14em;color:var(--mut,#A99A9E);padding:4px 10px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis')}>❤️ {couple?.spaceName || 'OUR SPACE'}</div>}
       {NAV_MAIN.map((item) => (
         <NavRow key={item.path} item={item} open={open} />
       ))}
@@ -72,7 +72,7 @@ export function Sidebar() {
         <NavRow key={item.path} item={item} open={open} />
       ))}
 
-      {open && <div style={pcss('font:700 9.5px "Nunito",sans-serif;letter-spacing:.14em;color:var(--mut,#A99A9E);padding:16px 10px 8px')}>⚙️ AKUN</div>}
+      {open && <div style={pcss('font:700 9.5px "Nunito",sans-serif;letter-spacing:.14em;color:var(--mut,#A99A9E);padding:16px 10px 8px')}>⚙️ ACCOUNT</div>}
       {NAV_ACCOUNT.map((item) => (
         <NavRow key={item.path} item={item} open={open} />
       ))}
@@ -87,7 +87,7 @@ export function Sidebar() {
             <div style={pcss('height:6px;border-radius:6px;background:var(--ln,rgba(74,74,74,.1));margin-top:9px')}>
               <div style={pcss('width:42%;height:6px;border-radius:6px;background:linear-gradient(90deg,var(--pk,#FFB7B2),var(--lav,#E3D7F7))')} />
             </div>
-            <div style={pcss('font:600 10px "Nunito",sans-serif;color:var(--mut,#A99A9E);margin-top:7px')}>Semua memori aman ✨</div>
+            <div style={pcss('font:600 10px "Nunito",sans-serif;color:var(--mut,#A99A9E);margin-top:7px')}>All memories are safe ✨</div>
           </div>
         )}
       </div>

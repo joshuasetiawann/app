@@ -60,13 +60,13 @@ export function AppShell() {
                 <div style={pcss('margin:0 16px 4px;padding:11px 14px;border-radius:16px;background:#FFF0D9;border:1px solid #F5D9A8;display:flex;align-items:center;gap:9px;animation:kk-up .25s ease')}>
                   <span style={{ fontSize: 15 }}>📡</span>
                   <span style={pcss("font:600 11.5px/1.4 'Nunito',sans-serif;color:#8A6B33")}>
-                    Kamu lagi offline. Tenang, pesan cintanya disimpen dulu, nanti dikirim otomatis 💌
+                    You are offline. Messages will stay queued and send automatically when you reconnect. 💌
                   </span>
                 </div>
               )}
 
-              <div style={pcss(`flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:${isMobile ? 'calc(104px + env(safe-area-inset-bottom))' : '26px'}`)}>
-                <div className="kk-route-enter" key={location.pathname}>
+              <div className={`kk-main-scroll${location.pathname === '/chat' ? ' kk-main-scroll-chat' : ''}`} style={pcss(`flex:1;overflow-y:${location.pathname === '/chat' ? 'hidden' : 'auto'};overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:${isMobile ? 'calc(82px + env(safe-area-inset-bottom))' : '26px'}`)}>
+                <div className={`kk-route-enter${location.pathname === '/chat' ? ' kk-route-chat' : ''}`} key={location.pathname}>
                   <Outlet />
                   <div data-screens-end="1" />
                 </div>

@@ -36,9 +36,9 @@ function AppBoot({ error }: { error?: string }) {
       <main className="kk-app-boot">
         <section className="kk-boot-card kk-boot-error" role="alert">
           <div aria-hidden="true" style={{ fontSize: 42 }}>☁️</div>
-          <h1>Koneksi belum siap.</h1>
+          <h1>The connection is not ready.</h1>
           <p>{error}</p>
-          <button type="button" onClick={() => void auth.refresh()}>Coba lagi</button>
+          <button type="button" onClick={() => void auth.refresh()}>Try again</button>
         </section>
       </main>
     );
@@ -46,7 +46,7 @@ function AppBoot({ error }: { error?: string }) {
   return (
     <main className="kk-app-boot" aria-label="Memuat KisahKita" aria-busy="true">
       <section className="kk-boot-card">
-        <div className="kk-boot-head"><div className="kk-brand-mark"><span>♥</span><i /></div><div><strong>KisahKita</strong><small>Menyiapkan ruang kalian…</small></div></div>
+        <div className="kk-boot-head"><div className="kk-brand-mark"><span>♥</span><i /></div><div><strong>KisahKita</strong><small>Preparing your shared space…</small></div></div>
         <div className="kk-skeleton kk-skeleton-title" />
         <div className="kk-skeleton kk-skeleton-line" />
         <div className="kk-skeleton kk-skeleton-line short" />

@@ -8,17 +8,17 @@ export default function StatesPage() {
 
   const requestLocation = () => {
     if (!navigator.geolocation) {
-      toast('Perangkat ini tidak mendukung lokasi.');
+      toast('This device does not support location.');
       return;
     }
     navigator.geolocation.getCurrentPosition(
       () => {
         setLocation(true);
-        toast('Izin lokasi diberikan ✓');
+        toast('Location permission granted ✓');
       },
       (error) => {
         setLocation(false);
-        toast(error.code === error.PERMISSION_DENIED ? 'Izin lokasi masih ditolak.' : 'Lokasi belum bisa dibaca. Coba lagi.');
+        toast(error.code === error.PERMISSION_DENIED ? 'Location permission is still blocked.' : 'Location could not be read. Try again.');
       },
       { enableHighAccuracy: false, timeout: 10_000 },
     );
@@ -27,13 +27,13 @@ export default function StatesPage() {
   return (
     <ScrollColumn>
       <div style={pcss('border-radius:22px;background:var(--sf2,#FFF4F1);padding:16px 17px')}>
-        <div style={pcss("font:700 14px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Kumpulan state buat engineer 🧩</div>
+        <div style={pcss("font:700 14px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Interface state library 🧩</div>
         <div style={pcss("font:600 10.5px/1.5 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:4px")}>
-          Semua kondisi yang harus dibikin: loading, kosong, error, offline, izin, upload, sukses. Copy langsung dari sini.
+          Every state the app needs: loading, empty, error, offline, permission, upload, and success.
         </div>
         <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
           <button type="button" style={pcss("padding:8px 13px;border:0;border-radius:100px;background:var(--sf,#fff);font:700 11px 'Nunito',sans-serif;color:var(--ink2,#6B5B60);cursor:pointer")} onClick={toggleOffline} aria-pressed={offline}>
-            {offline ? 'Matikan mode offline' : 'Coba mode offline'}
+            {offline ? 'Turn off offline mode' : 'Try offline mode'}
           </button>
           <button type="button" style={pcss("padding:8px 13px;border:0;border-radius:100px;background:var(--sf,#fff);font:700 11px 'Nunito',sans-serif;color:var(--ink2,#6B5B60);cursor:pointer")} onClick={() => openSheet('pap')}>
             Lihat flow upload
@@ -48,7 +48,7 @@ export default function StatesPage() {
             <div style={pcss('width:76px;height:76px;margin:0 auto;border-radius:50%;border:2px dashed rgba(232,111,135,.4);position:relative;animation:kk-orbit 3s linear infinite')}>
               <div style={{ position: 'absolute', top: -10, left: '50%', marginLeft: -9, fontSize: 17 }}>✈️</div>
             </div>
-            <div style={pcss("font:600 16px 'Caveat',cursive;color:var(--ink2,#6B5B60);margin-top:12px")}>Lagi terbang ke Taiwan... ☁️</div>
+            <div style={pcss("font:600 16px 'Caveat',cursive;color:var(--ink2,#6B5B60);margin-top:12px")}>Flying to Taiwan... ☁️</div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginTop: 8 }}>
             <div style={pcss('height:10px;border-radius:6px;background:linear-gradient(90deg,#F2ECEA 8%,#FBF7F5 18%,#F2ECEA 33%);background-size:320px 100%;animation:kk-shim 1.3s linear infinite')} />
@@ -59,29 +59,29 @@ export default function StatesPage() {
         <div style={pcss('border-radius:22px;background:var(--sf,#fff);padding:17px;box-shadow:var(--shadow,0 8px 24px rgba(0,0,0,.04));text-align:center')}>
           <div style={{ font: '700 9.5px "Nunito",sans-serif', letterSpacing: '.12em', color: 'var(--pki,#E86F87)', textAlign: 'left' }}>EMPTY · GALERI</div>
           <div style={{ fontSize: 38, marginTop: 14 }}>🧸📷</div>
-          <div style={pcss("font:700 13px 'Nunito',sans-serif;color:var(--ink,#4A4A4A);margin-top:10px")}>Belum ada foto nih</div>
-          <div style={pcss("font:600 11px/1.5 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:4px")}>Ayo kirim PAP biar kangennya ilang! 🥺</div>
+          <div style={pcss("font:700 13px 'Nunito',sans-serif;color:var(--ink,#4A4A4A);margin-top:10px")}>No pictures yet</div>
+          <div style={pcss("font:600 11px/1.5 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:4px")}>Send a picture to make the distance feel smaller. 🥺</div>
           <button
             type="button"
             style={pcss("margin-top:12px;padding:10px 16px;border:0;border-radius:100px;background:var(--pk,#FFB7B2);color:#5C3A42;font:700 11.5px 'Nunito',sans-serif;cursor:pointer")}
             onClick={() => openSheet('pap')}
           >
-            Kirim PAP
+            Send a picture
           </button>
         </div>
 
         <div style={pcss('border-radius:22px;background:var(--sf,#fff);padding:17px;box-shadow:var(--shadow,0 8px 24px rgba(0,0,0,.04));text-align:center')}>
           <div style={{ font: '700 9.5px "Nunito",sans-serif', letterSpacing: '.12em', color: 'var(--pki,#E86F87)', textAlign: 'left' }}>EMPTY · FOOD</div>
           <div style={{ fontSize: 38, marginTop: 14 }}>🍜😢</div>
-          <div style={pcss("font:700 13px 'Nunito',sans-serif;color:var(--ink,#4A4A4A);margin-top:10px")}>Ayang belum update makan</div>
+          <div style={pcss("font:700 13px 'Nunito',sans-serif;color:var(--ink,#4A4A4A);margin-top:10px")}>No meal update yet</div>
           <div style={pcss("font:600 11px/1.5 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:4px")}>Jangan sampai sakit perut ya! 🍜</div>
           <button
             type="button"
             disabled
-            title="Pengingat pasangan akan hadir segera"
+            title="Partner reminders are coming soon"
             style={pcss("margin-top:12px;padding:10px 16px;border:0;border-radius:100px;background:var(--sf2,#FFF4F1);color:var(--mut,#A99A9E);font:700 11.5px 'Nunito',sans-serif;cursor:not-allowed")}
           >
-            Tanyain · segera
+            Ask them · coming soon
           </button>
         </div>
 
@@ -89,26 +89,26 @@ export default function StatesPage() {
           <div style={{ font: '700 9.5px "Nunito",sans-serif', letterSpacing: '.12em', color: '#C2506B', textAlign: 'left' }}>ERROR</div>
           <div style={{ fontSize: 38, marginTop: 14 }}>💔</div>
           <div style={pcss("font:700 13px 'Nunito',sans-serif;color:var(--ink,#4A4A4A);margin-top:10px")}>Koneksi ngambek!</div>
-          <div style={pcss("font:600 11px/1.5 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:4px")}>Aktifkan mode offline di atas untuk menguji pemulihan.</div>
+          <div style={pcss("font:600 11px/1.5 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:4px")}>Enable offline mode above to test recovery.</div>
           <button
             type="button"
             disabled={!offline}
-            title={offline ? 'Kembali ke mode online' : 'Koneksi sedang aktif'}
+            title={offline ? 'Kembali ke mode online' : 'Connection is active'}
             style={pcss(`margin-top:12px;padding:10px 16px;border:0;border-radius:100px;background:${offline ? '#FFE1E1' : 'var(--sf2,#FFF4F1)'};color:${offline ? '#C2506B' : 'var(--mut,#A99A9E)'};font:700 11.5px 'Nunito',sans-serif;cursor:${offline ? 'pointer' : 'not-allowed'}`)}
             onClick={toggleOffline}
           >
-            {offline ? 'Pulihkan koneksi' : 'Koneksi aktif'}
+            {offline ? 'Pulihkan koneksi' : 'Connected'}
           </button>
         </div>
 
         <div style={pcss('border-radius:22px;background:var(--sf,#fff);padding:17px;box-shadow:var(--shadow,0 8px 24px rgba(0,0,0,.04))')}>
           <div style={pcss("font:700 9.5px 'Nunito',sans-serif;letter-spacing:.12em;color:var(--pki,#E86F87)")}>PERMISSION</div>
           <div style={{ fontSize: 30, marginTop: 12 }}>📍</div>
-          <div style={pcss("font:700 13px 'Nunito',sans-serif;color:var(--ink,#4A4A4A);margin-top:8px")}>Izin lokasi ditolak</div>
-          <div style={pcss("font:600 11px/1.5 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:4px")}>Buka Setelan HP › Izin › Lokasi buat nyalain lagi. Kamu tetap bisa pakai fitur lain.</div>
+          <div style={pcss("font:700 13px 'Nunito',sans-serif;color:var(--ink,#4A4A4A);margin-top:8px")}>Location permission blocked</div>
+          <div style={pcss("font:600 11px/1.5 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:4px")}>Open device settings › Permissions › Location to enable it again. Other features still work.</div>
           <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
             <button type="button" style={pcss("padding:9px 14px;border:0;border-radius:100px;background:var(--pk,#FFB7B2);color:#5C3A42;font:700 11px 'Nunito',sans-serif;cursor:pointer")} onClick={requestLocation}>
-              Minta izin lokasi
+              Request location permission
             </button>
           </div>
         </div>
@@ -121,14 +121,14 @@ export default function StatesPage() {
               <div style={{ height: 7, borderRadius: 7, background: 'var(--sf2,#FFF4F1)' }}>
                 <div style={{ width: '64%', height: 7, borderRadius: 7, background: 'linear-gradient(90deg,var(--pk,#FFB7B2),var(--lav,#E3D7F7))' }} />
               </div>
-              <div style={pcss("font:600 9.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:5px")}>Pratinjau proses · unggahan PAP memakai flow di atas</div>
+              <div style={pcss("font:600 9.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:5px")}>Process preview · picture uploads use the flow above</div>
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--ln,rgba(74,74,74,.07))' }}>
             <div style={{ width: 34, height: 34, borderRadius: '50%', background: '#E4F5EB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, animation: 'kk-pop .5s ease' }}>✓</div>
             <div>
               <div style={pcss("font:700 12px 'Nunito',sans-serif;color:var(--ink,#4A4A4A)")}>Contoh kondisi selesai</div>
-              <div style={pcss("font:600 10px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>Sinkronisasi cloud · segera</div>
+              <div style={pcss("font:600 10px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>Cloud sync · coming soon</div>
             </div>
           </div>
         </div>

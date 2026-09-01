@@ -83,7 +83,7 @@ try {
   await page.getByRole('button', { name: /Lihat ruang demo/i }).click();
   await page.waitForURL((url) => url.pathname === '/');
   await page.goto(`${base}/files`);
-  await page.getByRole('button', { name: 'Hubungkan Google Drive' }).click();
+    await page.getByRole('button', { name: 'Connect Google Drive' }).click();
   await page.getByText('TERHUBUNG', { exact: true }).waitFor();
   await page.getByText('Folder masih kosong.', { exact: false }).waitFor();
 

@@ -129,7 +129,7 @@ interface AppStateShape {
   galleryFilter: string;
   galleryView: GalleryView;
   foodCategory: string;
-  agendaView: 'Hari' | 'Minggu' | 'Bulan' | 'Agenda';
+  agendaView: 'Day' | 'Week' | 'Month' | 'Agenda';
   placeCategory: string;
   // privacy / location
   locationOn: boolean;
@@ -265,10 +265,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   const [foodStatus, setFoodStatusState] = useState<FoodStatus>(() => auth.mode === 'local' ? readStoredValue(`${storageBase}:food-status`, '') : '');
   const [partnerFoodStatus, setPartnerFoodStatus] = useState<FoodStatus>('');
-  const [mood, setMoodState] = useState(() => auth.mode === 'local' ? readStoredValue(`${storageBase}:mood`, isDemoSpace ? 'Kangen 🥺' : 'Belum diatur') : 'Belum diatur');
-  const [activity, setActivity] = useState(isDemoSpace ? 'Ngoding 💻' : 'Belum diatur');
-  const [partnerMood, setPartnerMood] = useState(isDemoSpace ? 'Semangat 🌸' : 'Belum ada update');
-  const [partnerActivity, setPartnerActivity] = useState(isDemoSpace ? 'Belajar 📚' : 'Belum diatur');
+  const [mood, setMoodState] = useState(() => auth.mode === 'local' ? readStoredValue(`${storageBase}:mood`, isDemoSpace ? 'Missing you 🥺' : 'Not set') : 'Not set');
+  const [activity, setActivity] = useState(isDemoSpace ? 'Coding 💻' : 'Not set');
+  const [partnerMood, setPartnerMood] = useState(isDemoSpace ? 'Motivated 🌸' : 'No update yet');
+  const [partnerActivity, setPartnerActivity] = useState(isDemoSpace ? 'Studying 📚' : 'Not set');
 
   const [papStep, setPapStep] = useState<0 | 1 | 2 | 3>(0);
   const [papCaption, setPapCaption] = useState('');
@@ -290,11 +290,11 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [draft, setDraftState] = useState('');
   const [typing, setTyping] = useState(false);
 
-  const [galleryFilter, setGalleryFilter] = useState('Semua');
+  const [galleryFilter, setGalleryFilter] = useState('All');
   const [galleryView, setGalleryView] = useState<GalleryView>('grid');
-  const [foodCategory, setFoodCategory] = useState('Semua');
+  const [foodCategory, setFoodCategory] = useState('All');
   const [agendaView, setAgendaView] = useState<AppStateShape['agendaView']>('Agenda');
-  const [placeCategory, setPlaceCategory] = useState('Semua');
+  const [placeCategory, setPlaceCategory] = useState('All');
 
   const [locationOn, setLocationOn] = useState(() => auth.mode === 'local' ? readStoredValue(`${storageBase}:location`, false) : false);
   const [privacy, setPrivacy] = useState<PrivacyToggles>(() => auth.mode === 'local' ? readStoredValue(`${storageBase}:privacy`, { onlineOn: true, lastSeenOn: true, actOn: true, galOn: true, meTime: false }) : { onlineOn: true, lastSeenOn: true, actOn: true, galOn: true, meTime: false });
@@ -349,10 +349,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setNotifications(readStoredValue(`${storageBase}:notifications`, isDemoSpace ? NOTIFICATIONS : []));
     setFoodStatusState(readStoredValue(`${storageBase}:food-status`, ''));
     setPartnerFoodStatus('');
-    setMoodState(readStoredValue(`${storageBase}:mood`, isDemoSpace ? 'Kangen 🥺' : 'Belum diatur'));
-    setActivity(isDemoSpace ? 'Ngoding 💻' : 'Belum diatur');
-    setPartnerMood(isDemoSpace ? 'Semangat 🌸' : 'Belum ada update');
-    setPartnerActivity(isDemoSpace ? 'Belajar 📚' : 'Belum diatur');
+    setMoodState(readStoredValue(`${storageBase}:mood`, isDemoSpace ? 'Missing you 🥺' : 'Not set'));
+    setActivity(isDemoSpace ? 'Coding 💻' : 'Not set');
+    setPartnerMood(isDemoSpace ? 'Motivated 🌸' : 'No update yet');
+    setPartnerActivity(isDemoSpace ? 'Studying 📚' : 'Not set');
     setPrivacy(readStoredValue(`${storageBase}:privacy`, { onlineOn: true, lastSeenOn: true, actOn: true, galOn: true, meTime: false }));
     setLocationOn(readStoredValue(`${storageBase}:location`, false));
     setSyncStatus('local');
@@ -480,10 +480,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     void operation
       .then(() => refreshSharedData())
       .catch((error) => {
-        const message = error instanceof Error ? error.message : 'Perubahan belum berhasil disinkronkan.';
+        const message = error instanceof Error ? error.message : 'The change could not be synced.';
         setSyncStatus('error');
         setSyncError(message);
-        toast(`Sinkronisasi gagal: ${message}`);
+        toast(`Sync failed: ${message}`);
         void refreshSharedData().catch(() => undefined);
       });
   }, [refreshSharedData, toast]);
@@ -506,7 +506,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
           await sendSharedMessage(syncContext, next.text);
           persistPendingMessages(pendingMessagesRef.current.filter((item) => item.id !== next.id));
         } catch (error) {
-          const message = error instanceof Error ? error.message : 'Pesan belum berhasil dikirim.';
+          const message = error instanceof Error ? error.message : 'The message could not be sent.';
           persistPendingMessages(pendingMessagesRef.current.map((item) => (
             item.id === next.id ? { ...item, status: 'failed' } : item
           )));
@@ -515,7 +515,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
           )));
           setSyncStatus('error');
           setSyncError(message);
-          toast(`Pesan belum terkirim: ${message}`);
+          toast(`Message not sent: ${message}`);
           return;
         }
       }
@@ -581,7 +581,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const sendMessage = useCallback((text: string) => {
     const t = text.trim();
     if (!t) return false;
-    const optimistic: Message = { id: `local-${crypto.randomUUID()}`, from: 'me', text: t, time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }), status: syncContext ? 'queued' : 'sent', read: false };
+    const optimistic: Message = { id: `local-${crypto.randomUUID()}`, from: 'me', text: t, time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }), status: syncContext ? 'queued' : 'sent', read: false };
     setMessages((prev) => [...prev, optimistic]);
     if (syncContext) {
       persistPendingMessages([...pendingMessagesRef.current, {
@@ -607,7 +607,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setMessages((current) => current.map((item) => (
       item.id === id ? { ...item, status: 'queued' } : item
     )));
-    if (offline) toast('Pesan tetap antre sampai koneksi kembali.');
+    if (offline) toast('Your message will stay queued until you are online.');
     else void flushPendingMessages();
   }, [flushPendingMessages, offline, persistPendingMessages, toast]);
 
@@ -627,10 +627,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       imageUrl: photo.dataUrl,
       slotLabel: photo.slotLabel,
       caption: photo.caption,
-      meta: 'Baru saja',
+      meta: 'Just now',
       takenAt: new Date().toISOString(),
       by: 'me',
-      tags: ['Foto', photo.album].filter(Boolean) as string[],
+      tags: ['Photos', photo.album].filter(Boolean) as string[],
       album: photo.album,
     }, ...current]);
     setMessages((prev) => [
@@ -641,7 +641,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         photoId: optimisticId,
         photoDataUrl: photo.dataUrl,
         text: photo.caption,
-        time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+        time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
         status: offline ? 'queued' : 'sent',
         read: false,
       },
@@ -649,7 +649,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     if (syncContext && photo.dataUrl) {
       if (offline) {
         setMessages((current) => current.map((item) => item.id === optimisticId ? { ...item, status: 'failed' } : item));
-        toast('PAP memerlukan koneksi internet agar sampai ke pasangan.');
+        toast('Pictures need an internet connection to reach your partner.');
       } else {
         runRemote(sendSharedPhoto(syncContext, { caption: photo.caption, dataUrl: photo.dataUrl, album: photo.album }));
       }
@@ -660,12 +660,12 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     const entry: Photo = {
       id: `local-photo-${crypto.randomUUID()}`,
       imageUrl: photo.dataUrl,
-      slotLabel: 'FOTO BARU',
-      caption: photo.caption.trim() || 'Momen baru 💗',
-      meta: 'Baru saja · oleh kamu',
+      slotLabel: 'NEW PHOTO',
+      caption: photo.caption.trim() || 'A new moment 💗',
+      meta: 'Just now · by you',
       takenAt: new Date().toISOString(),
       by: 'me',
-      tags: ['Foto', photo.album].filter(Boolean) as string[],
+      tags: ['Photos', photo.album].filter(Boolean) as string[],
       album: photo.album,
     };
     setPhotos((current) => [entry, ...current]);
@@ -678,9 +678,9 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       const album = patch.album !== undefined ? patch.album || undefined : photo.album;
       return {
         ...photo,
-        ...(patch.caption !== undefined ? { caption: patch.caption.trim() || 'Momen baru 💗' } : {}),
+        ...(patch.caption !== undefined ? { caption: patch.caption.trim() || 'A new moment 💗' } : {}),
         album,
-        tags: [photo.slotLabel.startsWith('VIDEO') ? 'Video' : 'Foto', album].filter(Boolean) as string[],
+        tags: [photo.slotLabel.startsWith('VIDEO') ? 'Video' : 'Photos', album].filter(Boolean) as string[],
       };
     }));
     if (syncContext && !id.startsWith('local-')) runRemote(updateSharedPhoto(syncContext, id, patch));
@@ -695,7 +695,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const addAlbum = useCallback((input: { title: string; icon: string }) => {
     const title = input.title.trim();
     if (!title || albums.some((album) => album.title.toLocaleLowerCase() === title.toLocaleLowerCase())) {
-      toast(title ? 'Nama album itu sudah dipakai.' : 'Nama album belum diisi.');
+      toast(title ? 'That album name is already in use.' : 'Enter an album name.');
       return;
     }
     setAlbums((current) => [...current, { id: `local-album-${crypto.randomUUID()}`, title, icon: input.icon.trim() || '🖼️' }]);
@@ -707,7 +707,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     const title = input.title.trim();
     if (!currentAlbum || !title) return;
     if (albums.some((album) => album.id !== id && album.title.toLocaleLowerCase() === title.toLocaleLowerCase())) {
-      toast('Nama album itu sudah dipakai.');
+      toast('That album name is already in use.');
       return;
     }
     setAlbums((current) => current.map((album) => album.id === id ? { ...album, title, icon: input.icon.trim() || '🖼️' } : album));
@@ -722,7 +722,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     if (!currentAlbum) return;
     setAlbums((current) => current.filter((album) => album.id !== id));
     setPhotos((current) => current.map((photo) => photo.album === currentAlbum.title || photo.tags.includes(currentAlbum.title) ? { ...photo, album: undefined, tags: photo.tags.filter((tag) => tag !== currentAlbum.title) } : photo));
-    if (galleryFilter === currentAlbum.title) setGalleryFilter('Semua');
+    if (galleryFilter === currentAlbum.title) setGalleryFilter('All');
     if (syncContext && !id.startsWith('local-') && !id.startsWith('legacy-')) runRemote(deleteSharedAlbum(syncContext, id, currentAlbum.title));
   }, [albums, galleryFilter, runRemote, syncContext]);
 
@@ -741,11 +741,11 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const addMemory = useCallback((input: { title: string; occurredOn: string; story: string; mood: string; location: string }) => {
     const entry: Memory = {
       id: `local-memory-${crypto.randomUUID()}`,
-      date: new Date(`${input.occurredOn}T12:00:00`).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase(),
+      date: new Date(`${input.occurredOn}T12:00:00`).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase(),
       title: input.title.trim(),
-      meta: input.location.trim() || 'Ditulis oleh kamu',
+      meta: input.location.trim() || 'Written by you',
       mood: input.mood.trim() || '💗',
-      story: input.story.trim() || 'Belum ada cerita tambahan.',
+      story: input.story.trim() || 'No additional story yet.',
       photoIds: [],
     };
     setMemories((current) => [entry, ...current]);
@@ -757,8 +757,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       id: `local-story-${crypto.randomUUID()}`,
       year: input.year.trim(),
       title: input.title.trim(),
-      place: input.place.trim() || 'Tempat belum diisi',
-      note: input.note.trim() || 'Belum ada catatan.',
+      place: input.place.trim() || 'Place not set',
+      note: input.note.trim() || 'No notes yet.',
       icon: input.icon.trim() || '🌱',
     };
     setStoryChapters((current) => [...current, entry]);
@@ -771,7 +771,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       id: `local-countdown-${crypto.randomUUID()}`,
       title: input.title.trim(),
       targetDate: targetAt,
-      when: new Date(targetAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }),
+      when: new Date(targetAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }),
       icon: input.icon.trim() || '⏳',
       colorTag: 'pk',
       progressPercent: 45,
@@ -782,15 +782,15 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   const addLoveNote = useCallback((input: { preview: string; body: string; unlockAt: string }) => {
     if (!auth.partner) {
-      toast('Hubungkan pasangan dulu sebelum mengirim surat.');
+      toast('Connect with your partner before sending a note.');
       return false;
     }
     const unlockAt = input.unlockAt ? new Date(input.unlockAt).toISOString() : '';
     const entry: LoveNote = {
       id: `local-note-${crypto.randomUUID()}`,
-      tag: unlockAt && new Date(unlockAt).getTime() > Date.now() ? 'SURAT TERKUNCI' : 'SURAT UNTUKMU',
+      tag: unlockAt && new Date(unlockAt).getTime() > Date.now() ? 'SEALED NOTE' : 'A NOTE FOR YOU',
       preview: input.preview.trim(),
-      meta: 'Dari kamu · baru saja',
+      meta: 'From you · just now',
       state: unlockAt && new Date(unlockAt).getTime() > Date.now() ? 'lock' : 'open',
       from: 'me',
       body: input.body.trim(),
@@ -811,10 +811,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       id: `local-place-${crypto.randomUUID()}`,
       icon: input.category.match(/\p{Extended_Pictographic}/u)?.[0] || '📍',
       title: input.title.trim(),
-      meta: input.visitedOn ? `Dikunjungi ${new Date(`${input.visitedOn}T12:00:00`).toLocaleDateString('id-ID')}` : 'Wishlist berdua',
+      meta: input.visitedOn ? `Visited ${new Date(`${input.visitedOn}T12:00:00`).toLocaleDateString('en-US')}` : 'Shared wishlist',
       category: input.category || '📍 Memories',
       rating: input.rating,
-      note: input.note.trim() || 'Belum ada catatan.',
+      note: input.note.trim() || 'No notes yet.',
       latitude: input.latitude,
       longitude: input.longitude,
       imageUrl: input.photoDataUrl,
@@ -832,7 +832,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     const entry: Trip = {
       id: `local-trip-${crypto.randomUUID()}`,
       title: input.title.trim(),
-      meta: [input.startsOn, input.endsOn].filter(Boolean).join(' – ') || 'Tanggal belum diisi',
+      meta: [input.startsOn, input.endsOn].filter(Boolean).join(' – ') || 'Date not set',
       coverGradient: 'linear-gradient(145deg,#DDE8F4,#F0D9E4)',
       upcoming: !input.endsOn || input.endsOn >= new Date().toISOString().slice(0, 10),
       flightCode: input.flightCode.trim() || '—',
@@ -910,7 +910,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   }, [runRemote, syncContext]);
 
   const resetSharedData = useCallback(async () => {
-    if (!syncContext) throw new Error('Ruang Supabase belum aktif.');
+    if (!syncContext) throw new Error('The Supabase space is not active.');
     setSyncStatus('loading');
     await resetSharedSpace(syncContext);
     await refreshSharedData();

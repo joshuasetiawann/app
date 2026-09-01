@@ -73,12 +73,12 @@ export function CoupleMap({ mine, partner, me, partnerProfile }: CoupleMapProps)
         .addTo(map)
         .bindTooltip(label, { permanent: true, direction: 'bottom', offset: [0, 6], className: 'kk-map-label' });
     };
-    addPerson(mine, me, 'pink', `${me?.name || 'Kamu'} · lokasi kamu`);
-    addPerson(partner, partnerProfile, 'blue', `${partnerProfile?.name || 'Pasangan'} · lokasi pasangan`);
+    addPerson(mine, me, 'pink', `${me?.name || 'You'} · your location`);
+    addPerson(partner, partnerProfile, 'blue', `${partnerProfile?.name || 'Partner'} · partner location`);
     if (mine && partner) L.polyline([[mine.latitude, mine.longitude], [partner.latitude, partner.longitude]], { color: '#d66f87', weight: 3, opacity: 0.7, dashArray: '7 9' }).addTo(map);
     if (points.length === 1) map.flyTo(points[0], 15, { duration: 0.7 });
     if (points.length > 1) map.fitBounds(L.latLngBounds(points), { padding: [62, 62], maxZoom: 15, animate: true });
   }, [me, mine, partner, partnerProfile]);
 
-  return <div ref={elementRef} className="kk-couple-map" aria-label="Peta lokasi kamu dan pasangan" />;
+  return <div ref={elementRef} className="kk-couple-map" aria-label="Map of you and your partner" />;
 }

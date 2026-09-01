@@ -8,7 +8,7 @@ export function MoodSheetContent() {
 
   return (
     <>
-      <SheetHeading title="Mood kamu hari ini?" sub="Partner bisa lihat ini" />
+      <SheetHeading title="How are you feeling today?" sub="Your partner can see this" />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 9 }}>
         {MOOD_OPTIONS.map((m) => {
           const on = mood === m;

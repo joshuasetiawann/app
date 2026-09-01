@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { pcss } from '../lib/pcss';
 import { useAppState } from '../state/AppState';
 import { SheetHeading, SheetPill } from '../components/shared/BottomSheet';
 import { ImageSourcePicker } from '../components/shared/ImageSourcePicker';
@@ -8,133 +7,83 @@ import { imageDataUrl } from '../lib/image';
 
 export function PapSheetContent() {
   const navigate = useNavigate();
-  const { albums, papStep, papCaption, papPercent, setPapCaption, papCaptionStep, resetPap, startPap, closeSheet, addPhotoMessage, toast } = useAppState();
+  const { albums, closeSheet, addPhotoMessage, toast } = useAppState();
   const [photoDataUrl, setPhotoDataUrl] = useState('');
+  const [caption, setCaption] = useState('');
   const [album, setAlbum] = useState('');
-  const [captureBusy, setCaptureBusy] = useState(false);
-  const [captureError, setCaptureError] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
 
   const choosePhoto = async (files: File[]) => {
     const file = files[0];
     if (!file) return;
-    setCaptureBusy(true);
-    setCaptureError('');
+    setBusy(true);
+    setError('');
     try {
       setPhotoDataUrl(await imageDataUrl(file));
-      papCaptionStep();
-    } catch (error) {
-      setCaptureError(error instanceof Error ? error.message : 'Foto belum bisa diproses.');
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'The picture could not be processed.');
     } finally {
-      setCaptureBusy(false);
+      setBusy(false);
     }
   };
 
-  const restart = () => {
-    setPhotoDataUrl('');
-    setCaptureError('');
-    setAlbum('');
-    resetPap();
+  const send = (openChat: boolean) => {
+    if (!photoDataUrl) return;
+    addPhotoMessage({
+      slotLabel: 'NEW PICTURE',
+      caption: caption.trim() || 'A little moment for you 📷',
+      dataUrl: photoDataUrl,
+      album,
+    });
+    toast('Picture sent to your chat ✓');
+    closeSheet();
+    if (openChat) navigate('/chat');
   };
 
-  if (papStep === 0) {
-    return (
-      <>
-        <SheetHeading title="Quick PAP 📸" sub="Cekrek, kasih caption lucu, kirim!" />
-        <div style={pcss('aspect-ratio:3/4;border-radius:22px;background:#241D22;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center')}>
-          <div style={{ position: 'absolute', inset: 0, background: 'repeating-linear-gradient(135deg,#2E2429 0 10px,#352A30 10px 20px)' }} />
-          <div style={pcss("position:relative;font:700 10px 'Nunito',sans-serif;color:rgba(255,255,255,.55)")}>{captureBusy ? 'MENYIAPKAN FOTO…' : 'KAMERA / GALERI SIAP'}</div>
-          <div style={{ position: 'absolute', bottom: 16, left: 16, right: 16 }}>
-            <ImageSourcePicker
-              busy={captureBusy}
-              onFiles={choosePhoto}
-              galleryAriaLabel="Pilih foto PAP"
-              cameraAriaLabel="Ambil foto PAP dengan kamera"
-            />
-          </div>
-        </div>
-        {captureError && <div role="alert" style={pcss("font:700 11px/1.4 'Nunito',sans-serif;color:#C2506B;text-align:center;margin-top:10px")}>{captureError}</div>}
-        <div style={pcss("font:500 17px 'Caveat',cursive;color:var(--mut,#A99A9E);text-align:center;margin-top:12px")}>satu foto, satu senyum 🌸</div>
-      </>
-    );
-  }
-
-  if (papStep === 1) {
-    return (
-      <>
-        <SheetHeading title="Kasih caption ✏️" sub="Biar makin gemes" />
-        <div style={pcss("background:#fff;padding:10px 10px 0;border-radius:5px;box-shadow:0 10px 26px rgba(120,90,100,.2);transform:rotate(-1.6deg);max-width:260px;margin:0 auto 16px")}>
-          <img src={photoDataUrl} alt="Pratinjau PAP yang dipilih" style={{ display: 'block', width: '100%', aspectRatio: 1, objectFit: 'cover' }} />
-          <div style={pcss("padding:10px 4px 12px;text-align:center;font:600 18px 'Caveat',cursive;color:#4A4A4A")}>{papCaption || 'tulis caption...'}</div>
-        </div>
-        <input
-          value={papCaption}
-          placeholder="mis. kangen kamu 🥺"
-          onChange={(e) => setPapCaption(e.target.value)}
-          aria-label="Caption foto"
-          style={pcss(
-            "width:100%;padding:13px 16px;border-radius:100px;border:1px solid var(--ln,rgba(74,74,74,.14));background:var(--sf2,#FFF4F1);font:600 13px 'Nunito',sans-serif;color:var(--ink,#4A4A4A);outline:none;margin-bottom:10px",
-          )}
-        />
-        <label style={pcss("display:block;margin-bottom:14px;font:800 10.5px 'Nunito',sans-serif;color:var(--ink2,#6B5B60)")}>
-          Simpan juga ke album
-          <select value={album} onChange={(event) => setAlbum(event.target.value)} aria-label="Album PAP" style={pcss("display:block;width:100%;min-height:43px;margin-top:6px;padding:0 13px;border:1px solid var(--ln,rgba(74,74,74,.12));border-radius:13px;background:var(--sf2,#FFF4F1);color:var(--ink,#4A4A4A);font:700 11.5px 'Nunito',sans-serif")}>
-            <option value="">Tanpa album</option>
-            {albums.map((item) => <option key={item.id} value={item.title}>{item.icon} {item.title}</option>)}
-          </select>
-        </label>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 9 }}>
-          <SheetPill label="Ulang" onClick={restart} />
-          <SheetPill label="Siapkan untuk Chat 🚀" onClick={startPap} primary />
-        </div>
-      </>
-    );
-  }
-
-  if (papStep === 2) {
-    return (
-      <>
-        <SheetHeading title="Menyiapkan foto…" sub="Mengoptimalkan lampiran untuk percakapan" />
-        <div style={{ textAlign: 'center', padding: '18px 0 8px' }}>
-          <div style={pcss('width:96px;height:96px;margin:0 auto;border-radius:50%;border:2px dashed rgba(232,111,135,.4);position:relative;animation:kk-orbit 3s linear infinite')}>
-            <div style={{ position: 'absolute', top: -11, left: '50%', marginLeft: -11, fontSize: 20 }}>✈️</div>
-          </div>
-          <div style={pcss("font:700 24px 'Quicksand',sans-serif;color:var(--pki,#E86F87);margin-top:16px")}>{papPercent}%</div>
-          <div style={pcss('height:8px;border-radius:8px;background:var(--sf2,#FFF4F1);margin:12px 0 6px')}>
-            <div style={pcss(`width:${papPercent}%;height:8px;border-radius:8px;background:linear-gradient(90deg,var(--pk,#FFB7B2),var(--lav,#E3D7F7));transition:width .12s`)} />
-          </div>
-          <div style={pcss("font:600 11.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>Tunggu sebentar ya ☁️</div>
-        </div>
-      </>
-    );
-  }
-
   return (
-    <div style={{ textAlign: 'center', padding: '10px 0 4px' }}>
-      <div style={{ fontSize: 52, animation: 'kk-pop .5s ease' }}>💌</div>
-      <div style={pcss("font:700 20px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A);margin-top:10px")}>Foto siap!</div>
-      <div style={pcss("font:500 18px 'Caveat',cursive;color:var(--mut,#A99A9E);margin-top:4px")}>foto kamu siap masuk ke Chat 💌</div>
-      <div style={pcss("font:600 11px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:12px")}>Pilih kirim untuk menambahkan foto ke percakapan</div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9, marginTop: 18 }}>
-        <SheetPill
-          label="Tambahkan & Tutup"
-          onClick={() => {
-            addPhotoMessage({ slotLabel: 'FOTO BARU', caption: papCaption || 'PAP baru 📸', dataUrl: photoDataUrl, album });
-            toast('PAP ditambahkan ke Chat ✓');
-            resetPap();
-            closeSheet();
-          }}
-        />
-        <SheetPill
-          label="Tambahkan & Buka Chat"
-          primary
-          onClick={() => {
-            addPhotoMessage({ slotLabel: 'FOTO BARU', caption: papCaption || 'PAP baru 📸', dataUrl: photoDataUrl, album });
-            resetPap();
-            closeSheet();
-            navigate('/chat');
-          }}
-        />
-      </div>
-    </div>
+    <>
+      <SheetHeading title="Send a picture 📷" sub="Capture it here or choose one from your photo library." />
+
+      {!photoDataUrl ? (
+        <div className="kk-picture-source-card">
+          <div className="kk-picture-source-visual" aria-hidden="true"><span>💞</span></div>
+          <strong>Share a moment, without leaving the app</strong>
+          <small>The in-app camera supports front and rear cameras. Your photo is optimized before it is securely synced.</small>
+          <ImageSourcePicker
+            busy={busy}
+            onFiles={choosePhoto}
+            galleryAriaLabel="Choose a picture to send"
+            cameraAriaLabel="Take a picture to send"
+          />
+          {busy && <div className="kk-picture-status" aria-live="polite">Optimizing your picture…</div>}
+          {error && <div className="kk-picture-error" role="alert">{error}</div>}
+        </div>
+      ) : (
+        <div className="kk-picture-compose">
+          <div className="kk-picture-preview">
+            <img src={photoDataUrl} alt="Selected picture preview" />
+            <button type="button" onClick={() => setPhotoDataUrl('')} aria-label="Choose another picture">↻ Replace</button>
+          </div>
+
+          <label>
+            Caption
+            <input value={caption} placeholder="Add a sweet note…" onChange={(event) => setCaption(event.target.value)} maxLength={160} />
+          </label>
+          <label>
+            Save to an album too
+            <select value={album} onChange={(event) => setAlbum(event.target.value)} aria-label="Picture album">
+              <option value="">No album</option>
+              {albums.map((item) => <option key={item.id} value={item.title}>{item.icon} {item.title}</option>)}
+            </select>
+          </label>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.25fr', gap: 9 }}>
+            <SheetPill label="Send & close" onClick={() => send(false)} />
+            <SheetPill label="Send & open chat" primary onClick={() => send(true)} />
+          </div>
+        </div>
+      )}
+    </>
   );
 }

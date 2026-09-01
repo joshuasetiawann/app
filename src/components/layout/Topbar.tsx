@@ -28,7 +28,7 @@ export function ViewportSwitcher({ floating = false }: { floating?: boolean }) {
   return (
     <div
       role="group"
-      aria-label="Pratinjau ukuran layar"
+      aria-label="Screen size preview"
       style={pcss(
         floating
           ? 'display:flex;gap:3px;padding:4px;border-radius:12px;background:rgba(255,255,255,.9);box-shadow:0 4px 14px rgba(90,60,70,.18);position:absolute;top:6px;right:18px;z-index:90'
@@ -39,7 +39,7 @@ export function ViewportSwitcher({ floating = false }: { floating?: boolean }) {
         <button
           type="button"
           key={opt.key}
-          aria-label={`Tampilkan pratinjau ${opt.label}`}
+          aria-label={`Preview ${opt.label}`}
           aria-pressed={viewport === opt.key}
           title={opt.label}
           style={vpBtnStyle(viewport === opt.key)}
@@ -60,19 +60,19 @@ export function Topbar() {
   const location = useLocation();
   const isMobile = viewport === 'mobile';
   const [defaultTitle, defaultSub] = SCREEN_TITLES[location.pathname] ?? SCREEN_TITLES['/'];
-  const partnerName = partner?.name || 'Pasangan';
+  const partnerName = partner?.name || 'Partner';
   const hour = Number(formatTimeInZone(now, profile?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC').slice(0, 2));
-  const greeting = hour < 11 ? 'Selamat pagi' : hour < 15 ? 'Selamat siang' : hour < 18 ? 'Selamat sore' : 'Selamat malam';
+  const greeting = hour < 11 ? 'Good morning' : hour < 15 ? 'Good afternoon' : hour < 18 ? 'Good evening' : 'Good night';
   const greetingIcon = hour < 11 ? '☀️' : hour < 15 ? '🌤️' : hour < 18 ? '🌅' : '🌙';
   const title = location.pathname === '/' ? couple?.spaceName || defaultTitle : defaultTitle;
   const sub = location.pathname === '/'
-    ? `${greeting}, ${profile?.name || 'kamu'} ${greetingIcon}`
+    ? `${greeting}, ${profile?.name || 'you'} ${greetingIcon}`
     : location.pathname === '/chat'
-      ? `Percakapan dengan ${partnerName} 💬`
+      ? `Conversation with ${partnerName} 💬`
       : location.pathname === '/location'
-        ? `Lokasi ${partnerName} muncul setelah dibagikan`
+        ? `${partnerName}'s location appears when shared`
         : location.pathname === '/profile'
-          ? `${profile?.name || 'Kamu'} & ${partnerName}`
+          ? `${profile?.name || 'You'} & ${partnerName}`
           : defaultSub;
 
   return (
@@ -85,7 +85,7 @@ export function Topbar() {
         {isMobile ? (
           <button
             type="button"
-            aria-label="Buka semua fitur"
+            aria-label="Open all features"
             style={pcss('display:flex;align-items:center;gap:9px;min-width:0;cursor:pointer;border:0;padding:0;background:transparent;text-align:left;color:inherit;font:inherit;appearance:none')}
             onClick={() => openSheet('more')}
           >
@@ -111,10 +111,10 @@ export function Topbar() {
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 'none' }}>
         {!isMobile && <ViewportSwitcher />}
-        <button type="button" style={iconBtn} onClick={toggleDark} title="Tema terang atau gelap" aria-label={dark ? 'Gunakan tema terang' : 'Gunakan tema gelap'}>
+        <button type="button" style={iconBtn} onClick={toggleDark} title="Light or dark appearance" aria-label={dark ? 'Use light appearance' : 'Use dark appearance'}>
           {dark ? '🌙' : '☀️'}
         </button>
-        <button type="button" style={iconBtn} onClick={() => navigate('/notif')} title="Notifikasi" aria-label="Buka notifikasi">
+        <button type="button" style={iconBtn} onClick={() => navigate('/notif')} title="Notifications" aria-label="Open notifications">
           🔔
           {unreadCount > 0 && <span aria-hidden="true" style={{ position: 'absolute', top: 5, right: 5, width: 7, height: 7, borderRadius: '50%', background: 'var(--pki,#E86F87)' }} />}
         </button>
@@ -124,7 +124,7 @@ export function Topbar() {
             'width:34px;height:34px;border:0;padding:0;border-radius:50%;background:linear-gradient(140deg,#FFD9DC,#E3D7F7);display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;flex:none;appearance:none;color:inherit;font-family:inherit',
           )}
           onClick={() => navigate('/profile')}
-          aria-label={`Buka profil ${profile?.name || 'kamu'}`}
+          aria-label={`Open ${profile?.name || 'your'} profile`}
         >
           {profile?.avatarEmoji || '🙂'}
         </button>

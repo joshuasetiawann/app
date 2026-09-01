@@ -152,7 +152,8 @@ button { touch-action: manipulation; }
 .kk-location-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 9px; margin-top: 13px; font-variant-numeric: tabular-nums; }
 
 .kk-profile-photo-editor {
-  display: flex;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: 14px;
   margin-bottom: 15px;
@@ -202,6 +203,7 @@ button { touch-action: manipulation; }
   .kk-map-shell { height: clamp(310px, 52dvh, 430px); }
   .kk-location-stats { grid-template-columns: 1fr 1fr; gap: 13px 18px; }
   .kk-profile-photo-editor { align-items: flex-start; }
+  .kk-profile-editor { padding: 15px !important; }
   .kk-quiet-editor { grid-template-columns: 1fr 1fr; }
   .kk-quiet-editor > div,
   .kk-quiet-editor button { grid-column: 1 / -1; }
@@ -1006,6 +1008,76 @@ textarea:focus-visible,
   .kk-pair-checking button { grid-column: 1 / -1; }
   .kk-invite-code strong { font-size: 27px; letter-spacing: .045em; }
   .kk-connected-avatars > span { width: 68px; height: 68px; border-radius: 22px; }
+}
+
+.kk-chat-attachments {
+  display: flex;
+  gap: 7px;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 2px 1px 9px;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.kk-toast { bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+.kk-toast-chat { bottom: calc(188px + env(safe-area-inset-bottom, 0px)); }
+
+@media (min-width: 760px) {
+  .kk-toast,
+  .kk-toast-chat { bottom: 28px; }
+}
+
+.kk-chat-attachments::-webkit-scrollbar { display: none; }
+
+.kk-main-scroll { box-sizing: border-box; min-height: 0; }
+.kk-main-scroll-chat { display: flex; flex-direction: column; }
+.kk-route-chat { flex: 1; min-height: 0; }
+.kk-chat-page { display: flex; height: 100%; min-height: 0; flex-direction: column; }
+.kk-chat-scroll { display: flex; min-height: 0; flex: 1; flex-direction: column; overflow-y: auto; overflow-x: hidden; overscroll-behavior-y: contain; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--pk,#ffb7b2) 48%, transparent) transparent; }
+
+.kk-picture-source-card {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid var(--ln, rgba(74,74,74,.1));
+  border-radius: 22px;
+  background: var(--sf2, #fff4f1);
+  text-align: center;
+}
+
+.kk-picture-source-visual {
+  display: grid;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 2px;
+  place-items: center;
+  border-radius: 25px;
+  background: linear-gradient(145deg, var(--pk, #ffb7b2), var(--lav, #e3d7f7));
+  box-shadow: 0 14px 28px rgba(188, 106, 128, .18);
+  font-size: 29px;
+}
+
+.kk-picture-source-card strong { color: var(--ink, #4a4a4a); font: 800 15px 'Quicksand', sans-serif; }
+.kk-picture-source-card small { max-width: 44ch; margin: 0 auto; color: var(--mut, #a99a9e); font: 600 11px/1.55 'Nunito', sans-serif; }
+.kk-picture-status { color: var(--pki, #e86f87); font: 700 10.5px 'Nunito', sans-serif; }
+.kk-picture-error { color: #b5485d; font: 700 10.5px/1.45 'Nunito', sans-serif; }
+.kk-picture-compose { display: grid; gap: 12px; }
+.kk-picture-preview { position: relative; overflow: hidden; max-width: 300px; margin: 0 auto; border-radius: 22px; background: #eee7e4; box-shadow: 0 14px 32px rgba(90,65,75,.14); }
+.kk-picture-preview img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
+.kk-picture-preview button { position: absolute; right: 10px; bottom: 10px; min-height: 36px; padding: 0 12px; border: 0; border-radius: 100px; color: #fff; background: rgba(31,24,28,.72); backdrop-filter: blur(8px); cursor: pointer; font: 800 10px 'Nunito', sans-serif; }
+.kk-picture-compose label { color: var(--ink2, #6b5b60); font: 800 10.5px 'Nunito', sans-serif; }
+.kk-picture-compose input,
+.kk-picture-compose select { display: block; width: 100%; min-height: 44px; margin-top: 6px; padding: 0 13px; border: 1px solid var(--ln, rgba(74,74,74,.12)); border-radius: 13px; outline: 0; color: var(--ink, #4a4a4a); background: var(--sf2, #fff4f1); font: 700 11.5px 'Nunito', sans-serif; }
+
+@media (max-width: 430px) {
+  .kk-chat-attachments button {
+    max-width: 46vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 /* Reduced-motion: honor OS preference in addition to the in-app toggle */

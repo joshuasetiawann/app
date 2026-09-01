@@ -160,7 +160,7 @@ function normalizeCode(code: string) {
 
 function normalizeDriveFolderId(folderId: string) {
   const value = folderId.trim();
-  if (!/^[A-Za-z0-9_-]{10,255}$/.test(value)) throw new Error('ID folder Google Drive belum valid.');
+  if (!/^[A-Za-z0-9_-]{10,255}$/.test(value)) throw new Error('The Google Drive folder ID is invalid.');
   return value;
 }
 
@@ -203,7 +203,7 @@ function createInviteCode(database: LocalDatabase) {
     const code = `KK-${token.slice(0, 4)}-${token.slice(4)}`;
     if (!database.couples.some((couple) => couple.coupleCode === code)) return code;
   }
-  throw new Error('Kode undangan belum bisa dibuat. Coba lagi.');
+  throw new Error('The invitation code could not be created. Try again.');
 }
 
 function publicLocalProfile(user: LocalUser): AccountProfile {
@@ -256,7 +256,7 @@ async function localSignUp(emailInput: string, password: string, nameInput: stri
   const name = nameInput.trim();
   const database = readDatabase();
   if (database.users.some((user) => user.email === email)) {
-    throw new Error('Email ini sudah terdaftar. Coba masuk.');
+    throw new Error('This email is already registered. Try signing in.');
   }
   const salt = createSalt();
   const user: LocalUser = {
@@ -284,17 +284,17 @@ async function localSignIn(emailInput: string, password: string) {
   const database = readDatabase();
   const user = database.users.find((item) => item.email === normalizeEmail(emailInput));
   if (!user || (await passwordDigest(password, user.salt)) !== user.passwordHash) {
-    throw new Error('Email atau password belum cocok.');
+    throw new Error('The email or password is incorrect.');
   }
   window.localStorage.setItem(LOCAL_SESSION_KEY, user.id);
   return localSnapshot(database, user);
 }
 
 async function localResetPassword(emailInput: string, newPassword?: string) {
-  if (!newPassword) throw new Error('Masukkan password baru untuk mode lokal.');
+  if (!newPassword) throw new Error('Enter a new password for local mode.');
   const database = readDatabase();
   const user = database.users.find((item) => item.email === normalizeEmail(emailInput));
-  if (!user) throw new Error('Akun dengan email itu belum ada di perangkat ini.');
+  if (!user) throw new Error('There is no account with that email on this device.');
   const salt = createSalt();
   user.salt = salt;
   user.passwordHash = await passwordDigest(newPassword, salt);
@@ -304,7 +304,7 @@ async function localResetPassword(emailInput: string, newPassword?: string) {
 async function localUpdatePassword(password: string) {
   const database = readDatabase();
   const user = currentLocalUser(database);
-  if (!user) throw new Error('Sesi sudah berakhir. Silakan masuk lagi.');
+  if (!user) throw new Error('Your session has ended. Sign in again.');
   const salt = createSalt();
   user.salt = salt;
   user.passwordHash = await passwordDigest(password, salt);
@@ -314,7 +314,7 @@ async function localUpdatePassword(password: string) {
 function localUpdateProfile(patch: ProfilePatch) {
   const database = readDatabase();
   const user = currentLocalUser(database);
-  if (!user) throw new Error('Sesi sudah berakhir. Silakan masuk lagi.');
+  if (!user) throw new Error('Your session has ended. Sign in again.');
   Object.assign(user, patch);
   writeDatabase(database);
   return localSnapshot(database, user);
@@ -323,12 +323,12 @@ function localUpdateProfile(patch: ProfilePatch) {
 function localCreateSpace(spaceNameInput: string, startedAt: string) {
   const database = readDatabase();
   const user = currentLocalUser(database);
-  if (!user) throw new Error('Sesi sudah berakhir. Silakan masuk lagi.');
+  if (!user) throw new Error('Your session has ended. Sign in again.');
   if (user.coupleId) return localSnapshot(database, user);
   const now = new Date();
   const couple: LocalCouple = {
     id: crypto.randomUUID(),
-    spaceName: spaceNameInput.trim() || 'Ruang Kita',
+    spaceName: spaceNameInput.trim() || 'Our Space',
     coupleCode: createInviteCode(database),
     startedAt,
     inviteExpiresAt: new Date(now.getTime() + INVITE_TTL_MS).toISOString(),
@@ -345,14 +345,14 @@ function localCreateSpace(spaceNameInput: string, startedAt: string) {
 function localJoinSpace(codeInput: string) {
   const database = readDatabase();
   const user = currentLocalUser(database);
-  if (!user) throw new Error('Sesi sudah berakhir. Silakan masuk lagi.');
+  if (!user) throw new Error('Your session has ended. Sign in again.');
   const couple = database.couples.find((item) => normalizeCode(item.coupleCode) === normalizeCode(codeInput));
-  if (!couple) throw new Error('Kode undangan tidak ditemukan. Periksa lagi huruf dan angkanya.');
+  if (!couple) throw new Error('Invitation code not found. Check the letters and numbers.');
   if (user.coupleId === couple.id) return localSnapshot(database, user);
-  if (user.coupleId) throw new Error('Akun ini sudah terhubung dengan pasangan lain.');
-  if (couple.memberIds.length >= 2) throw new Error('Ruang ini sudah lengkap untuk dua orang.');
+  if (user.coupleId) throw new Error('This account is already connected to another partner.');
+  if (couple.memberIds.length >= 2) throw new Error('This space already has two members.');
   if (couple.inviteExpiresAt && new Date(couple.inviteExpiresAt).getTime() < Date.now()) {
-    throw new Error('Kode undangan sudah kedaluwarsa. Minta pasangan membuat kode baru.');
+    throw new Error('This invitation code has expired. Ask your partner to create a new one.');
   }
   couple.memberIds.push(user.id);
   couple.pairedAt = new Date().toISOString();
@@ -365,9 +365,9 @@ function localJoinSpace(codeInput: string) {
 function localRefreshInvite() {
   const database = readDatabase();
   const user = currentLocalUser(database);
-  if (!user?.coupleId) throw new Error('Buat ruang terlebih dahulu.');
+  if (!user?.coupleId) throw new Error('Create a shared space first.');
   const couple = database.couples.find((item) => item.id === user.coupleId);
-  if (!couple) throw new Error('Ruang pasangan tidak ditemukan.');
+  if (!couple) throw new Error('The shared space could not be found.');
   if (couple.memberIds.length >= 2) return localSnapshot(database, user);
   couple.coupleCode = createInviteCode(database);
   couple.inviteExpiresAt = new Date(Date.now() + INVITE_TTL_MS).toISOString();
@@ -398,7 +398,7 @@ async function localContinueDemo() {
     database.users.push(me, partner);
     database.couples.push({
       id: coupleId,
-      spaceName: 'Ruang Joshua & Mia',
+      spaceName: 'Joshua & Mia’s Space',
       coupleCode: createInviteCode(database),
       startedAt: '2026-01-14',
       inviteExpiresAt: null,
@@ -413,18 +413,18 @@ async function localContinueDemo() {
 }
 
 function friendlyError(message: string) {
-  if (/invalid login credentials/i.test(message)) return 'Email atau password belum cocok.';
-  if (/email not confirmed/i.test(message)) return 'Email belum diverifikasi. Cek inbox kamu dulu.';
-  if (/user already registered/i.test(message)) return 'Email ini sudah terdaftar. Coba masuk.';
+  if (/invalid login credentials/i.test(message)) return 'The email or password is incorrect.';
+  if (/email not confirmed/i.test(message)) return 'Your email has not been verified. Check your inbox.';
+  if (/user already registered/i.test(message)) return 'This email is already registered. Try signing in.';
   if (/password should be at least/i.test(message)) return 'Password masih terlalu pendek.';
-  if (/invalid or (expired|unavailable) couple code|invalid couple code/i.test(message)) return 'Kode undangan tidak valid, sudah kedaluwarsa, atau sudah dipakai.';
-  if (/couple is already paired/i.test(message)) return 'Ruang ini sudah lengkap untuk dua orang.';
-  if (/profile already belongs to a different couple/i.test(message)) return 'Akun ini sudah terhubung dengan pasangan lain.';
-  if (/relationship start date is invalid/i.test(message)) return 'Tanggal hubungan belum valid.';
-  if (/space name must contain/i.test(message)) return 'Nama ruang perlu berisi 1–80 karakter.';
-  if (/authentication required/i.test(message)) return 'Sesi sudah berakhir. Silakan masuk lagi.';
-  if (/profile not found/i.test(message)) return 'Profil akun belum siap. Muat ulang lalu coba lagi.';
-  if (/provider.*(disabled|enabled|unsupported)/i.test(message)) return 'Login Google belum diaktifkan di Supabase.';
+  if (/invalid or (expired|unavailable) couple code|invalid couple code/i.test(message)) return 'The invitation code is invalid, expired, or already used.';
+  if (/couple is already paired/i.test(message)) return 'This space already has two members.';
+  if (/profile already belongs to a different couple/i.test(message)) return 'This account is already connected to another partner.';
+  if (/relationship start date is invalid/i.test(message)) return 'The relationship start date is invalid.';
+  if (/space name must contain/i.test(message)) return 'The space name must contain 1–80 characters.';
+  if (/authentication required/i.test(message)) return 'Your session has ended. Sign in again.';
+  if (/profile not found/i.test(message)) return 'Your profile is not ready. Reload and try again.';
+  if (/provider.*(disabled|enabled|unsupported)/i.test(message)) return 'Google sign-in is not enabled in Supabase.';
   return message;
 }
 
@@ -465,7 +465,7 @@ async function remoteSnapshot(userInput?: User): Promise<AuthSnapshot | null> {
     profileRow = data;
     if (!profileRow) await new Promise((resolve) => window.setTimeout(resolve, 150));
   }
-  if (!profileRow) throw new Error('Profil belum berhasil dibuat. Muat ulang halaman lalu coba lagi.');
+  if (!profileRow) throw new Error('Your profile could not be created. Reload and try again.');
   const profile = mapRemoteProfile(profileRow, user.email ?? '');
   if (!profile.coupleId) return { profile, couple: null, partner: null };
 
@@ -478,7 +478,7 @@ async function remoteSnapshot(userInput?: User): Promise<AuthSnapshot | null> {
   const members = membersResult.data ?? [];
   const partnerRow = members.find((member) => member.id !== profile.id) ?? null;
   const row = coupleResult.data;
-  if (!row) throw new Error('Ruang pasangan belum dapat dimuat. Coba lagi.');
+  if (!row) throw new Error('The shared space could not be loaded. Try again.');
   return {
     profile,
     partner: partnerRow ? mapRemoteProfile(partnerRow) : null,
@@ -540,7 +540,7 @@ export async function signInWithGoogle() {
       options: { scopes: ['email', 'profile'] },
     });
     if (result.responseType !== 'online' || !result.idToken) {
-      throw new Error('Google tidak mengirim identitas akun. Coba pilih akun lagi.');
+      throw new Error('Google did not return an account identity. Choose the account again.');
     }
     const { data, error } = await supabase.auth.signInWithIdToken({
       provider: 'google',
@@ -550,10 +550,10 @@ export async function signInWithGoogle() {
     return remoteSnapshot(data.user ?? undefined);
   } catch (error) {
     const code = error && typeof error === 'object' && 'code' in error ? String(error.code) : '';
-    if (code === 'USER_CANCELLED') throw new Error('Pemilihan akun Google dibatalkan.');
+    if (code === 'USER_CANCELLED') throw new Error('Google account selection was cancelled.');
     const message = error instanceof Error ? error.message : '';
     if (/28444|developer_error|configuration/i.test(message)) {
-      throw new Error('OAuth Google Android belum cocok. Periksa package name, SHA-1, dan Web Client ID.');
+      throw new Error('Android Google OAuth does not match. Check the package name, SHA-1, and Web Client ID.');
     }
     throw error;
   }
@@ -614,7 +614,7 @@ export async function updateAccountProfile(patch: ProfilePatch) {
   if (!supabase) return localUpdateProfile(patch);
   const { data: userData, error: userError } = await supabase.auth.getUser();
   throwRemoteError(userError);
-  if (!userData.user) throw new Error('Sesi sudah berakhir. Silakan masuk lagi.');
+  if (!userData.user) throw new Error('Your session has ended. Sign in again.');
   const payload = {
     name: patch.name,
     nickname: patch.nickname,
@@ -632,10 +632,10 @@ export async function updateAccountProfile(patch: ProfilePatch) {
 
 export async function createCoupleSpace(spaceName: string, startedAt: string) {
   if (!supabase) return localCreateSpace(spaceName, startedAt);
-  const { error } = await supabase.rpc('create_couple_space', { p_space_name: spaceName.trim() || 'Ruang Kita', p_started_at: startedAt });
+  const { error } = await supabase.rpc('create_couple_space', { p_space_name: spaceName.trim() || 'Our Space', p_started_at: startedAt });
   throwRemoteError(error);
   const snapshot = await remoteSnapshot();
-  if (!snapshot) throw new Error('Sesi sudah berakhir. Silakan masuk lagi.');
+  if (!snapshot) throw new Error('Your session has ended. Sign in again.');
   return snapshot;
 }
 
@@ -644,20 +644,20 @@ export async function joinCoupleSpace(code: string) {
   const { error } = await supabase.rpc('join_couple_by_code', { p_code: normalizeCode(code) });
   throwRemoteError(error);
   const snapshot = await remoteSnapshot();
-  if (!snapshot) throw new Error('Sesi sudah berakhir. Silakan masuk lagi.');
+  if (!snapshot) throw new Error('Your session has ended. Sign in again.');
   return snapshot;
 }
 
 export async function refreshCoupleInvite() {
   if (!supabase) return localRefreshInvite();
   const snapshotBeforeRefresh = await remoteSnapshot();
-  if (!snapshotBeforeRefresh?.couple) throw new Error('Buat ruang terlebih dahulu.');
+  if (!snapshotBeforeRefresh?.couple) throw new Error('Create a shared space first.');
   const { error } = await supabase.rpc('refresh_couple_invite', {
     p_current_code: snapshotBeforeRefresh.couple.coupleCode,
   });
   throwRemoteError(error);
   const snapshot = await remoteSnapshot();
-  if (!snapshot) throw new Error('Sesi sudah berakhir. Silakan masuk lagi.');
+  if (!snapshot) throw new Error('Your session has ended. Sign in again.');
   return snapshot;
 }
 
@@ -666,23 +666,23 @@ export async function updateCoupleDriveFolder(folderIdInput: string) {
   if (!supabase) {
     const database = readDatabase();
     const user = currentLocalUser(database);
-    if (!user?.coupleId) throw new Error('Hubungkan akun dengan pasangan terlebih dahulu.');
+    if (!user?.coupleId) throw new Error('Connect with your partner first.');
     const couple = database.couples.find((item) => item.id === user.coupleId);
-    if (!couple) throw new Error('Ruang pasangan tidak ditemukan.');
+    if (!couple) throw new Error('The shared space could not be found.');
     couple.driveFolderId = folderId;
     writeDatabase(database);
     return localSnapshot(database, user);
   }
 
   const current = await remoteSnapshot();
-  if (!current?.couple) throw new Error('Hubungkan akun dengan pasangan terlebih dahulu.');
+  if (!current?.couple) throw new Error('Connect with your partner first.');
   const { error } = await supabase
     .from('couples')
     .update({ drive_folder_id: folderId, drive_connected_at: new Date().toISOString() })
     .eq('id', current.couple.id);
   throwRemoteError(error);
   const snapshot = await remoteSnapshot();
-  if (!snapshot) throw new Error('Sesi sudah berakhir. Silakan masuk lagi.');
+  if (!snapshot) throw new Error('Your session has ended. Sign in again.');
   return snapshot;
 }
 
@@ -695,7 +695,7 @@ export async function publishLocationPing(input: LocationPingInput): Promise<Loc
   if (!supabase) {
     const database = readDatabase();
     const user = currentLocalUser(database);
-    if (!user?.coupleId) throw new Error('Hubungkan akun dengan pasangan terlebih dahulu.');
+    if (!user?.coupleId) throw new Error('Connect with your partner first.');
     const ping: LocationPing = {
       profileId: user.id,
       coupleId: user.coupleId,
@@ -714,7 +714,7 @@ export async function publishLocationPing(input: LocationPingInput): Promise<Loc
   }
 
   const snapshot = await remoteSnapshot();
-  if (!snapshot?.couple) throw new Error('Hubungkan akun dengan pasangan terlebih dahulu.');
+  if (!snapshot?.couple) throw new Error('Connect with your partner first.');
   const payload = {
     profile_id: snapshot.profile.id,
     couple_id: snapshot.couple.id,
@@ -730,7 +730,7 @@ export async function publishLocationPing(input: LocationPingInput): Promise<Loc
     .select('profile_id,couple_id,lat,lng,accuracy_m,speed_kmh,recorded_at')
     .single();
   throwRemoteError(error);
-  if (!data) throw new Error('Lokasi belum berhasil disimpan.');
+  if (!data) throw new Error('The location could not be saved.');
   return {
     profileId: data.profile_id,
     coupleId: data.couple_id,

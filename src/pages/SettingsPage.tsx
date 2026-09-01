@@ -46,8 +46,8 @@ export default function SettingsPage() {
   const [quietDraft, setQuietDraft] = useState(quietHours);
   const startedAt = auth.couple?.startedAt;
   const relationshipDate = startedAt
-    ? new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(`${startedAt}T00:00:00`))
-    : 'Belum diatur';
+    ? new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(new Date(`${startedAt}T00:00:00`))
+    : 'Not set';
 
   useEffect(() => {
     void getDeviceNotificationPermission().then(setPushPermission).catch(() => setPushPermission('unsupported'));
@@ -57,11 +57,11 @@ export default function SettingsPage() {
     try {
       const permission = await enableDeviceNotifications();
       setPushPermission(permission);
-      if (permission === 'granted') toast('Izin notifikasi perangkat aktif 🔔');
-      else toast(permission === 'denied' ? 'Izin notifikasi diblokir di pengaturan perangkat' : 'Izin notifikasi belum diberikan');
+      if (permission === 'granted') toast('Device notifications enabled 🔔');
+      else toast(permission === 'denied' ? 'Notifications are blocked in device settings' : 'Notification permission was not granted');
     } catch {
       setPushPermission('unsupported');
-      toast('Pengaturan notifikasi perangkat belum dapat dibuka');
+      toast('Device notification settings could not be opened');
     }
   };
 
@@ -69,7 +69,7 @@ export default function SettingsPage() {
     event.preventDefault();
     setQuietHours(quietDraft);
     setQuietOpen(false);
-    toast(`Mode senyap ${quietDraft.from}–${quietDraft.to} tersimpan 🌙`);
+    toast(`Quiet hours ${quietDraft.from}–${quietDraft.to} saved 🌙`);
   };
 
   const downloadBackup = () => {
@@ -84,55 +84,55 @@ export default function SettingsPage() {
     anchor.download = `kisahkita-backup-${new Date().toISOString().slice(0, 10)}.json`;
     anchor.click();
     URL.revokeObjectURL(url);
-    toast('Cadangan lokal berhasil diunduh 💾');
+    toast('Local backup downloaded 💾');
   };
 
   const groups: SettingGroup[] = [
     {
-      title: 'AKUN',
+      title: 'ACCOUNT',
       rows: [
-        { icon: auth.profile?.avatarEmoji || '🙂', label: 'Profil', value: auth.profile?.name || 'Belum diisi', onClick: () => navigate('/profile') },
-        { icon: '📧', label: 'Email', value: auth.profile?.email || 'Belum tersedia', onClick: () => navigate('/profile') },
-        { icon: '🛡️', label: 'Penyimpanan akun', value: auth.mode === 'supabase' ? 'Supabase cloud' : 'Lokal di perangkat' },
+        { icon: auth.profile?.avatarEmoji || '🙂', label: 'Profile', value: auth.profile?.name || 'Not set', onClick: () => navigate('/profile') },
+        { icon: '📧', label: 'Email', value: auth.profile?.email || 'Not available', onClick: () => navigate('/profile') },
+        { icon: '🛡️', label: 'Account storage', value: auth.mode === 'supabase' ? 'Supabase cloud' : 'Local on device' },
       ],
     },
     {
-      title: 'PASANGAN',
+      title: 'PARTNER',
       rows: [
-        { icon: '💗', label: 'Pasangan', value: auth.partner ? `${auth.partner.name} · terhubung` : auth.couple ? 'Menunggu pasangan' : 'Belum terhubung', onClick: () => navigate('/pair') },
-        { icon: '🏠', label: 'Nama ruang', value: auth.couple?.spaceName || 'Belum dibuat', onClick: () => navigate('/pair') },
-        { icon: '📅', label: 'Tanggal hubungan', value: relationshipDate, onClick: () => navigate('/pair') },
-        { icon: '🔗', label: 'Kode pasangan', value: auth.couple?.coupleCode || 'Buat ruang dulu', onClick: () => navigate('/pair') },
+        { icon: '💗', label: 'Partner', value: auth.partner ? `${auth.partner.name} · connected` : auth.couple ? 'Waiting for partner' : 'Not connected', onClick: () => navigate('/pair') },
+        { icon: '🏠', label: 'Space name', value: auth.couple?.spaceName || 'Not created', onClick: () => navigate('/pair') },
+        { icon: '📅', label: 'Relationship date', value: relationshipDate, onClick: () => navigate('/pair') },
+        { icon: '🔗', label: 'Partner code', value: auth.couple?.coupleCode || 'Create a space first', onClick: () => navigate('/pair') },
       ],
     },
     {
-      title: 'NOTIFIKASI',
+      title: 'NOTIFICATIONS',
       rows: [
-        { icon: '🔔', label: 'Pusat notifikasi', value: unreadCount ? `${unreadCount} belum dibaca` : 'Semua terbaca', onClick: () => navigate('/notif') },
-        { icon: '📲', label: 'Izin notifikasi perangkat', value: pushPermission === 'granted' ? 'Aktif' : pushPermission === 'denied' ? 'Diblokir perangkat' : pushPermission === 'unsupported' ? 'Tidak didukung' : 'Ketuk untuk aktifkan', onClick: () => void enableNotifications() },
-        { icon: '🌙', label: 'Jadwal senyap', value: `${quietHours.from}–${quietHours.to}`, onClick: () => { setQuietDraft(quietHours); setQuietOpen((value) => !value); } },
+        { icon: '🔔', label: 'Notification center', value: unreadCount ? `${unreadCount} unread` : 'All read', onClick: () => navigate('/notif') },
+        { icon: '📲', label: 'Device notification permission', value: pushPermission === 'granted' ? 'Active' : pushPermission === 'denied' ? 'Blocked by device' : pushPermission === 'unsupported' ? 'Not supported' : 'Tap to enable', onClick: () => void enableNotifications() },
+        { icon: '🌙', label: 'Quiet hours', value: `${quietHours.from}–${quietHours.to}`, onClick: () => { setQuietDraft(quietHours); setQuietOpen((value) => !value); } },
       ],
     },
     {
-      title: 'TAMPILAN',
+      title: 'APPEARANCE',
       rows: [
-        { icon: THEMES[theme].icon, label: 'Tema', value: THEMES[theme].label, onClick: () => navigate('/theme') },
-        { icon: dark ? '🌙' : '☀️', label: 'Mode warna', value: dark ? 'Gelap' : 'Terang', onClick: () => navigate('/theme') },
-        { icon: '✨', label: 'Level animasi', value: animLevel === 'full' ? 'Penuh' : animLevel === 'calm' ? 'Kalem' : 'Hemat daya', onClick: () => navigate('/theme') },
+        { icon: THEMES[theme].icon, label: 'Appearance', value: THEMES[theme].label, onClick: () => navigate('/theme') },
+        { icon: dark ? '🌙' : '☀️', label: 'Color mode', value: dark ? 'Dark' : 'Light', onClick: () => navigate('/theme') },
+        { icon: '✨', label: 'Motion level', value: animLevel === 'full' ? 'Full' : animLevel === 'calm' ? 'Calm' : 'Power saver', onClick: () => navigate('/theme') },
       ],
     },
     {
       title: 'DATA',
       rows: [
-        { icon: '💾', label: auth.mode === 'supabase' ? 'Cache teknis perangkat' : 'Data KisahKita di perangkat', value: auth.mode === 'supabase' ? 'Sesi + antrean offline' : localDataSize() },
+        { icon: '💾', label: auth.mode === 'supabase' ? 'Device technical cache' : 'KisahKita data on device', value: auth.mode === 'supabase' ? 'Session + offline queue' : localDataSize() },
         auth.mode === 'supabase'
-          ? { icon: '☁️', label: 'Sumber data utama', value: 'Supabase cloud' }
-          : { icon: '📦', label: 'Unduh cadangan lokal', value: 'JSON', onClick: downloadBackup },
-        { icon: '🔐', label: 'Akun & ruang pasangan', value: auth.mode === 'supabase' ? 'Tersimpan di Supabase' : 'Hanya browser ini' },
-        { icon: '📍', label: 'Lokasi live', value: auth.mode === 'supabase' ? 'Cloud saat diaktifkan' : 'Hanya browser ini', onClick: () => navigate('/location') },
-        { icon: '△', label: 'Google Drive', value: auth.couple?.driveFolderId ? 'Folder pasangan terdaftar' : 'Opsional', onClick: () => navigate('/files') },
-        { icon: '☁️', label: 'Chat, jadwal & jurnal', value: auth.mode === 'supabase' ? syncStatus === 'synced' ? 'Realtime aktif' : syncStatus === 'error' ? 'Perlu diperiksa' : 'Menyinkronkan…' : 'Tersimpan lokal' },
-        { icon: '🖼️', label: 'Foto profil & galeri', value: 'Kelola media', onClick: () => navigate('/profile') },
+          ? { icon: '☁️', label: 'Primary data source', value: 'Supabase cloud' }
+          : { icon: '📦', label: 'Download local backup', value: 'JSON', onClick: downloadBackup },
+        { icon: '🔐', label: 'Account & couple space', value: auth.mode === 'supabase' ? 'Stored in Supabase' : 'This browser only' },
+        { icon: '📍', label: 'Live location', value: auth.mode === 'supabase' ? 'Cloud when enabled' : 'This browser only', onClick: () => navigate('/location') },
+        { icon: '△', label: 'Google Drive', value: auth.couple?.driveFolderId ? 'Couple folder registered' : 'Optional', onClick: () => navigate('/files') },
+        { icon: '☁️', label: 'Chat, schedule & journals', value: auth.mode === 'supabase' ? syncStatus === 'synced' ? 'Realtime active' : syncStatus === 'error' ? 'Needs attention' : 'Syncing…' : 'Stored locally' },
+        { icon: '🖼️', label: 'Profile & gallery pictures', value: 'Manage media', onClick: () => navigate('/profile') },
       ],
     },
   ];
@@ -144,21 +144,21 @@ export default function SettingsPage() {
       await auth.signOutAccount();
       navigate('/auth', { replace: true });
     } catch (error) {
-      setLogoutError(error instanceof Error ? error.message : 'Belum bisa keluar. Coba lagi.');
+      setLogoutError(error instanceof Error ? error.message : 'Could not sign out. Try again.');
     } finally {
       setLogoutPending(false);
     }
   };
 
   const resetRoomData = async () => {
-    if (!auth.couple || !window.confirm('Bersihkan seluruh aktivitas ruang ini? Chat, PAP, jurnal makanan, jadwal, notifikasi, lokasi, dan konten bersama akan dihapus permanen. Akun, profil, pasangan, dan folder Google Drive tetap ada.')) return;
+    if (!auth.couple || !window.confirm('Clear all activity from this space? Chat, pictures, food journal entries, schedules, notifications, locations, and shared content will be permanently deleted. Accounts, profiles, partner connection, and the Google Drive folder will remain.')) return;
     setResetPending(true);
     setResetError('');
     try {
       await resetSharedData();
-      toast('Aktivitas ruang berhasil dibersihkan');
+      toast('Shared activity cleared');
     } catch (error) {
-      setResetError(error instanceof Error ? error.message : 'Data ruang belum berhasil dibersihkan.');
+      setResetError(error instanceof Error ? error.message : 'Shared data could not be cleared.');
     } finally {
       setResetPending(false);
     }
@@ -191,40 +191,40 @@ export default function SettingsPage() {
       {quietOpen && (
         <form className="kk-quiet-editor" onSubmit={saveQuietHours}>
           <div>
-            <strong>Jadwal senyap</strong>
-            <small>Preferensi akun ini tersinkron ke Supabase; izin notifikasi tetap mengikuti perangkat.</small>
+            <strong>Quiet hours</strong>
+            <small>This account preference syncs through Supabase; notification permission still follows each device.</small>
           </div>
-          <label>Mulai<input type="time" value={quietDraft.from} onChange={(event) => setQuietDraft((current) => ({ ...current, from: event.target.value }))} required /></label>
-          <label>Selesai<input type="time" value={quietDraft.to} onChange={(event) => setQuietDraft((current) => ({ ...current, to: event.target.value }))} required /></label>
-          <button type="submit">Simpan jadwal</button>
+          <label>From<input type="time" value={quietDraft.from} onChange={(event) => setQuietDraft((current) => ({ ...current, from: event.target.value }))} required /></label>
+          <label>To<input type="time" value={quietDraft.to} onChange={(event) => setQuietDraft((current) => ({ ...current, to: event.target.value }))} required /></label>
+          <button type="submit">Save quiet hours</button>
         </form>
       )}
 
       <div style={pcss("border-radius:20px;background:var(--sf2,#FFF4F1);padding:15px 16px;border:1px dashed rgba(232,111,135,.28)")}>
         <div style={pcss("display:flex;align-items:center;justify-content:space-between;gap:12px;font:700 12px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>
-          <span>Status penyimpanan</span>
+          <span>Storage status</span>
           <span style={pcss("padding:5px 9px;border-radius:100px;background:var(--sf,#fff);font:800 9px 'Nunito',sans-serif;color:var(--pki,#E86F87);letter-spacing:.06em")}>
-            {auth.mode === 'supabase' ? 'SUPABASE' : 'MODE LOKAL'}
+            {auth.mode === 'supabase' ? 'SUPABASE' : 'LOCAL MODE'}
           </span>
         </div>
         <div style={pcss("font:600 10.5px/1.55 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:7px")}>
           {auth.mode === 'supabase'
             ? syncStatus === 'synced'
-              ? 'Supabase Realtime aktif. Chat, PAP, jadwal, jurnal makanan, notifikasi, mood, privasi, dan status lokasi diperbarui otomatis di kedua akun.'
+              ? 'Supabase Realtime is active. Chat, pictures, schedule, food journal, notifications, mood, privacy, and location status update automatically on both accounts.'
               : syncStatus === 'error'
-                ? `Sinkronisasi belum aktif: ${syncError || 'jalankan migrasi sinkronisasi Supabase lalu muat ulang.'}`
-                : 'Menghubungkan seluruh aktivitas ruang ke Supabase Realtime…'
-            : 'Akun demo, ruang pasangan, lokasi, dan seluruh konten tersimpan di browser perangkat ini. Membuka akun yang sama di perangkat lain tidak akan membawa konten tersebut.'}
+                ? `Sync is not active: ${syncError || 'run the Supabase sync migration, then reload.'}`
+                : 'Connecting all shared activity to Supabase Realtime…'
+            : 'The demo account, couple space, location, and content are stored in this browser. Opening the same account on another device will not carry that content over.'}
         </div>
         <div style={pcss("font:600 10px/1.5 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:7px")}>
-          Konten, profil, tema, animasi, jadwal senyap, lokasi, dan metadata Drive memakai akun cloud. Hanya izin browser, token sesi, dan antrean offline sementara yang tetap di perangkat.
+          Content, profiles, appearance, animations, quiet hours, location, and Drive metadata use your cloud account. Only browser permissions, session tokens, and the temporary offline queue stay on the device.
         </div>
       </div>
 
       {auth.mode === 'supabase' && auth.couple && (
         <div style={pcss('border-radius:20px;background:#FFF3F3;padding:15px 16px;border:1px solid rgba(194,80,107,.2)')}>
-          <div style={pcss("font:700 12px 'Quicksand',sans-serif;color:#9F4057")}>Bersihkan aktivitas ruang</div>
-          <div style={pcss("font:600 10.5px/1.5 'Nunito',sans-serif;color:#A26775;margin-top:5px")}>Menghapus data uji bersama tanpa menghapus dua akun, hubungan pasangan, foto profil, atau folder Google Drive.</div>
+          <div style={pcss("font:700 12px 'Quicksand',sans-serif;color:#9F4057")}>Clear shared activity</div>
+          <div style={pcss("font:600 10.5px/1.5 'Nunito',sans-serif;color:#A26775;margin-top:5px")}>Deletes shared test data without removing either account, the partner connection, profile pictures, or the Google Drive folder.</div>
           {resetError && <div role="alert" style={pcss("font:700 10.5px/1.45 'Nunito',sans-serif;color:#B23D59;margin-top:8px")}>{resetError}</div>}
           <button
             type="button"
@@ -232,13 +232,13 @@ export default function SettingsPage() {
             onClick={() => void resetRoomData()}
             style={pcss(`margin-top:11px;border:0;border-radius:100px;padding:10px 15px;background:#C95C73;color:#fff;font:800 10.5px 'Nunito',sans-serif;cursor:${resetPending ? 'wait' : 'pointer'};opacity:${resetPending ? '.65' : '1'}`)}
           >
-            {resetPending ? 'Membersihkan…' : 'Bersihkan data aktivitas'}
+            {resetPending ? 'Clearing…' : 'Clear activity data'}
           </button>
         </div>
       )}
 
       <div style={{ textAlign: 'center', padding: '6px 0 14px' }}>
-        <div style={pcss("font:600 11px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>KisahKita v1.0 · ruang digital untuk dua orang 💗</div>
+        <div style={pcss("font:600 11px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>KisahKita v1.0 · a private digital space for two 💗</div>
         {logoutError && <div role="alert" style={pcss("font:700 11.5px/1.4 'Nunito',sans-serif;color:#C2506B;margin-top:10px")}>{logoutError}</div>}
         <button
           type="button"
@@ -246,7 +246,7 @@ export default function SettingsPage() {
           style={pcss(`border:0;padding:0;background:transparent;font:700 11.5px 'Nunito',sans-serif;color:#C2506B;margin-top:10px;cursor:${logoutPending ? 'wait' : 'pointer'};opacity:${logoutPending ? '.65' : '1'};appearance:none`)}
           onClick={() => void logout()}
         >
-          {logoutPending ? 'Sedang keluar…' : 'Keluar dari akun'}
+          {logoutPending ? 'Signing out…' : 'Sign out'}
         </button>
       </div>
     </ScrollColumn>

@@ -63,23 +63,23 @@ export default function AuthPage() {
     setSuccess('');
 
     if (view !== 'reset' && !validEmail(email)) {
-      setError('Masukkan alamat email yang valid.');
+      setError('Enter a valid email address.');
       return;
     }
     if (view === 'signup' && name.trim().length < 2) {
-      setError('Nama perlu setidaknya 2 karakter.');
+      setError('Name must be at least 2 characters.');
       return;
     }
     if (view !== 'forgot' && password.length < 8) {
-      setError('Gunakan minimal 8 karakter untuk password.');
+      setError('Use at least 8 characters for your password.');
       return;
     }
     if ((view === 'signup' || view === 'reset') && password !== confirmPassword) {
-      setError('Konfirmasi password belum sama.');
+      setError('Password confirmation does not match.');
       return;
     }
     if (view === 'forgot' && auth.mode === 'local' && password.length < 8) {
-      setError('Gunakan minimal 8 karakter untuk password baru.');
+      setError('Use at least 8 characters for your new password.');
       return;
     }
 
@@ -91,7 +91,7 @@ export default function AuthPage() {
       } else if (view === 'signup') {
         const outcome = await auth.signUpAccount(email, password, name);
         if (outcome.needsEmailConfirmation) {
-          setSuccess('Tautan verifikasi sudah dikirim. Buka email kamu, lalu kembali untuk masuk.');
+          setSuccess('Verification link sent. Open your email, then come back to sign in.');
           setView('login');
           setPassword('');
           setConfirmPassword('');
@@ -101,17 +101,17 @@ export default function AuthPage() {
       } else if (view === 'forgot') {
         await auth.requestPasswordReset(email, auth.mode === 'local' ? password : undefined);
         setSuccess(auth.mode === 'local'
-          ? 'Password lokal sudah diganti. Kamu bisa masuk sekarang.'
-          : 'Tautan pemulihan sudah dikirim. Cek inbox dan folder spam.');
+          ? 'Local password updated. You can sign in now.'
+          : 'Recovery link sent. Check your inbox and spam folder.');
         setView('login');
         setPassword('');
       } else {
         await auth.completePasswordRecovery(password);
-        setSuccess('Password baru sudah tersimpan.');
+        setSuccess('Your new password has been saved.');
         navigate(auth.isPaired ? '/' : '/pair', { replace: true });
       }
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Belum berhasil. Coba lagi.');
+      setError(caught instanceof Error ? caught.message : 'Something went wrong. Try again.');
     } finally {
       setBusy(false);
     }
@@ -124,7 +124,7 @@ export default function AuthPage() {
       await auth.enterDemo();
       navigate('/', { replace: true });
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Demo belum bisa dibuka.');
+      setError(caught instanceof Error ? caught.message : 'Demo mode could not be opened.');
     } finally {
       setBusy(false);
     }
@@ -138,68 +138,68 @@ export default function AuthPage() {
       const snapshot = await auth.signInWithGoogleAccount();
       if (snapshot) navigate(destination(!!snapshot.partner), { replace: true });
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Login Google belum berhasil.');
+      setError(caught instanceof Error ? caught.message : 'Google sign-in did not complete.');
     } finally {
       setBusy(false);
     }
   };
 
   const formTitle = view === 'signup'
-    ? 'Bikin akunmu'
+    ? 'Create your account'
     : view === 'forgot'
-      ? 'Pulihkan akses'
+      ? 'Recover access'
       : view === 'reset'
-        ? 'Pilih password baru'
-        : 'Selamat datang kembali';
+        ? 'Choose a new password'
+        : 'Welcome back';
   const formCopy = view === 'signup'
-    ? 'Satu akun untukmu. Pasanganmu membuat akunnya sendiri, lalu kalian terhubung dengan satu kode.'
+    ? 'One account for you. Your partner creates their own account, then you connect with one private code.'
     : view === 'forgot'
       ? auth.mode === 'local'
-        ? 'Mode lokal tidak mengirim email. Tetapkan password baru untuk akun yang tersimpan di perangkat ini.'
-        : 'Kami akan mengirim tautan aman ke email akunmu.'
+        ? 'Local mode does not send email. Set a new password for the account stored on this device.'
+        : 'We will send a secure link to your account email.'
       : view === 'reset'
-        ? 'Gunakan kombinasi yang mudah kamu ingat dan sulit ditebak.'
-        : 'Masuk untuk melanjutkan cerita kalian.';
+        ? 'Use a combination that is easy for you to remember and hard to guess.'
+        : 'Sign in to continue your story.';
 
   return (
     <main className="kk-auth-page" data-auth-mode={auth.mode}>
       <div className="kk-auth-ambient kk-auth-ambient-one" aria-hidden="true" />
       <div className="kk-auth-ambient kk-auth-ambient-two" aria-hidden="true" />
-      <section className="kk-auth-shell" aria-label="Akun KisahKita">
+      <section className="kk-auth-shell" aria-label="KisahKita account">
         <aside className="kk-auth-story">
           <div className="kk-auth-brand"><HeartMark /><span>KisahKita</span></div>
           <div className="kk-auth-story-copy">
-            <p className="kk-eyebrow">Ruang privat untuk dua orang</p>
-            <h1>Jaraknya jauh.<br />Ceritanya tetap dekat.</h1>
-            <p>Simpan ritual kecil, rencana pulang, dan momen yang cuma kalian berdua pahami.</p>
+            <p className="kk-eyebrow">A private space for two</p>
+            <h1>Miles apart.<br />Still close at heart.</h1>
+            <p>Keep the little rituals, reunion plans, and moments only the two of you understand.</p>
           </div>
           <div className="kk-couple-preview" aria-hidden="true">
             <div className="kk-preview-person">
               <span className="kk-preview-avatar kk-preview-avatar-a">🧑🏻</span>
-              <div><small>JAKARTA</small><strong>15:42</strong><em>Kangen · ngoding</em></div>
+              <div><small>JAKARTA</small><strong>15:42</strong><em>Missing you · coding</em></div>
             </div>
             <div className="kk-preview-distance"><i /><span>8.421 km</span><i /></div>
             <div className="kk-preview-person kk-preview-person-right">
-              <div><small>TAIPEI</small><strong>16:42</strong><em>Senang · di kelas</em></div>
+              <div><small>TAIPEI</small><strong>16:42</strong><em>Happy · in class</em></div>
               <span className="kk-preview-avatar kk-preview-avatar-b">👩🏻</span>
             </div>
           </div>
           <div className="kk-auth-promise">
-            <span>01</span><p><strong>Dua akun, satu ruang</strong><br />Data pasangan baru terbuka setelah kode diterima.</p>
+            <span>01</span><p><strong>Two accounts, one space</strong><br />Shared data opens only after the invitation is accepted.</p>
           </div>
         </aside>
 
         <section className="kk-auth-panel">
           <div className="kk-auth-mobile-brand"><HeartMark /><span>KisahKita</span></div>
           {(view === 'login' || view === 'signup') && (
-            <div className="kk-auth-tabs" role="tablist" aria-label="Pilih cara masuk">
-              <button type="button" role="tab" aria-selected={view === 'login'} onClick={() => switchView('login')}>Masuk</button>
-              <button type="button" role="tab" aria-selected={view === 'signup'} onClick={() => switchView('signup')}>Buat akun</button>
+            <div className="kk-auth-tabs" role="tablist" aria-label="Choose how to sign in">
+              <button type="button" role="tab" aria-selected={view === 'login'} onClick={() => switchView('login')}>Sign in</button>
+              <button type="button" role="tab" aria-selected={view === 'signup'} onClick={() => switchView('signup')}>Create account</button>
             </div>
           )}
 
           <div className="kk-auth-heading" key={view}>
-            <span>{view === 'signup' ? 'Langkah pertama' : view === 'login' ? 'Ruangmu menunggu' : 'Akses akun'}</span>
+            <span>{view === 'signup' ? 'First step' : view === 'login' ? 'Your space is waiting' : 'Access your account'}</span>
             <h2>{formTitle}</h2>
             <p>{formCopy}</p>
           </div>
@@ -208,48 +208,48 @@ export default function AuthPage() {
             <>
               <button className="kk-google-auth" type="button" onClick={continueWithGoogle} disabled={busy}>
                 {busy ? <span className="kk-mini-spinner" aria-hidden="true" /> : <GoogleMark />}
-                Lanjutkan dengan Google
+                Continue with Google
               </button>
-              <div className="kk-auth-divider"><span>atau dengan email</span></div>
+              <div className="kk-auth-divider"><span>or continue with email</span></div>
             </>
           )}
 
           <form className="kk-auth-form" onSubmit={submit} noValidate>
             {view === 'signup' && (
               <label>
-                <span>Nama panggilan</span>
-                <input aria-label="Nama panggilan" value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" placeholder="Mis. Nara" disabled={busy} />
+                <span>Display name</span>
+                <input aria-label="Display name" value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" placeholder="e.g. Nara" disabled={busy} />
               </label>
             )}
             {view !== 'reset' && (
               <label>
                 <span>Email</span>
-                <input aria-label="Email" value={email} onChange={(event) => setEmail(event.target.value)} type="email" autoComplete="email" placeholder="kamu@email.com" disabled={busy} />
+                <input aria-label="Email" value={email} onChange={(event) => setEmail(event.target.value)} type="email" autoComplete="email" placeholder="you@email.com" disabled={busy} />
               </label>
             )}
             {(view !== 'forgot' || auth.mode === 'local') && (
               <label>
-                <span>{view === 'forgot' || view === 'reset' ? 'Password baru' : 'Password'}</span>
+                <span>{view === 'forgot' || view === 'reset' ? 'New password' : 'Password'}</span>
                 <div className="kk-password-field">
                   <input
-                    aria-label={view === 'forgot' || view === 'reset' ? 'Password baru' : 'Password'}
+                    aria-label={view === 'forgot' || view === 'reset' ? 'New password' : 'Password'}
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
                     type={showPassword ? 'text' : 'password'}
                     autoComplete={view === 'login' ? 'current-password' : 'new-password'}
-                    placeholder="Minimal 8 karakter"
+                    placeholder="At least 8 characters"
                     disabled={busy}
                   />
-                  <button type="button" onClick={() => setShowPassword((shown) => !shown)} aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}>
-                    {showPassword ? 'Tutup' : 'Lihat'}
+                  <button type="button" onClick={() => setShowPassword((shown) => !shown)} aria-label={showPassword ? 'Hide password' : 'Show password'}>
+                    {showPassword ? 'Hide' : 'Show'}
                   </button>
                 </div>
               </label>
             )}
             {(view === 'signup' || view === 'reset') && (
               <label>
-                <span>Ulangi password</span>
-                <input aria-label="Ulangi password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} type="password" autoComplete="new-password" placeholder="Ketik sekali lagi" disabled={busy} />
+                <span>Repeat password</span>
+                <input aria-label="Repeat password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} type="password" autoComplete="new-password" placeholder="Type it one more time" disabled={busy} />
               </label>
             )}
 
@@ -258,25 +258,25 @@ export default function AuthPage() {
 
             <button className="kk-auth-submit" type="submit" disabled={busy}>
               {busy && <span className="kk-button-loader" aria-hidden="true" />}
-              {view === 'login' ? 'Masuk ke ruang kita' : view === 'signup' ? 'Buat akun' : view === 'forgot' ? auth.mode === 'local' ? 'Simpan password baru' : 'Kirim tautan' : 'Simpan password'}
+              {view === 'login' ? 'Enter our space' : view === 'signup' ? 'Create account' : view === 'forgot' ? auth.mode === 'local' ? 'Save new password' : 'Send link' : 'Save password'}
             </button>
           </form>
 
           <div className="kk-auth-secondary">
-            {view === 'login' && <button type="button" onClick={() => switchView('forgot')}>Lupa password?</button>}
-            {(view === 'forgot' || view === 'reset') && <button type="button" onClick={() => switchView('login')}>← Kembali ke masuk</button>}
+            {view === 'login' && <button type="button" onClick={() => switchView('forgot')}>Forgot password?</button>}
+            {(view === 'forgot' || view === 'reset') && <button type="button" onClick={() => switchView('login')}>← Back to sign in</button>}
           </div>
 
           {auth.mode === 'local' && (view === 'login' || view === 'signup') && (
             <div className="kk-demo-entry">
-              <span>atau</span>
-              <button type="button" onClick={enterDemo} disabled={busy}>Lihat ruang demo <b>→</b></button>
+              <span>or</span>
+              <button type="button" onClick={enterDemo} disabled={busy}>Preview demo space <b>→</b></button>
             </div>
           )}
 
           <p className="kk-auth-mode-note">
             <i aria-hidden="true" />
-            {auth.mode === 'supabase' ? 'Terhubung ke Supabase · sesi tersimpan aman' : 'Mode lokal · data akun hanya tersimpan di perangkat ini'}
+            {auth.mode === 'supabase' ? 'Connected to Supabase · session stored securely' : 'Local mode · account data stays on this device'}
           </p>
         </section>
       </section>

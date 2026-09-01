@@ -25,11 +25,11 @@ export function formatTimeInZone(date: Date, timeZone: string): string {
 
 /** Full Indonesian weekday name for a date in a given zone, e.g. "Rabu". */
 export function weekdayInZone(date: Date, timeZone: string): string {
-  return new Intl.DateTimeFormat('id-ID', { weekday: 'long', timeZone }).format(date);
+  return new Intl.DateTimeFormat('en-US', { weekday: 'long', timeZone }).format(date);
 }
 
 export function formatDateLabel(date: Date, timeZone: string): string {
-  const parts = new Intl.DateTimeFormat('id-ID', { weekday: 'short', day: 'numeric', month: 'short', timeZone }).formatToParts(date);
+  const parts = new Intl.DateTimeFormat('en-US', { weekday: 'short', day: 'numeric', month: 'short', timeZone }).formatToParts(date);
   const get = (t: string) => parts.find((p) => p.type === t)?.value ?? '';
   const weekday = get('weekday').replace('.', '');
   return `${weekday.charAt(0).toUpperCase()}${weekday.slice(1)}, ${get('day')} ${get('month')}`;

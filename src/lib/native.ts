@@ -28,7 +28,7 @@ export async function enableDeviceNotifications(): Promise<DeviceNotificationPer
     const permission = await Notification.requestPermission()
     if (permission === 'granted') {
       try {
-        new Notification('KisahKita siap 💗', { body: 'Notifikasi perangkat sudah diizinkan.' })
+        new Notification('KisahKita is ready 💗', { body: 'Device notifications are enabled.' })
       } catch {
         // Some mobile browsers require an installed PWA.
       }
@@ -43,7 +43,7 @@ export async function enableDeviceNotifications(): Promise<DeviceNotificationPer
     await LocalNotifications.createChannel({
       id: 'kisahkita',
       name: 'KisahKita',
-      description: 'Aktivitas ruang pasangan',
+      description: 'Shared space activity',
       importance: 4,
     })
   }
@@ -51,7 +51,7 @@ export async function enableDeviceNotifications(): Promise<DeviceNotificationPer
     notifications: [{
       id: Math.floor(Date.now() / 1_000) % 2_147_483_647,
       title: 'KisahKita siap 💗',
-      body: 'Notifikasi perangkat sudah diizinkan.',
+      body: 'Device notifications are enabled.',
       channelId: 'kisahkita',
       schedule: { at: new Date(Date.now() + 500) },
     }],
@@ -71,7 +71,7 @@ export async function initializeNativeRuntime() {
       if (recovery) window.dispatchEvent(new Event('kk-auth-recovery'))
     } catch (error) {
       lastUrl = ''
-      console.error('Deep link autentikasi belum dapat diselesaikan.', error)
+      console.error('The authentication deep link could not be completed.', error)
     }
   }
 

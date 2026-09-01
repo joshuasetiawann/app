@@ -35,7 +35,7 @@ export default function ThemePage() {
       <div style={pcss('display:flex;justify-content:space-between;align-items:center;border-radius:22px;background:var(--sf,#fff);padding:16px 17px;box-shadow:var(--shadow,0 8px 24px rgba(0,0,0,.04))')}>
         <div>
           <div style={pcss("font:700 14px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Mode gelap</div>
-          <div style={pcss("font:600 10.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:2px")}>{dark ? 'Nyala · Deep Midnight' : 'Mati · Warm Pearl'}</div>
+          <div style={pcss("font:600 10.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:2px")}>{dark ? 'Nyala · Deep Midnight' : 'Off · Warm Pearl'}</div>
         </div>
         <button
           type="button"
@@ -48,7 +48,7 @@ export default function ThemePage() {
         </button>
       </div>
 
-      <div style={pcss("font:700 10px 'Nunito',sans-serif;letter-spacing:.14em;color:var(--mut,#A99A9E);padding:4px 4px 0")}>TEMA KAMI</div>
+      <div style={pcss("font:700 10px 'Nunito',sans-serif;letter-spacing:.14em;color:var(--mut,#A99A9E);padding:4px 4px 0")}>OUR THEME</div>
       <div style={{ display: 'grid', gridTemplateColumns: themeCols, gap: 12 }}>
         {THEME_LIST.map((key) => {
           const t = THEMES[key];
@@ -60,7 +60,7 @@ export default function ThemePage() {
               style={pcss(`border-radius:22px;padding:13px;cursor:pointer;text-align:left;color:inherit;background:var(--sf,#fff);box-shadow:var(--shadow,0 8px 24px rgba(0,0,0,.04));border:2px solid ${active ? 'var(--pk,#FFB7B2)' : 'transparent'}`)}
               onClick={() => {
                 setTheme(key);
-                toast(`Tema: ${t.label}`);
+                toast(`Appearance: ${t.label}`);
               }}
               aria-pressed={active}
             >
@@ -73,7 +73,7 @@ export default function ThemePage() {
       </div>
 
       <div style={pcss('border-radius:22px;background:var(--sf,#fff);padding:17px;box-shadow:var(--shadow,0 8px 24px rgba(0,0,0,.04))')}>
-        <div style={pcss("font:700 13px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Warna aksen</div>
+        <div style={pcss("font:700 13px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Accent color</div>
         <div style={{ display: 'flex', gap: 10, marginTop: 13, flexWrap: 'wrap' }}>
           {ACCENT_SWATCHES.map((c) => (
             <button
@@ -83,22 +83,22 @@ export default function ThemePage() {
               onClick={() => {
                 const next = SWATCH_THEME[c];
                 setTheme(next);
-                toast(`Aksen ${THEMES[next].label} diterapkan`);
+                toast(`${THEMES[next].label} accent applied`);
               }}
               aria-pressed={theme === SWATCH_THEME[c]}
-              aria-label={`Aksen ${c}`}
+              aria-label={`${c} accent`}
             />
           ))}
         </div>
         <div style={{ height: 1, background: 'var(--ln,rgba(74,74,74,.08))', margin: '16px 0' }} />
-        <div style={pcss("font:700 13px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Level animasi</div>
+        <div style={pcss("font:700 13px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Motion level</div>
         <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-          <button type="button" style={{ ...animBtnStyle(animLevel === 'full'), border: 0 }} onClick={() => setLevel('full', 'Animasi penuh ✨')} aria-pressed={animLevel === 'full'}>Penuh ✨</button>
-          <button type="button" style={{ ...animBtnStyle(animLevel === 'calm'), border: 0 }} onClick={() => setLevel('calm', 'Animasi kalem')} aria-pressed={animLevel === 'calm'}>Kalem</button>
-          <button type="button" style={{ ...animBtnStyle(animLevel === 'off'), border: 0 }} onClick={() => setLevel('off', 'Hemat daya 🔋 animasi dimatikan')} aria-pressed={animLevel === 'off'}>Hemat daya 🔋</button>
+          <button type="button" style={{ ...animBtnStyle(animLevel === 'full'), border: 0 }} onClick={() => setLevel('full', 'Full motion ✨')} aria-pressed={animLevel === 'full'}>Full ✨</button>
+          <button type="button" style={{ ...animBtnStyle(animLevel === 'calm'), border: 0 }} onClick={() => setLevel('calm', 'Calm motion')} aria-pressed={animLevel === 'calm'}>Calm</button>
+          <button type="button" style={{ ...animBtnStyle(animLevel === 'off'), border: 0 }} onClick={() => setLevel('off', 'Power saver 🔋 animations off')} aria-pressed={animLevel === 'off'}>Power saver 🔋</button>
         </div>
         <div style={pcss("font:600 10.5px/1.5 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:10px")}>
-          Hemat daya mematikan kelopak sakura, pulse hati, dan foto miring — cocok kalau baterai tipis atau kamu sensitif gerakan.
+          Power saver disables falling petals, pulsing hearts, and tilted pictures—useful for low battery or motion sensitivity.
         </div>
       </div>
     </ScrollColumn>

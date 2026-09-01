@@ -10,17 +10,17 @@ export default function NotifPage() {
   return (
     <ScrollColumn>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={pcss("font:700 15px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Hari ini</span>
+        <span style={pcss("font:700 15px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Today</span>
         <button
           type="button"
           style={pcss("padding:7px 10px;border:0;border-radius:100px;background:transparent;font:700 11px 'Nunito',sans-serif;color:var(--pki,#E86F87);cursor:pointer")}
           disabled={unreadCount === 0}
           onClick={() => {
             markAllNotificationsRead();
-            toast('Semua notifikasi dibaca ✓');
+            toast('All notifications marked as read ✓');
           }}
         >
-          {unreadCount > 0 ? `Tandai semua (${unreadCount})` : 'Semua terbaca'}
+          {unreadCount > 0 ? `Mark all read (${unreadCount})` : 'All read'}
         </button>
       </div>
 
@@ -36,7 +36,7 @@ export default function NotifPage() {
                 markNotificationRead(n.id);
                 navigate(n.route);
               }}
-              aria-label={`${unread ? 'Belum dibaca. ' : ''}${n.text}`}
+              aria-label={`${unread ? 'Unread. ' : ''}${n.text}`}
             >
               <div
                 style={pcss(
@@ -55,22 +55,22 @@ export default function NotifPage() {
         })}
         {notifications.length === 0 && (
           <div style={pcss("padding:28px 8px;text-align:center;font:600 11.5px/1.5 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>
-            Belum ada notifikasi baru.
+            No new notifications.
           </div>
         )}
       </div>
 
       <div style={pcss('border-radius:22px;background:var(--sf2,#FFF4F1);padding:16px 17px')}>
-        <div style={pcss("font:700 13px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Atur notifikasi</div>
+        <div style={pcss("font:700 13px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Notification preferences</div>
         <div style={pcss("font:600 10.5px/1.5 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:4px")}>
-          Bisa pilih mana yang bunyi, mana yang diem — terutama pas jam kuliah atau tidur.
+          Choose which updates make a sound, especially during class, work, or sleep.
         </div>
         <div style={{ display: 'flex', gap: 7, marginTop: 12, flexWrap: 'wrap' }}>
           <button type="button" style={pcss("padding:8px 13px;border:0;border-radius:100px;background:var(--sf,#fff);font:700 11px 'Nunito',sans-serif;color:var(--ink2,#6B5B60);cursor:pointer")} onClick={() => navigate('/settings')}>
-            Buka pengaturan
+            Open settings
           </button>
           <button type="button" style={pcss("padding:8px 13px;border:0;border-radius:100px;background:var(--sf,#fff);font:700 11px 'Nunito',sans-serif;color:var(--ink2,#6B5B60);cursor:pointer")} onClick={() => navigate('/settings')}>
-            🌙 Atur jam tidur
+            🌙 Set quiet hours
           </button>
         </div>
       </div>

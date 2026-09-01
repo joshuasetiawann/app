@@ -10,7 +10,7 @@ export function MoreSheetContent() {
 
   return (
     <>
-      <SheetHeading title="Semua fitur" sub="Ruang kita, lengkap 🌸" />
+      <SheetHeading title="All features" sub="Our space, lengkap 🌸" />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10 }}>
         {MORE_SHEET_ITEMS.map((item) => (
           <button

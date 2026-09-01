@@ -8,10 +8,10 @@ let nativeInitialization: Promise<void> | null = null;
 
 export function googleNativeConfigurationError() {
   if (!GOOGLE_WEB_CLIENT_ID) {
-    return new Error('Google belum dikonfigurasi. Isi VITE_GOOGLE_DRIVE_CLIENT_ID lalu buat ulang aplikasi.');
+    return new Error('Google is not configured. Set VITE_GOOGLE_DRIVE_CLIENT_ID, then rebuild the app.');
   }
   if (Capacitor.getPlatform() === 'ios' && !GOOGLE_IOS_CLIENT_ID) {
-    return new Error('Google untuk iOS belum dikonfigurasi. Isi VITE_GOOGLE_DRIVE_IOS_CLIENT_ID lalu sinkronkan ulang aplikasi.');
+    return new Error('Google for iOS is not configured. Set VITE_GOOGLE_DRIVE_IOS_CLIENT_ID, then sync the app again.');
   }
   return null;
 }
