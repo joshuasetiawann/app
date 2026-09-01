@@ -19,3 +19,15 @@ export function currentDeviceLocation(): Promise<GeoPoint> {
 export function coordinateLabel(point: GeoPoint, prefix = 'GPS') {
   return `${prefix} · ${point.latitude.toFixed(5)}, ${point.longitude.toFixed(5)}`;
 }
+
+export function distanceBetweenKm(a: GeoPoint | null, b: GeoPoint | null) {
+  if (!a || !b) return null;
+  const radians = (degrees: number) => degrees * Math.PI / 180;
+  const latDelta = radians(b.latitude - a.latitude);
+  const lngDelta = radians(b.longitude - a.longitude);
+  const startLat = radians(a.latitude);
+  const endLat = radians(b.latitude);
+  const h = Math.sin(latDelta / 2) ** 2
+    + Math.cos(startLat) * Math.cos(endLat) * Math.sin(lngDelta / 2) ** 2;
+  return 6_371 * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+}

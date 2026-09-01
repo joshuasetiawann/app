@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { pcss } from '../lib/pcss';
 import { useAppState } from '../state/AppState';
@@ -8,6 +9,8 @@ import { THEMES } from '../lib/theme';
 import { RELATIONSHIP, COUNTDOWNS } from '../data/mockData';
 import { PhotoOpenTarget } from '../components/shared/PhotoOpenTarget';
 import { useAuthState } from '../state/AuthState';
+import { distanceBetweenKm } from '../lib/geolocation';
+import { getLatestLocationPings, subscribeToLocationPings, type LocationPing } from '../services/authService';
 
 function foodStatusLabel(status: string) {
   if (status === 'ate') return 'already ate';
@@ -61,6 +64,30 @@ export default function HomePage() {
     .filter((countdown) => new Date(countdown.targetDate).getTime() > now.getTime())
     .sort((a, b) => new Date(a.targetDate).getTime() - new Date(b.targetDate).getTime())[0];
   const daysToNext = nextCountdown ? daysUntil(nextCountdown.targetDate, now) : 0;
+  const [locationPings, setLocationPings] = useState<{ mine: LocationPing | null; partner: LocationPing | null }>({ mine: null, partner: null });
+
+  useEffect(() => {
+    if (!couple?.id) return;
+    let active = true;
+    const refresh = () => void getLatestLocationPings()
+      .then((latest) => { if (active) setLocationPings(latest); })
+      .catch(() => undefined);
+    refresh();
+    const unsubscribe = subscribeToLocationPings(couple.id, refresh);
+    window.addEventListener('focus', refresh);
+    return () => {
+      active = false;
+      unsubscribe();
+      window.removeEventListener('focus', refresh);
+    };
+  }, [couple?.id]);
+
+  const distance = useMemo(() => distanceBetweenKm(locationPings.mine, locationPings.partner), [locationPings]);
+  const distanceLabel = distance == null
+    ? ''
+    : distance < 10
+      ? distance.toFixed(1)
+      : new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(distance);
 
   return (
     <ScrollColumn>
@@ -123,12 +150,16 @@ export default function HomePage() {
       <div style={{ display: 'grid', gridTemplateColumns: twoCol, gap: 12 }}>
         <Card>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={pcss("font:700 11px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>{isDemo ? 'CONTOH JARAK' : 'JARAK KITA'}</span>
+            <span style={pcss("font:700 11px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>DISTANCE BETWEEN US</span>
             <button type="button" style={pcss("border:0;background:transparent;padding:4px;font:700 10px 'Nunito',sans-serif;color:var(--pki,#E86F87);cursor:pointer")} onClick={() => navigate('/location')}>Open distance map 📍</button>
           </div>
-          <div style={pcss("font:700 24px/1 'Quicksand',sans-serif;color:var(--ink,#4A4A4A);margin-top:8px")}>
-            {isDemo ? '8.421' : '—'} <span style={{ fontSize: 12, color: 'var(--mut,#A99A9E)' }}>km</span>
-          </div>
+          {distanceLabel ? (
+            <div style={pcss("font:700 24px/1 'Quicksand',sans-serif;color:var(--ink,#4A4A4A);margin-top:8px;font-variant-numeric:tabular-nums")}>
+              {distanceLabel} <span style={{ fontSize: 12, color: 'var(--mut,#A99A9E)' }}>km</span>
+            </div>
+          ) : (
+            <div style={pcss("font:700 13px/1.35 'Quicksand',sans-serif;color:var(--ink,#4A4A4A);margin-top:9px")}>Waiting for both locations</div>
+          )}
           <div style={pcss('margin-top:12px;height:74px;border-radius:16px;background:var(--sf2,#FFF4F1);position:relative;display:flex;align-items:center;justify-content:space-between;padding:0 16px;overflow:hidden')}>
             <div style={{ position: 'absolute', inset: 0, background: 'repeating-linear-gradient(135deg,rgba(255,183,178,.16) 0 9px,rgba(255,255,255,0) 9px 18px)' }} />
             <div style={{ textAlign: 'center', position: 'relative' }}>
@@ -143,7 +174,7 @@ export default function HomePage() {
               <div style={pcss("font:700 8px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:5px")}>{partnerCity.slice(0, 3).toUpperCase()}</div>
             </div>
           </div>
-          <div style={pcss("font:500 16px 'Caveat',cursive;color:var(--ink2,#6B5B60);margin-top:9px")}>Jauh di mata, dekat di hati ✈️</div>
+          <div style={pcss("font:500 16px 'Caveat',cursive;color:var(--ink2,#6B5B60);margin-top:9px")}>{distanceLabel ? 'Far apart, close at heart ✈️' : 'Turn on Live Location on both phones to calculate it.'}</div>
         </Card>
 
         <div style={pcss('border-radius:24px;padding:16px 17px;background:linear-gradient(155deg,#4A3B45,#2E2530);color:#FFF6F3;box-shadow:0 8px 22px rgba(60,45,52,.25)')}>

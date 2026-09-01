@@ -415,9 +415,9 @@ await withSession('interactions', VIEWPORTS.desktop, async (page) => {
   const memoryTitle = 'Synced QA memory';
   await visit(page, '/memories');
   await page.getByRole('button', { name: '+ Memory', exact: true }).click();
-  await page.getByLabel('Title', { exact: true }).fill(memoryTitle);
-  await page.getByLabel('Date').fill('2026-08-20');
-  await page.getByLabel('The story').fill('This story was created by visual QA.');
+  await page.getByLabel('Memory title').fill(memoryTitle);
+  await page.getByLabel('Memory date').fill('2026-08-20');
+  await page.getByLabel('Memory story').fill('This story was created by visual QA.');
   await page.getByRole('button', { name: 'Save memory 📖' }).click();
   await expectVisible(page.getByText(memoryTitle, { exact: true }), 'Kenangan baru tidak muncul');
   await page.reload({ waitUntil: 'domcontentloaded' });

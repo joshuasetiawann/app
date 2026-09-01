@@ -35,7 +35,7 @@ function NavRow({ item, open }: { item: NavItem; open: boolean }) {
 
 export function Sidebar() {
   const { viewport } = useAppState();
-  const { profile, partner, couple } = useAuthState();
+  const { profile, partner } = useAuthState();
   const isTablet = viewport === 'tablet';
   const open = !isTablet;
   const coupleNames = `${profile?.name || 'You'} & ${partner?.name || 'Partner'}`;
@@ -46,7 +46,7 @@ export function Sidebar() {
         `display:flex;flex-direction:column;padding:${isTablet ? '16px 12px' : '18px 14px'};border-right:1px solid var(--ln,rgba(74,74,74,.08));background:var(--sf,#fff);overflow-y:auto`,
       )}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 8px 18px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 8px 16px' }}>
         <div
           style={pcss(
             'width:38px;height:38px;border-radius:13px;background:linear-gradient(140deg,var(--pk,#FFB7B2),var(--lav,#E3D7F7));display:flex;align-items:center;justify-content:center;font-size:17px;flex:none',
@@ -61,8 +61,6 @@ export function Sidebar() {
           </div>
         )}
       </div>
-
-      {open && <div style={pcss('font:700 9.5px "Nunito",sans-serif;letter-spacing:.14em;color:var(--mut,#A99A9E);padding:4px 10px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis')}>❤️ {couple?.spaceName || 'OUR SPACE'}</div>}
       {NAV_MAIN.map((item) => (
         <NavRow key={item.path} item={item} open={open} />
       ))}

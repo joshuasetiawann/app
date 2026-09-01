@@ -10,20 +10,9 @@ import {
   subscribeToLocationPings,
   type LocationPing,
 } from '../services/authService';
+import { distanceBetweenKm } from '../lib/geolocation';
 
 type GeoStatus = 'idle' | 'requesting' | 'ready' | 'denied' | 'unavailable' | 'error';
-
-function distanceKm(a: LocationPing | null, b: LocationPing | null) {
-  if (!a || !b) return null;
-  const radians = (degrees: number) => degrees * Math.PI / 180;
-  const latDelta = radians(b.latitude - a.latitude);
-  const lngDelta = radians(b.longitude - a.longitude);
-  const startLat = radians(a.latitude);
-  const endLat = radians(b.latitude);
-  const h = Math.sin(latDelta / 2) ** 2
-    + Math.cos(startLat) * Math.cos(endLat) * Math.sin(lngDelta / 2) ** 2;
-  return 6_371 * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
-}
 
 function relativeUpdate(value: string | null, now: number) {
   if (!value) return 'Not available';
@@ -107,7 +96,7 @@ export default function LocationPage() {
     return () => navigator.geolocation.clearWatch(watcher);
   }, [auth.couple?.id, auth.profile?.id, locationOn, refreshPings, setLocation]);
 
-  const distance = useMemo(() => distanceKm(mine, partnerPing), [mine, partnerPing]);
+  const distance = useMemo(() => distanceBetweenKm(mine, partnerPing), [mine, partnerPing]);
   const partnerFresh = !!partnerPing && currentTime - new Date(partnerPing.recordedAt).getTime() < 5 * 60_000;
   const partnerName = auth.partner?.name || 'Partner';
 

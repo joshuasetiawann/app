@@ -114,7 +114,6 @@ export default function MemoriesPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 12, marginTop: 14 }}>
             <label style={pcss("font:800 10px 'Nunito',sans-serif;color:var(--ink2,#6B5B60)")}>Title<input name="title" aria-label="Memory title" placeholder="Video call until we fell asleep" required maxLength={100} style={fieldStyle} /></label>
             <label style={pcss("font:800 10px 'Nunito',sans-serif;color:var(--ink2,#6B5B60)")}>Date<input name="occurredOn" aria-label="Memory date" type="date" defaultValue={today} max={today} required style={fieldStyle} /></label>
-            <label style={pcss("font:800 10px 'Nunito',sans-serif;color:var(--ink2,#6B5B60)")}>Place<input aria-label="Memory place" value={location} onChange={(event) => setLocation(event.target.value)} placeholder="Type a place or use GPS" maxLength={140} style={fieldStyle} /></label>
             <label style={pcss("font:800 10px 'Nunito',sans-serif;color:var(--ink2,#6B5B60)")}>Mood emoji<input name="mood" aria-label="Memory mood" placeholder="🥹" defaultValue="💗" maxLength={12} style={fieldStyle} /></label>
             <label style={pcss("grid-column:1/-1;font:800 10px 'Nunito',sans-serif;color:var(--ink2,#6B5B60)")}>The story<textarea name="story" aria-label="Memory story" placeholder="Write the details you both want to remember…" rows={4} maxLength={2_000} style={{ ...fieldStyle, resize: 'vertical' }} /></label>
           </div>
@@ -122,6 +121,9 @@ export default function MemoriesPage() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 13 }}>
             <button type="button" disabled={geoBusy} onClick={() => void selectCurrentLocation()} style={actionStyle}>{geoBusy ? 'Finding GPS…' : '⌖ My current location'}</button>
             <button type="button" aria-pressed={pickMode} onClick={() => setPickMode((value) => !value)} style={actionStyle}>🗺️ Pick on map</button>
+          </div>
+          <div aria-label="Selected memory location" style={pcss(`margin-top:8px;padding:9px 11px;border-radius:11px;background:var(--sf,#fff);font:700 9.5px/1.4 'Nunito',sans-serif;color:${location ? 'var(--ink2,#6B5B60)' : 'var(--mut,#A99A9E)'}`)}>
+            {location || 'No location selected · optional'}
           </div>
 
           {(pickMode || draftPoint) && (

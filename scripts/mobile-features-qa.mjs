@@ -2,6 +2,8 @@ import fs from 'node:fs';
 import { chromium } from 'playwright';
 
 const base = process.env.QA_BASE_URL || 'http://127.0.0.1:4174';
+const screenshotDir = process.env.QA_SCREENSHOTS;
+if (screenshotDir) fs.mkdirSync(screenshotDir, { recursive: true });
 const executablePath = [
   'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
   'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
@@ -10,7 +12,7 @@ const executablePath = [
 const picture = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZQmcAAAAASUVORK5CYII=', 'base64');
 const browser = await chromium.launch({ executablePath, args: ['--no-sandbox'] });
 const context = await browser.newContext({
-  viewport: { width: 390, height: 844 },
+  viewport: { width: 1440, height: 900 },
   geolocation: { latitude: -6.1754, longitude: 106.8272 },
   permissions: ['geolocation', 'notifications'],
 });
@@ -23,6 +25,27 @@ try {
   await page.goto(`${base}/auth`, { waitUntil: 'domcontentloaded' });
   await page.getByRole('button', { name: /Preview demo space/i }).click();
   await page.waitForURL((url) => url.pathname === '/');
+
+  const brandBox = await page.locator('aside > div').first().boundingBox();
+  const homeNavBox = await page.locator('aside a[href="/"]').boundingBox();
+  if (!brandBox || !homeNavBox || brandBox.y + brandBox.height > homeNavBox.y) throw new Error('Desktop sidebar brand overlaps the Home navigation.');
+  await page.evaluate(() => {
+    const database = JSON.parse(localStorage.getItem('kk-auth-db-v1'));
+    const sessionId = localStorage.getItem('kk-auth-session-v1');
+    const me = database.users.find((user) => user.id === sessionId);
+    const partner = database.users.find((user) => user.coupleId === me.coupleId && user.id !== me.id);
+    const recordedAt = new Date().toISOString();
+    database.locationPings = [
+      { profileId: me.id, coupleId: me.coupleId, latitude: -6.1754, longitude: 106.8272, accuracyM: 12, speedKmh: null, recordedAt },
+      { profileId: partner.id, coupleId: me.coupleId, latitude: 25.033, longitude: 121.5654, accuracyM: 18, speedKmh: null, recordedAt },
+    ];
+    localStorage.setItem('kk-auth-db-v1', JSON.stringify(database));
+  });
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await page.getByText('DISTANCE BETWEEN US', { exact: true }).waitFor({ state: 'visible' });
+  await page.getByText(/^[\d,.]+ km$/).waitFor({ state: 'visible' });
+  if (screenshotDir) await page.screenshot({ path: `${screenshotDir}/home-desktop.png`, fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
 
   await page.goto(`${base}/places`, { waitUntil: 'domcontentloaded' });
   const placeMap = page.locator('.kk-place-map');
@@ -38,11 +61,13 @@ try {
 
   await page.goto(`${base}/memories`, { waitUntil: 'domcontentloaded' });
   await page.getByRole('button', { name: '+ Memory', exact: true }).click();
+  if (await page.getByLabel('Memory place').count()) throw new Error('The duplicate memory Place field is still visible.');
+  if (screenshotDir) await page.screenshot({ path: `${screenshotDir}/memories-mobile.png`, fullPage: true });
   await page.getByLabel('Choose a memory picture').setInputFiles({ name: 'memory.png', mimeType: 'image/png', buffer: picture });
   await page.getByRole('button', { name: '⌖ My current location' }).click();
-  await page.getByLabel('Memory place').waitFor({ state: 'visible' });
-  await page.waitForFunction(() => document.querySelector('[aria-label="Memory place"]')?.value.startsWith('GPS ·'));
-  const placeValue = await page.getByLabel('Memory place').inputValue();
+  await page.getByLabel('Selected memory location').waitFor({ state: 'visible' });
+  await page.waitForFunction(() => document.querySelector('[aria-label="Selected memory location"]')?.textContent?.startsWith('GPS ·'));
+  const placeValue = await page.getByLabel('Selected memory location').textContent() || '';
   if (!placeValue.startsWith('GPS · -6.17540, 106.82720')) throw new Error(`Memory GPS was not captured: ${placeValue}`);
   await page.getByLabel('Memory title').fill('Production GPS memory');
   await page.getByLabel('Memory story').fill('Picture and coordinates should stay attached.');
