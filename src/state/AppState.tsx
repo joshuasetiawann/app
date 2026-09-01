@@ -31,6 +31,7 @@ import {
   TRIPS,
 } from '../data/mockData';
 import { useAuthState } from './AuthState';
+import { showDeviceNotification } from '../lib/native';
 import {
   addSharedAlbum,
   addSharedEvent,
@@ -169,7 +170,7 @@ interface AppStateApi extends AppStateShape {
   updateAlbum: (id: string, input: { title: string; icon: string }) => void;
   removeAlbum: (id: string) => void;
   addFavorite: (body: string) => void;
-  addMemory: (input: { title: string; occurredOn: string; story: string; mood: string; location: string }) => void;
+  addMemory: (input: { title: string; occurredOn: string; story: string; mood: string; location: string; photoDataUrl?: string }) => void;
   addStoryChapter: (input: { year: string; title: string; place: string; note: string; icon: string }) => void;
   addCountdown: (input: { title: string; targetAt: string; icon: string }) => void;
   addLoveNote: (input: { preview: string; body: string; unlockAt: string }) => boolean;
@@ -243,6 +244,19 @@ function clearLegacyCloudStorage() {
   }
 }
 
+function isQuietTime(hours: { from: string; to: string }) {
+  const minutes = (value: string) => {
+    const [hour, minute] = value.split(':').map(Number);
+    return hour * 60 + minute;
+  };
+  const now = new Date();
+  const current = now.getHours() * 60 + now.getMinutes();
+  const start = minutes(hours.from);
+  const end = minutes(hours.to);
+  if (start === end) return false;
+  return start < end ? current >= start && current < end : current >= start || current < end;
+}
+
 export function AppStateProvider({ children }: { children: ReactNode }) {
   const auth = useAuthState();
   const storageBase = `kk-space-${auth.couple?.id ?? auth.profile?.id ?? 'guest'}`;
@@ -311,6 +325,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const queueFlushingRef = useRef(false);
   const markingReadRef = useRef(false);
   const chatPresenceRef = useRef<ChatPresence | null>(null);
+  const notificationIdsRef = useRef<Set<string> | null>(null);
 
   useEffect(() => {
     const onResize = () => setWidth(window.innerWidth);
@@ -363,6 +378,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     pendingMessagesRef.current = syncContext
       ? readStoredValue(`${storageBase}:pending-messages`, [])
       : [];
+    notificationIdsRef.current = null;
   }, [storageBase, syncContext]);
 
   useEffect(() => { if (auth.mode === 'local') writeStoredValue(`${storageBase}:messages`, messages); }, [auth.mode, messages, storageBase]);
@@ -386,6 +402,14 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   useEffect(() => { if (auth.mode === 'local') writeStoredValue(`${storageBase}:quiet-hours`, quietHours); }, [auth.mode, quietHours, storageBase]);
 
   const applySharedData = useCallback((snapshot: Awaited<ReturnType<typeof loadSharedData>>) => {
+    const knownNotificationIds = notificationIdsRef.current;
+    if (knownNotificationIds) {
+      const incoming = snapshot.notifications.find((item) => item.unread && !knownNotificationIds.has(item.id));
+      if (incoming && !snapshot.privacy.meTime && !isQuietTime(snapshot.preferences.quietHours)) {
+        void showDeviceNotification('KisahKita', `${incoming.icon} ${incoming.text}`, incoming.route);
+      }
+    }
+    notificationIdsRef.current = new Set(snapshot.notifications.map((item) => item.id));
     setPhotos(snapshot.photos);
     setAlbums(snapshot.albums);
     setFavorites(snapshot.favorites);
@@ -738,17 +762,32 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     if (syncContext) runRemote(addSharedFavorite(syncContext, value));
   }, [runRemote, syncContext]);
 
-  const addMemory = useCallback((input: { title: string; occurredOn: string; story: string; mood: string; location: string }) => {
+  const addMemory = useCallback((input: { title: string; occurredOn: string; story: string; mood: string; location: string; photoDataUrl?: string }) => {
+    const memoryId = `local-memory-${crypto.randomUUID()}`;
+    const photoId = input.photoDataUrl ? `local-memory-photo-${crypto.randomUUID()}` : '';
     const entry: Memory = {
-      id: `local-memory-${crypto.randomUUID()}`,
+      id: memoryId,
       date: new Date(`${input.occurredOn}T12:00:00`).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase(),
       title: input.title.trim(),
       meta: input.location.trim() || 'Written by you',
       mood: input.mood.trim() || '💗',
       story: input.story.trim() || 'No additional story yet.',
-      photoIds: [],
+      photoIds: photoId ? [photoId] : [],
     };
     setMemories((current) => [entry, ...current]);
+    if (photoId && input.photoDataUrl) {
+      setPhotos((current) => [{
+        id: photoId,
+        imageUrl: input.photoDataUrl,
+        slotLabel: 'MEMORY PHOTO',
+        caption: input.title.trim(),
+        meta: input.location.trim() || 'Added to a memory',
+        takenAt: new Date().toISOString(),
+        location: input.location.trim() || undefined,
+        by: 'me',
+        tags: ['Photos', 'Memories'],
+      }, ...current]);
+    }
     if (syncContext) runRemote(addSharedMemory(syncContext, input));
   }, [runRemote, syncContext]);
 

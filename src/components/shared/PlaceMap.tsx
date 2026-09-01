@@ -24,6 +24,13 @@ export function PlaceMap({
   const mapRef = useRef<LeafletMap | null>(null);
   const markersRef = useRef<LayerGroup | null>(null);
   const onPickRef = useRef(onPick);
+  const viewportKey = [
+    ...places
+      .filter((place) => place.latitude != null && place.longitude != null)
+      .map((place) => `${place.latitude},${place.longitude}`)
+      .sort(),
+    ...(draftPoint ? [`${draftPoint.latitude},${draftPoint.longitude}`] : []),
+  ].join(';');
 
   useEffect(() => { onPickRef.current = onPick; }, [onPick]);
 
@@ -31,6 +38,9 @@ export function PlaceMap({
     if (!elementRef.current) return;
     const map = L.map(elementRef.current, { center: [-6.2, 106.8167], zoom: 11, zoomControl: false });
     mapRef.current = map;
+    const reportZoom = () => { if (elementRef.current) elementRef.current.dataset.zoom = String(map.getZoom()); };
+    reportZoom();
+    map.on('zoomend', reportZoom);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; OpenStreetMap contributors',
@@ -39,11 +49,17 @@ export function PlaceMap({
     markersRef.current = L.layerGroup().addTo(map);
     const click = (event: L.LeafletMouseEvent) => onPickRef.current?.({ latitude: event.latlng.lat, longitude: event.latlng.lng });
     map.on('click', click);
-    const observer = new ResizeObserver(() => map.invalidateSize());
+    let resizeFrame = 0;
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(resizeFrame);
+      resizeFrame = requestAnimationFrame(() => map.invalidateSize({ pan: false }));
+    });
     observer.observe(elementRef.current);
     return () => {
+      cancelAnimationFrame(resizeFrame);
       observer.disconnect();
       map.off('click', click);
+      map.off('zoomend', reportZoom);
       map.remove();
       mapRef.current = null;
       markersRef.current = null;
@@ -55,11 +71,9 @@ export function PlaceMap({
     const layer = markersRef.current;
     if (!map || !layer) return;
     layer.clearLayers();
-    const points: L.LatLngExpression[] = [];
     for (const place of places) {
       if (place.latitude == null || place.longitude == null) continue;
       const point: L.LatLngExpression = [place.latitude, place.longitude];
-      points.push(point);
       const icon = L.divIcon({
         className: '',
         html: `<span class="kk-place-marker${selectedId === place.id ? ' is-selected' : ''}"><span>${place.icon}</span></span>`,
@@ -73,14 +87,19 @@ export function PlaceMap({
     }
     if (draftPoint) {
       const point: L.LatLngExpression = [draftPoint.latitude, draftPoint.longitude];
-      points.push(point);
       L.circleMarker(point, { radius: 10, color: '#c95270', fillColor: '#ffb7c3', fillOpacity: 0.9, weight: 3 })
         .addTo(layer)
         .bindTooltip('Selected location', { permanent: true, direction: 'top' });
     }
-    if (points.length === 1) map.flyTo(points[0], 15, { duration: 0.6 });
-    if (points.length > 1) map.fitBounds(L.latLngBounds(points), { padding: [42, 42], maxZoom: 15, animate: true });
   }, [draftPoint, places, selectedId, onSelect]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !viewportKey) return;
+    const points = viewportKey.split(';').map((value) => value.split(',').map(Number) as [number, number]);
+    if (points.length === 1) map.flyTo(points[0], 15, { duration: 0.6 });
+    else map.fitBounds(L.latLngBounds(points), { padding: [42, 42], maxZoom: 15, animate: true });
+  }, [viewportKey]);
 
   return <div ref={elementRef} className={`kk-place-map${picking ? ' is-picking' : ''}`} aria-label={picking ? 'Location picker map, tap to choose' : 'Shared places map'} />;
 }

@@ -28,7 +28,9 @@ export async function enableDeviceNotifications(): Promise<DeviceNotificationPer
     const permission = await Notification.requestPermission()
     if (permission === 'granted') {
       try {
-        new Notification('KisahKita is ready 💗', { body: 'Device notifications are enabled.' })
+        const registration = 'serviceWorker' in navigator ? await navigator.serviceWorker.ready : null
+        if (registration) await registration.showNotification('KisahKita is ready 💗', { body: 'Device notifications are enabled.', icon: '/icons/icon-192.png' })
+        else new Notification('KisahKita is ready 💗', { body: 'Device notifications are enabled.' })
       } catch {
         // Some mobile browsers require an installed PWA.
       }
@@ -59,8 +61,59 @@ export async function enableDeviceNotifications(): Promise<DeviceNotificationPer
   return permission
 }
 
+export async function showDeviceNotification(title: string, body: string, route = '/') {
+  if (document.visibilityState === 'visible') return
+
+  if (!isNativeApp()) {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return
+    try {
+      const registration = 'serviceWorker' in navigator ? await navigator.serviceWorker.ready : null
+      if (registration) {
+        await registration.showNotification(title, { body, icon: '/icons/icon-192.png', tag: route, data: { route } })
+        return
+      }
+      const notification = new Notification(title, { body, icon: '/icons/icon-192.png', tag: route })
+      notification.onclick = () => {
+        window.focus()
+        window.location.assign(route)
+        notification.close()
+      }
+    } catch {
+      // Installed mobile web apps may require Web Push for background delivery.
+    }
+    return
+  }
+
+  if (mapPermission((await LocalNotifications.checkPermissions()).display) !== 'granted') return
+  if (Capacitor.getPlatform() === 'android') {
+    await LocalNotifications.createChannel({ id: 'kisahkita', name: 'KisahKita', description: 'Shared space activity', importance: 4 })
+  }
+  await LocalNotifications.schedule({
+    notifications: [{
+      id: Math.floor(Date.now() / 1_000) % 2_147_483_647,
+      title,
+      body,
+      channelId: 'kisahkita',
+      extra: { route },
+      schedule: { at: new Date(Date.now() + 250) },
+    }],
+  })
+}
+
 export async function initializeNativeRuntime() {
+  if ('serviceWorker' in navigator && import.meta.env.PROD) {
+    try {
+      await navigator.serviceWorker.register('/sw.js')
+    } catch (error) {
+      console.warn('Web notification service could not start.', error)
+    }
+  }
   if (!isNativeApp()) return
+
+  await LocalNotifications.addListener('localNotificationActionPerformed', ({ notification }) => {
+    const route = typeof notification.extra?.route === 'string' ? notification.extra.route : '/'
+    window.location.assign(route)
+  })
 
   let lastUrl = ''
   const openUrl = async (url: string) => {

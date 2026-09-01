@@ -42,13 +42,13 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>KisahKita memakai kamera untuk foto profil, PAP, galeri, makanan, dan tempat pasangan.</string>
+	<string>KisahKita uses the camera for profile pictures, shared pictures, gallery memories, food entries, and places.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>KisahKita memakai lokasimu saat aplikasi dibuka agar dapat dibagikan secara privat kepada pasangan.</string>
+	<string>KisahKita uses your location while the app is open so you can privately share places and distance with your partner.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>KisahKita memerlukan akses ke foto yang kamu pilih untuk ruang pasangan.</string>
+	<string>KisahKita accesses only the pictures you choose for your private couple space.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>KisahKita dapat menyimpan foto yang kamu pilih ke perangkat.</string>
+	<string>KisahKita can save pictures you choose to your device.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

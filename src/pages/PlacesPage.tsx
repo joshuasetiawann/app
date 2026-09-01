@@ -7,6 +7,7 @@ import { ChipRow, EmptyState, Stars } from '../components/shared/Atoms';
 import { ImageSourcePicker } from '../components/shared/ImageSourcePicker';
 import { PlaceMap, type MapPoint } from '../components/shared/PlaceMap';
 import { PLACE_CATS } from '../data/mockData';
+import { currentDeviceLocation } from '../lib/geolocation';
 
 const fieldStyle = pcss("width:100%;min-height:44px;margin-top:6px;padding:10px 12px;border:1px solid var(--ln,rgba(74,74,74,.12));border-radius:13px;outline:none;color:var(--ink,#4A4A4A);background:var(--sf,#fff);font:600 12px 'Nunito',sans-serif");
 const actionStyle = pcss("min-height:40px;padding:0 13px;border:1px solid var(--ln,rgba(74,74,74,.1));border-radius:12px;background:var(--sf,#fff);color:var(--ink2,#6B5B60);font:800 10.5px 'Nunito',sans-serif;cursor:pointer");
@@ -53,26 +54,18 @@ export default function PlacesPage() {
     }
   };
 
-  const useCurrentLocation = () => {
+  const selectCurrentLocation = async () => {
     setFormError('');
-    if (!navigator.geolocation) {
-      setFormError('This device does not provide location access.');
-      return;
-    }
     setGeoBusy(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setDraftPoint({ latitude: position.coords.latitude, longitude: position.coords.longitude });
-        setPickMode(false);
-        setGeoBusy(false);
-        toast('Current device location selected for this pin');
-      },
-      (error) => {
-        setGeoBusy(false);
-        setFormError(error.code === error.PERMISSION_DENIED ? 'Location permission is blocked. Enable it in site settings and try again.' : 'The device location could not be read.');
-      },
-      { enableHighAccuracy: true, maximumAge: 30_000, timeout: 12_000 },
-    );
+    try {
+      setDraftPoint(await currentDeviceLocation());
+      setPickMode(false);
+      toast('Current device location selected for this pin');
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : 'The device location could not be read.');
+    } finally {
+      setGeoBusy(false);
+    }
   };
 
   const startPicking = () => {
@@ -141,7 +134,7 @@ export default function PlacesPage() {
           </div>
           <div style={{ marginTop: 13 }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              <button type="button" disabled={geoBusy} onClick={useCurrentLocation} style={actionStyle}>{geoBusy ? 'Finding GPS…' : '⌖ My current location'}</button>
+              <button type="button" disabled={geoBusy} onClick={() => void selectCurrentLocation()} style={actionStyle}>{geoBusy ? 'Finding GPS…' : '⌖ My current location'}</button>
               <button type="button" aria-pressed={pickMode} onClick={startPicking} style={actionStyle}>🗺️ Pick on map</button>
             </div>
             <div aria-live="polite" style={pcss("margin-top:8;padding:9px 11px;border-radius:11px;background:var(--sf,#fff);font:700 9.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>{draftPoint ? `Pin: ${draftPoint.latitude.toFixed(5)}, ${draftPoint.longitude.toFixed(5)}` : 'Location optional · no pin yet'}</div>

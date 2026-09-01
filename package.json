@@ -30,6 +30,7 @@
     "qa:visual": "node scripts/visual-qa.mjs",
     "qa:drive": "node scripts/google-drive-qa.mjs",
     "qa:production": "node scripts/supabase-production-qa.mjs",
+    "qa:mobile-features": "node scripts/mobile-features-qa.mjs",
     "reset:cloud": "node scripts/reset-supabase.mjs"
   },
   "dependencies": {

@@ -692,6 +692,7 @@ interface SharedPhotoInput {
   dataUrl: string;
   album?: string;
   location?: string;
+  memoryId?: string;
 }
 
 async function createSharedPhotoAsset(context: SyncContext, photo: SharedPhotoInput) {
@@ -705,6 +706,7 @@ async function createSharedPhotoAsset(context: SyncContext, photo: SharedPhotoIn
     id: assetId,
     couple_id: context.coupleId,
     uploaded_by: context.userId,
+    memory_id: photo.memoryId ?? null,
     album: photo.album?.trim() || null,
     kind: 'photo',
     storage_path: path,
@@ -833,9 +835,10 @@ export async function addSharedFavorite(context: SyncContext, body: string) {
 
 export async function addSharedMemory(
   context: SyncContext,
-  input: { title: string; occurredOn: string; story: string; mood: string; location: string },
+  input: { title: string; occurredOn: string; story: string; mood: string; location: string; photoDataUrl?: string },
 ) {
-  const { error } = await client().from('memories').insert({
+  const db = client();
+  const { data, error } = await db.from('memories').insert({
     couple_id: context.coupleId,
     author_id: context.userId,
     title: input.title.trim(),
@@ -843,8 +846,21 @@ export async function addSharedMemory(
     story: input.story.trim() || null,
     mood_emoji: input.mood.trim() || '💗',
     location: input.location.trim() || null,
-  });
+  }).select('id').single<{ id: string }>();
   assertRemote(error);
+  if (!data) throw new Error('The memory could not be saved.');
+  if (!input.photoDataUrl) return;
+  try {
+    await createSharedPhotoAsset(context, {
+      caption: input.title,
+      dataUrl: input.photoDataUrl,
+      location: input.location,
+      memoryId: data.id,
+    });
+  } catch (uploadError) {
+    const detail = uploadError instanceof Error ? uploadError.message : 'Unknown upload error';
+    throw new Error(`The memory was saved, but its picture could not be uploaded: ${detail}`);
+  }
 }
 
 export async function addSharedStoryChapter(
