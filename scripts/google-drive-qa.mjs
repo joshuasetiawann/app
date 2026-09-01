@@ -80,12 +80,12 @@ try {
   await page.goto(`${base}/auth`);
   await page.evaluate(() => localStorage.clear());
   await page.reload();
-  await page.getByRole('button', { name: /Lihat ruang demo/i }).click();
+  await page.getByRole('button', { name: /^Preview demo space/ }).click();
   await page.waitForURL((url) => url.pathname === '/');
   await page.goto(`${base}/files`);
     await page.getByRole('button', { name: 'Connect Google Drive' }).click();
-  await page.getByText('TERHUBUNG', { exact: true }).waitFor();
-  await page.getByText('Folder masih kosong.', { exact: false }).waitFor();
+  await page.getByText('CONNECTED', { exact: true }).waitFor();
+  await page.getByText('This folder is empty.', { exact: false }).waitFor();
 
   const storedFolderId = await page.evaluate(() => {
     const database = JSON.parse(localStorage.getItem('kk-auth-db-v1') || '{}');
@@ -93,7 +93,7 @@ try {
   });
   if (storedFolderId !== 'folder-qa-1234567890') throw new Error('ID folder Drive tidak tersimpan pada ruang pasangan.');
 
-  await page.getByLabel('Pilih berkas untuk Google Drive').setInputFiles({
+  await page.getByLabel('Choose a file for Google Drive').setInputFiles({
     name: 'tiket-qa.pdf',
     mimeType: 'application/pdf',
     buffer: Buffer.from('KisahKita Drive QA'),
@@ -102,8 +102,8 @@ try {
   await page.screenshot({ path: path.join(output, 'drive-mocked-connected.png') });
 
   await page.reload();
-  await page.getByText('BELUM TERHUBUNG', { exact: true }).waitFor();
-  await page.getByText('Folder pasangan sudah terdaftar.', { exact: false }).waitFor();
+  await page.getByText('NOT CONNECTED', { exact: true }).waitFor();
+  await page.getByText('Your couple folder is registered.', { exact: false }).waitFor();
   if (consoleErrors.length) throw new Error(`Console errors: ${consoleErrors.join(' | ')}`);
 
   console.log('✓ Google Drive QA passed — connect, folder sharing metadata, upload, listing, and reload persistence are healthy.');

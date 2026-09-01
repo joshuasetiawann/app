@@ -178,7 +178,7 @@ export default function FilesPage() {
           <div aria-hidden="true" style={pcss('width:48px;height:48px;border-radius:17px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:23px;box-shadow:0 7px 18px rgba(80,110,90,.1)')}>△</div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-              <div style={pcss("font:700 17px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Google Drive bersama</div>
+              <div style={pcss("font:700 17px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Shared Google Drive</div>
               <span style={pcss(`padding:5px 9px;border-radius:100px;background:${connected ? '#D7EFE2' : 'rgba(255,255,255,.72)'};font:800 9px 'Nunito',sans-serif;color:${connected ? '#376858' : 'var(--mut,#A99A9E)'}`)}>
                 {connected ? 'CONNECTED' : googleDriveConfigured ? 'NOT CONNECTED' : 'SETUP REQUIRED'}
               </span>
@@ -212,7 +212,7 @@ export default function FilesPage() {
             <button type="button" disabled={Boolean(busy)} onClick={() => inputRef.current?.click()} style={pcss("padding:10px 15px;border:0;border-radius:100px;background:#5C7C66;color:#fff;font:800 11px 'Nunito',sans-serif;cursor:pointer")}>{busy === 'upload' ? 'Mengunggah…' : '⬆ Upload file'}</button>
             <button type="button" disabled={Boolean(busy)} onClick={() => void refresh()} style={pcss("padding:10px 15px;border:0;border-radius:100px;background:#fff;color:var(--ink2,#6B5B60);font:800 11px 'Nunito',sans-serif;cursor:pointer")}>{busy === 'refresh' ? 'Memuat…' : '↻ Refresh'}</button>
             {folderId && <a href={googleDriveFolderUrl(folderId)} target="_blank" rel="noreferrer" style={pcss("padding:10px 15px;border-radius:100px;background:#fff;color:var(--ink2,#6B5B60);font:800 11px 'Nunito',sans-serif;text-decoration:none")}>Open folder ↗</a>}
-            {folderId && partnerEmail && <button type="button" disabled={Boolean(busy)} onClick={() => void share()} style={pcss("padding:10px 15px;border:0;border-radius:100px;background:#fff;color:var(--ink2,#6B5B60);font:800 11px 'Nunito',sans-serif;cursor:pointer")}>{busy === 'share' ? 'Membagikan…' : 'Share with partner'}</button>}
+            {folderId && partnerEmail && <button type="button" disabled={Boolean(busy)} onClick={() => void share()} style={pcss("padding:10px 15px;border:0;border-radius:100px;background:#fff;color:var(--ink2,#6B5B60);font:800 11px 'Nunito',sans-serif;cursor:pointer")}>{busy === 'share' ? 'Sharing…' : 'Share with partner'}</button>}
             <button type="button" disabled={Boolean(busy)} onClick={disconnect} style={pcss("padding:10px 13px;border:0;background:transparent;color:var(--mut,#A99A9E);font:800 10.5px 'Nunito',sans-serif;cursor:pointer")}>Putuskan sesi</button>
           </div>
         )}
@@ -225,7 +225,7 @@ export default function FilesPage() {
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '13px 0', borderBottom: '1px solid var(--ln,rgba(74,74,74,.07))' }}>
           <div>
             <div style={pcss("font:700 13px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Your shared files</div>
-            <div style={pcss("font:600 9.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:2px")}>{connected ? `${files.length} item · maksimal upload langsung 5 MB` : 'Connect Drive to view this folder'}</div>
+            <div style={pcss("font:600 9.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:2px")}>{connected ? `${files.length} item${files.length === 1 ? '' : 's'} · direct upload limit 5 MB` : 'Connect Drive to view this folder'}</div>
           </div>
           {folderId && <span style={pcss("font:700 9px 'Nunito',sans-serif;color:var(--mut,#A99A9E);align-self:center")}>Folder linked to your couple space</span>}
         </div>
