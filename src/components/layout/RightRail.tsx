@@ -6,7 +6,7 @@ import { useAppNow, weekdayInZone } from '../../lib/appClock';
 
 export function RightRail() {
   const navigate = useNavigate();
-  const { events, setDraft } = useAppState();
+  const { events, setDraft, partnerFoodStatus, partnerMood, partnerActivity } = useAppState();
   const { partner, couple } = useAuthState();
   const today = weekdayInZone(useAppNow(3_600_000), Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC');
   const partnerName = partner?.nickname || partner?.name || 'Partner';
@@ -14,16 +14,28 @@ export function RightRail() {
   const connectionLabel = partner
     ? ['Connected', partnerPlace].filter(Boolean).join(' · ')
     : couple
-      ? 'Waiting for partner bergabung'
+      ? 'Waiting for your partner to join'
       : 'Not connected';
   const upcoming = events.slice(0, 3);
+  const foodLabel = partnerFoodStatus === 'ate'
+    ? 'Already ate'
+    : partnerFoodStatus === 'now'
+      ? 'Eating now'
+      : partnerFoodStatus === 'not'
+        ? 'Not yet'
+        : 'No update yet';
+  const cleanStatus = (value: string, fallback: string) => {
+    const normalized = value.trim().toLocaleLowerCase();
+    if (!normalized || normalized === 'not set' || normalized === 'no update yet' || normalized === 'tanya di chat') return fallback;
+    return value;
+  };
 
   const greetPartner = () => {
     if (!partner) {
       navigate('/pair');
       return;
     }
-    setDraft(`Hai ${partnerName.replaceAll('"', '')} 👋`);
+    setDraft(`Hi ${partnerName.replaceAll('"', '')} 👋`);
     navigate('/chat');
   };
 
@@ -43,9 +55,9 @@ export function RightRail() {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginTop: 13 }}>
           {[
-            ['🍜 Food', 'No update yet'],
-            ['🥰 Mood', 'Tanya di Chat'],
-            ['📚 Aktivitas', 'Tanya di Chat'],
+            ['🍜 Food', foodLabel],
+            ['🥰 Mood', cleanStatus(partnerMood, 'Ask in Chat')],
+            ['📚 Activity', cleanStatus(partnerActivity, 'Ask in Chat')],
             ['📍 Location', partner ? 'View latest location' : 'Not available'],
           ].map(([label, value]) => (
             <div key={label} style={pcss("display:flex;justify-content:space-between;gap:12px;font:600 11.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>
@@ -61,15 +73,7 @@ export function RightRail() {
             style={pcss("flex:1;text-align:center;padding:9px 0;border:0;border-radius:100px;background:var(--pk,#FFB7B2);color:#5C3A42;font:700 11.5px 'Nunito',sans-serif;cursor:pointer;appearance:none")}
             onClick={greetPartner}
           >
-            {partner ? `Sapa ${partnerName} 💬` : 'Connect partner'}
-          </button>
-          <button
-            type="button"
-            disabled
-            title="Push notifications will be available after the notification service is enabled"
-            style={pcss("flex:none;padding:9px 13px;border:0;border-radius:100px;background:var(--sf2,#FFF4F1);font:700 11.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E);cursor:not-allowed;opacity:.68;appearance:none")}
-          >
-            Push nanti
+            {partner ? `Message ${partnerName} 💬` : 'Connect partner'}
           </button>
         </div>
       </div>

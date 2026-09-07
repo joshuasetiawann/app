@@ -1,13 +1,12 @@
 import { pcss } from '../lib/pcss';
 import { ScrollColumn, useTwoColTemplate } from '../components/shared/ScrollColumn';
 import { useAppState } from '../state/AppState';
-import { MOOD_BARS, HEATMAP } from '../data/mockData';
 import { useAuthState } from '../state/AuthState';
 import { daysSince } from '../lib/appClock';
 
 export default function StatsPage() {
   const { profile, partner, couple } = useAuthState();
-  const { viewport, foodEntries, messages, events } = useAppState();
+  const { viewport, foodEntries, messages, events, photos, memories, mood, partnerMood, activity, partnerActivity } = useAppState();
   const twoCol = useTwoColTemplate();
   const statCols = viewport === 'mobile' ? '1fr 1fr' : 'repeat(4,1fr)';
   const meName = profile?.nickname || profile?.name || 'You';
@@ -19,7 +18,7 @@ export default function StatsPage() {
   }, {})).sort((a, b) => b[1] - a[1]);
   const categoryCounts: [string, number][] = sortedCategoryCounts.length <= 5
     ? sortedCategoryCounts
-    : [...sortedCategoryCounts.slice(0, 4), ['Lainnya', sortedCategoryCounts.slice(4).reduce((sum, [, count]) => sum + count, 0)]];
+    : [...sortedCategoryCounts.slice(0, 4), ['Other', sortedCategoryCounts.slice(4).reduce((sum, [, count]) => sum + count, 0)]];
   const foodTotal = foodEntries.length;
   const pieSegments = categoryCounts.map(([label, count], index) => {
     const earlierCount = categoryCounts.slice(0, index).reduce((sum, [, itemCount]) => sum + itemCount, 0);
@@ -32,32 +31,24 @@ export default function StatsPage() {
     : 'var(--sf2,#FFF4F1)';
   const actualStats = [
     { label: 'DAYS TOGETHER', value: couple?.startedAt ? String(Math.max(1, daysSince(couple.startedAt, new Date()))) : '—', note: couple?.startedAt ? `since ${new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(new Date(couple.startedAt))}` : 'date not set', gradient: 'linear-gradient(150deg,#FFE7E4,#FFF1E9)' },
-    { label: 'SAVED MESSAGES', value: String(messages.length), note: 'on this device', gradient: 'linear-gradient(150deg,#E8F4DA,#F6F3E4)' },
-    { label: 'SCHEDULE', value: String(events.length), note: 'your shared agenda', gradient: 'linear-gradient(150deg,#E4EAFF,#F1F0FF)' },
-    { label: 'MENU DICATAT', value: String(foodEntries.length), note: 'food journal', gradient: 'linear-gradient(150deg,#FFE0EC,#F3E1FF)' },
+    { label: 'MESSAGES', value: String(messages.length), note: 'in your shared conversation', gradient: 'linear-gradient(150deg,#E8F4DA,#F6F3E4)' },
+    { label: 'PICTURES', value: String(photos.length), note: `${memories.length} saved memories`, gradient: 'linear-gradient(150deg,#E4EAFF,#F1F0FF)' },
+    { label: 'SHARED PLANS', value: String(events.length), note: `${foodEntries.length} food journal entries`, gradient: 'linear-gradient(150deg,#FFE0EC,#F3E1FF)' },
   ];
 
   return (
     <ScrollColumn>
       <div style={{ display: 'grid', gridTemplateColumns: twoCol, gap: 12 }}>
         <div style={pcss('border-radius:24px;background:var(--sf,#fff);padding:17px;box-shadow:var(--shadow,0 8px 24px rgba(0,0,0,.04))')}>
-          <div style={pcss("font:700 14px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>This month's mood 🌊</div>
-          <div style={pcss("font:600 10.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:2px")}>Trend preview · mood history coming soon</div>
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 5, height: 120, marginTop: 16 }}>
-            {MOOD_BARS.map((m, i) => (
-              <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', gap: 3 }}>
-                <div style={{ height: m.her * 11, borderRadius: 6, background: '#B5EAD7' }} />
-                <div style={{ height: m.me * 11, borderRadius: 6, background: 'var(--pk,#FFB7B2)' }} />
+          <div style={pcss("font:700 14px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>How you both feel right now 🌊</div>
+          <div style={pcss("font:600 10.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:2px")}>Live from your shared Supabase space</div>
+          <div style={{ display: 'grid', gap: 10, marginTop: 15 }}>
+            {[[meName, mood], [partnerName, partnerMood]].map(([name, value], index) => (
+              <div key={name} style={pcss('display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;border-radius:16px;background:var(--sf2,#FFF4F1)')}>
+                <span style={pcss("font:700 11.5px 'Nunito',sans-serif;color:var(--ink2,#6B5B60)")}>{name}</span>
+                <span style={pcss(`font:700 12px 'Nunito',sans-serif;color:${index === 0 ? 'var(--pki,#E86F87)' : '#5C8B70'};text-align:right`)}>{value || 'Not set'}</span>
               </div>
             ))}
-          </div>
-          <div style={{ display: 'flex', gap: 14, marginTop: 12 }}>
-            <span style={pcss("display:flex;align-items:center;gap:6px;font:600 10px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>
-              <span style={{ width: 8, height: 8, borderRadius: 3, background: 'var(--pk,#FFB7B2)' }} />{meName}
-            </span>
-            <span style={pcss("display:flex;align-items:center;gap:6px;font:600 10px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>
-              <span style={{ width: 8, height: 8, borderRadius: 3, background: '#B5EAD7' }} />{partnerName}
-            </span>
           </div>
         </div>
 
@@ -98,24 +89,17 @@ export default function StatsPage() {
       </div>
 
       <div style={pcss('border-radius:24px;background:var(--sf,#fff);padding:17px;box-shadow:var(--shadow,0 8px 24px rgba(0,0,0,.04))')}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={pcss("font:700 14px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Daily activity</span>
-          <span style={pcss("font:600 10.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>Visual preview</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+          <span style={pcss("font:700 14px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Current activity</span>
+          <span style={pcss("font:600 10.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>Synced automatically</span>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(24,1fr)', gap: 4, marginTop: 15 }}>
-          {HEATMAP.map((lv, i) => (
-            <div key={i} style={{ aspectRatio: 1, borderRadius: 4, background: ['#F4E7E4', '#FFD3CE', '#FFB7B2', '#E8899A'][lv] }} />
+        <div style={{ display: 'grid', gridTemplateColumns: twoCol, gap: 10, marginTop: 14 }}>
+          {[[meName, activity], [partnerName, partnerActivity]].map(([name, value]) => (
+            <div key={name} style={pcss('padding:14px 15px;border-radius:17px;background:var(--sf2,#FFF4F1)')}>
+              <div style={pcss("font:700 10px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>{name}</div>
+              <div style={pcss("font:700 13px 'Nunito',sans-serif;color:var(--ink,#4A4A4A);margin-top:4px")}>{value || 'Not set'}</div>
+            </div>
           ))}
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
-          <span style={pcss("font:600 10px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>Automatic daily history · coming soon</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-            <span style={pcss("font:600 9px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>quiet</span>
-            {['#F4E7E4', '#FFD3CE', '#FFB7B2', '#E8899A'].map((c) => (
-              <span key={c} style={{ width: 10, height: 10, borderRadius: 3, background: c }} />
-            ))}
-            <span style={pcss("font:600 9px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>busy</span>
-          </div>
         </div>
       </div>
 

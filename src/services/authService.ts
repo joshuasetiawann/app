@@ -416,7 +416,7 @@ function friendlyError(message: string) {
   if (/invalid login credentials/i.test(message)) return 'The email or password is incorrect.';
   if (/email not confirmed/i.test(message)) return 'Your email has not been verified. Check your inbox.';
   if (/user already registered/i.test(message)) return 'This email is already registered. Try signing in.';
-  if (/password should be at least/i.test(message)) return 'Password masih terlalu pendek.';
+  if (/password should be at least/i.test(message)) return 'The password is still too short.';
   if (/invalid or (expired|unavailable) couple code|invalid couple code/i.test(message)) return 'The invitation code is invalid, expired, or already used.';
   if (/couple is already paired/i.test(message)) return 'This space already has two members.';
   if (/profile already belongs to a different couple/i.test(message)) return 'This account is already connected to another partner.';
@@ -519,7 +519,7 @@ export async function signIn(email: string, password: string) {
 }
 
 export async function signInWithGoogle() {
-  if (!supabase) throw new Error('Login Google membutuhkan koneksi Supabase.');
+  if (!supabase) throw new Error('Google sign-in requires a Supabase connection.');
 
   if (!Capacitor.isNativePlatform()) {
     const { error } = await supabase.auth.signInWithOAuth({

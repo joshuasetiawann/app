@@ -29,7 +29,7 @@ export const ME: UserProfile = {
   id: 'user-joshua',
   slot: 'me',
   name: 'Joshua',
-  nickname: '"Bebeb ngoding"',
+  nickname: '"Coding buddy"',
   avatarEmoji: '🧑🏻',
   avatarGradient: 'linear-gradient(140deg,#FFD9DC,#E3D7F7)',
   country: 'Indonesia',
@@ -37,12 +37,12 @@ export const ME: UserProfile = {
   city: 'Jakarta',
   timezone: 'WIB',
   utcOffset: 7,
-  birthday: '14 Maret',
+  birthday: 'March 14',
   favoriteFood: 'Nasi padang',
-  favoriteColor: 'Biru navy',
-  device: 'HP 14s · Android',
-  mood: 'Kangen 🥺',
-  activity: 'Ngoding 💻',
+  favoriteColor: 'Navy blue',
+  device: 'Android phone',
+  mood: 'Missing you 🥺',
+  activity: 'Coding 💻',
   online: true,
 };
 
@@ -50,7 +50,7 @@ export const PARTNER: UserProfile = {
   id: 'user-partner',
   slot: 'partner',
   name: 'Partner',
-  nickname: '"Ayang boba"',
+  nickname: '"Boba love"',
   avatarEmoji: '👩🏻',
   avatarGradient: 'linear-gradient(140deg,#D9E9FF,#FFD3EA)',
   country: 'Taiwan',
@@ -58,12 +58,12 @@ export const PARTNER: UserProfile = {
   city: 'Taipei',
   timezone: 'CST',
   utcOffset: 8,
-  birthday: '28 Mei',
+  birthday: 'May 28',
   favoriteFood: 'Beef noodle',
   favoriteColor: 'Peach',
   device: 'iOS · Web',
-  mood: 'Seneng 🥰',
-  activity: 'Di kelas 📚',
+  mood: 'Happy 🥰',
+  activity: 'In class 📚',
   online: true,
 };
 
@@ -215,8 +215,8 @@ export const TZ_HOURS: { label: string; both: boolean }[] = [
 export const PLACES: Place[] = [
   { id: 'pl1', icon: '🍜', title: 'Lin Dong Fang Beef Noodle', meta: 'Taipei · Restaurant · visited May 12', category: '🍜 Restaurants', rating: 5, note: 'we have to try this together again' },
   { id: 'pl2', icon: '🏫', title: 'NCCU Wenshan', meta: 'Taipei · Campus · every day', category: '🏫 Campus', rating: 4, note: 'where my partner studies every morning' },
-  { id: 'pl3', icon: '❤️', title: 'Kafe first date', meta: 'Jakarta · Dates · 14 Sep 2025', category: '❤️ Dates', rating: 5, note: 'bangku pojok, masih ada' },
-  { id: 'pl4', icon: '🏮', title: 'Shilin Night Market', meta: 'Taipei · Travel · 17 Mei', category: '✈️ Travel', rating: 4, note: 'VC sambil keliling, seru' },
+  { id: 'pl3', icon: '❤️', title: 'First-date café', meta: 'Jakarta · Dates · Sep 14, 2025', category: '❤️ Dates', rating: 5, note: 'Our corner table is still there' },
+  { id: 'pl4', icon: '🏮', title: 'Shilin Night Market', meta: 'Taipei · Travel · May 17', category: '✈️ Travel', rating: 4, note: 'A fun video call while walking around' },
   { id: 'pl5', icon: '🏠', title: 'Wenshan home', meta: 'Taipei · Home', category: '🏠 Home', rating: 3, note: 'small but cozy' },
 ];
 
@@ -229,7 +229,7 @@ export const TRIPS: Trip[] = [
       { day: '01', title: 'Land at CGK at 10:05', meta: 'Joshua picks up · nasi padang for lunch' },
       { day: '02', title: 'Old Town & Museum', meta: 'Rent bikes · take lots of pictures' },
       { day: '05', title: 'Leave for Bandung', meta: 'Depart at 06:00 · stay for 3 days' },
-      { day: '12', title: 'Balik ke Jakarta', meta: 'Beli oleh-oleh buat keluarga' },
+      { day: '12', title: 'Return to Jakarta', meta: 'Buy souvenirs for the family' },
     ],
   },
   { id: 'tr2', title: 'Taiwan trip 🇹🇼', meta: 'Jan 2026 · 9 days · 186 pictures', coverGradient: 'repeating-linear-gradient(135deg,#E4EAF5 0 10px,#EFF3F9 10px 20px)', upcoming: false },
@@ -238,19 +238,19 @@ export const TRIPS: Trip[] = [
 
 export const FILE_FOLDERS: FileFolder[] = [
   { id: 'fo1', icon: '📄', label: 'Personal Documents', countLabel: '12 files', color: '#FFF0D9' },
-  { id: 'fo2', icon: '✈️', label: 'Tiket & Itinerary', countLabel: '8 file', color: '#D9E9FF' },
-  { id: 'fo3', icon: '🎁', label: 'Ide Kado & Wishlist', countLabel: '5 file', color: '#FFE0EC' },
+  { id: 'fo2', icon: '✈️', label: 'Tickets & Itinerary', countLabel: '8 files', color: '#D9E9FF' },
+  { id: 'fo3', icon: '🎁', label: 'Gift Ideas & Wishlist', countLabel: '5 files', color: '#FFE0EC' },
   { id: 'fo4', icon: '💌', label: 'Love Notes', countLabel: '21 files', color: '#FFE1E6' },
   { id: 'fo5', icon: '🖼️', label: 'Pictures', countLabel: '1,245 files', color: '#F0E4FA' },
-  { id: 'fo6', icon: '🎥', label: 'Video', countLabel: '38 file', color: '#E2F0CB' },
-  { id: 'fo7', icon: '🗜️', label: 'Arsip ZIP', countLabel: '3 file', color: '#EDEDF5' },
+  { id: 'fo6', icon: '🎥', label: 'Video', countLabel: '38 files', color: '#E2F0CB' },
+  { id: 'fo7', icon: '🗜️', label: 'ZIP Archive', countLabel: '3 files', color: '#EDEDF5' },
 ];
 
 export const FILES: FileItem[] = [
-  { id: 'fi1', ext: 'PDF', name: 'Visa_Student_Taiwan.pdf', meta: '2,4 MB · 12 Mei · tersinkron', color: '#FFE1E6', status: 'synced' },
-  { id: 'fi2', ext: 'JPG', name: 'Tiket_CI761_Partner.jpg', meta: '1,1 MB · 10 Mei · tersinkron', color: '#D9E9FF', status: 'synced' },
+  { id: 'fi1', ext: 'PDF', name: 'Taiwan_Student_Visa.pdf', meta: '2.4 MB · May 12 · synced', color: '#FFE1E6', status: 'synced' },
+  { id: 'fi2', ext: 'JPG', name: 'CI761_Partner_Ticket.jpg', meta: '1.1 MB · May 10 · synced', color: '#D9E9FF', status: 'synced' },
   { id: 'fi3', ext: 'PDF', name: 'NCCU_Scholarship_Letter.pdf', meta: '860 KB · May 2 · synced', color: '#FFF0D9', status: 'synced' },
-  { id: 'fi4', ext: 'DOC', name: 'Wishlist_Kado_Ultah.docx', meta: '48 KB · 28 Apr · tersinkron', color: '#E2F0CB', status: 'synced' },
+  { id: 'fi4', ext: 'DOC', name: 'Birthday_Gift_Wishlist.docx', meta: '48 KB · Apr 28 · synced', color: '#E2F0CB', status: 'synced' },
   { id: 'fi5', ext: 'ZIP', name: 'Taiwan_Trip_Pictures.zip', meta: '1.8 GB · Jan 20 · in the cloud', color: '#EDEDF5', status: 'synced' },
 ];
 

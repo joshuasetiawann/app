@@ -209,11 +209,11 @@ export default function FilesPage() {
           </div>
         ) : (
           <div style={{ display: 'flex', gap: 8, marginTop: 16, flexWrap: 'wrap' }}>
-            <button type="button" disabled={Boolean(busy)} onClick={() => inputRef.current?.click()} style={pcss("padding:10px 15px;border:0;border-radius:100px;background:#5C7C66;color:#fff;font:800 11px 'Nunito',sans-serif;cursor:pointer")}>{busy === 'upload' ? 'Mengunggah…' : '⬆ Upload file'}</button>
-            <button type="button" disabled={Boolean(busy)} onClick={() => void refresh()} style={pcss("padding:10px 15px;border:0;border-radius:100px;background:#fff;color:var(--ink2,#6B5B60);font:800 11px 'Nunito',sans-serif;cursor:pointer")}>{busy === 'refresh' ? 'Memuat…' : '↻ Refresh'}</button>
+            <button type="button" disabled={Boolean(busy)} onClick={() => inputRef.current?.click()} style={pcss("padding:10px 15px;border:0;border-radius:100px;background:#5C7C66;color:#fff;font:800 11px 'Nunito',sans-serif;cursor:pointer")}>{busy === 'upload' ? 'Uploading…' : '⬆ Upload file'}</button>
+            <button type="button" disabled={Boolean(busy)} onClick={() => void refresh()} style={pcss("padding:10px 15px;border:0;border-radius:100px;background:#fff;color:var(--ink2,#6B5B60);font:800 11px 'Nunito',sans-serif;cursor:pointer")}>{busy === 'refresh' ? 'Loading…' : '↻ Refresh'}</button>
             {folderId && <a href={googleDriveFolderUrl(folderId)} target="_blank" rel="noreferrer" style={pcss("padding:10px 15px;border-radius:100px;background:#fff;color:var(--ink2,#6B5B60);font:800 11px 'Nunito',sans-serif;text-decoration:none")}>Open folder ↗</a>}
             {folderId && partnerEmail && <button type="button" disabled={Boolean(busy)} onClick={() => void share()} style={pcss("padding:10px 15px;border:0;border-radius:100px;background:#fff;color:var(--ink2,#6B5B60);font:800 11px 'Nunito',sans-serif;cursor:pointer")}>{busy === 'share' ? 'Sharing…' : 'Share with partner'}</button>}
-            <button type="button" disabled={Boolean(busy)} onClick={disconnect} style={pcss("padding:10px 13px;border:0;background:transparent;color:var(--mut,#A99A9E);font:800 10.5px 'Nunito',sans-serif;cursor:pointer")}>Putuskan sesi</button>
+            <button type="button" disabled={Boolean(busy)} onClick={disconnect} style={pcss("padding:10px 13px;border:0;background:transparent;color:var(--mut,#A99A9E);font:800 10.5px 'Nunito',sans-serif;cursor:pointer")}>Disconnect</button>
           </div>
         )}
 

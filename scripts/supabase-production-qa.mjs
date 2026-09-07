@@ -72,7 +72,7 @@ async function signIn(page, account) {
   if (mode !== 'supabase') throw new Error('Server QA tidak berjalan dalam mode Supabase.');
   await page.getByLabel('Email').fill(account.email);
   await page.getByLabel('Password', { exact: true }).fill(password);
-  await page.getByRole('button', { name: 'Masuk ke ruang kita' }).click();
+  await page.getByRole('button', { name: 'Enter our space' }).click();
   await page.waitForURL((target) => target.pathname === '/pair', { timeout: 15_000 });
 }
 
@@ -104,72 +104,72 @@ try {
   }
 
   await signIn(pageA, accounts[0]);
-  await pageA.getByLabel('Nama ruang').fill('Ruang QA Produksi');
-  await pageA.getByLabel('Mulai hubungan').fill('2026-01-01');
-  await pageA.getByRole('button', { name: 'Buat ruang & kode' }).click();
+  await pageA.getByLabel('Space name').fill('Production QA Space');
+  await pageA.getByLabel('Relationship started').fill('2026-01-01');
+  await pageA.getByRole('button', { name: 'Create space & code' }).click();
   const invite = pageA.locator('.kk-invite-code strong');
   await waitVisible(invite, 'Kode pasangan tidak dibuat.');
   const inviteCode = (await invite.textContent())?.trim() || '';
   if (!inviteCode) throw new Error('Kode pasangan kosong.');
 
   await signIn(pageB, accounts[1]);
-  await pageB.getByRole('tab', { name: 'Masukkan kode' }).click();
-  await pageB.getByLabel('Kode undangan').fill(inviteCode);
-  await pageB.getByRole('button', { name: 'Hubungkan akun' }).click();
+  await pageB.getByRole('tab', { name: 'Enter code' }).click();
+  await pageB.getByLabel('Invitation code').fill(inviteCode);
+  await pageB.getByRole('button', { name: 'Connect account' }).click();
   await pageB.waitForURL((target) => target.pathname === '/', { timeout: 15_000 });
-  if (await pageA.getByRole('button', { name: 'Cek sekarang' }).count()) {
-    await pageA.getByRole('button', { name: 'Cek sekarang' }).click();
+  if (await pageA.getByRole('button', { name: 'Check now' }).count()) {
+    await pageA.getByRole('button', { name: 'Check now' }).click();
   }
-  await waitVisible(pageA.getByRole('button', { name: /Masuk ke ruang kita/ }), 'Akun pertama belum mendeteksi pasangan.');
-  await pageA.getByRole('button', { name: /Masuk ke ruang kita/ }).click();
+  await waitVisible(pageA.getByRole('button', { name: /Enter our space/ }), 'The first account did not detect its partner.');
+  await pageA.getByRole('button', { name: /Enter our space/ }).click();
 
-  const chatText = `Pesan realtime produksi ${stamp}`;
+  const chatText = `Production realtime message ${stamp}`;
   await pageA.goto(`${base}/chat`, { waitUntil: 'domcontentloaded' });
   await pageB.goto(`${base}/chat`, { waitUntil: 'domcontentloaded' });
-  await pageA.getByLabel('Tulis pesan').fill(chatText);
-  await pageA.getByLabel('Kirim pesan').click();
+  await pageA.getByLabel('Write a message').fill(chatText);
+  await pageA.getByLabel('Send message').click();
   await reloadUntilVisible(pageB, pageB.getByText(chatText, { exact: true }), 'Pesan tidak tersinkron ke pasangan.');
 
-  const galleryCaption = `Foto produksi ${stamp}`;
+  const galleryCaption = `Production picture ${stamp}`;
   await pageA.goto(`${base}/gallery`, { waitUntil: 'domcontentloaded' });
   await pageB.goto(`${base}/gallery`, { waitUntil: 'domcontentloaded' });
-  await pageA.getByRole('button', { name: '+ Tambah foto' }).click();
-  await pageA.getByLabel('Caption foto galeri').fill(galleryCaption);
-  await pageA.getByLabel('Pilih banyak foto untuk galeri').setInputFiles({ name: 'gallery-qa.png', mimeType: 'image/png', buffer: png });
+  await pageA.getByRole('button', { name: '+ Add pictures' }).click();
+  await pageA.getByLabel('Gallery picture caption').fill(galleryCaption);
+  await pageA.getByLabel('Choose multiple pictures for the gallery').setInputFiles({ name: 'gallery-qa.png', mimeType: 'image/png', buffer: png });
   await waitVisible(pageA.getByRole('img', { name: galleryCaption }), 'Foto galeri tidak muncul di pengunggah.');
   await reloadUntilVisible(pageB, pageB.getByRole('img', { name: galleryCaption }), 'Foto galeri tidak tersinkron ke pasangan.');
   await pageA.getByRole('img', { name: galleryCaption }).click();
-  await pageA.getByRole('button', { name: '🗑️ Hapus' }).click();
-  await pageA.getByRole('button', { name: 'Yakin hapus' }).click();
+  await pageA.getByRole('button', { name: '🗑️ Delete' }).click();
+  await pageA.getByRole('button', { name: 'Confirm delete' }).click();
   await pageB.reload({ waitUntil: 'domcontentloaded' });
   if (await pageB.getByRole('img', { name: galleryCaption }).count()) throw new Error('Foto yang dihapus masih terlihat pada akun pasangan.');
 
-  const foodName = `Makanan produksi ${stamp}`;
+  const foodName = `Production meal ${stamp}`;
   await pageA.goto(`${base}/food`, { waitUntil: 'domcontentloaded' });
   await pageB.goto(`${base}/food`, { waitUntil: 'domcontentloaded' });
-  await pageA.getByRole('button', { name: '+ Catat makan' }).click();
-  await pageA.getByLabel('Pilih foto makanan dari galeri').setInputFiles({ name: 'food-qa.png', mimeType: 'image/png', buffer: png });
-  await pageA.getByLabel('Nama makanan').fill(foodName);
-  await pageA.getByRole('button', { name: 'Simpan 🍜' }).click();
+  await pageA.getByRole('button', { name: '+ Add a meal' }).click();
+  await pageA.getByLabel('Choose a meal picture').setInputFiles({ name: 'food-qa.png', mimeType: 'image/png', buffer: png });
+  await pageA.getByLabel('Meal name').fill(foodName);
+  await pageA.getByRole('button', { name: 'Save meal 🍜' }).click();
   await reloadUntilVisible(pageB, pageB.getByText(foodName, { exact: true }), 'Food Journal tidak tersinkron ke pasangan.');
   await pageA.getByRole('button', { name: new RegExp(foodName) }).click();
-  await pageA.getByRole('button', { name: 'Hapus', exact: true }).click();
+  await pageA.getByRole('button', { name: 'Delete', exact: true }).click();
   await pageB.reload({ waitUntil: 'domcontentloaded' });
   if (await pageB.getByText(foodName, { exact: true }).count()) throw new Error('Catatan Food yang dihapus masih terlihat pada akun pasangan.');
 
-  const placeName = `Tempat produksi ${stamp}`;
+  const placeName = `Production place ${stamp}`;
   await pageA.goto(`${base}/places`, { waitUntil: 'domcontentloaded' });
   await pageB.goto(`${base}/places`, { waitUntil: 'domcontentloaded' });
-  await pageA.getByRole('button', { name: '+ Tempat' }).click();
-  await pageA.getByLabel('Nama tempat').fill(placeName);
-  await pageA.getByLabel('Pilih foto tempat dari galeri').setInputFiles({ name: 'place-qa.png', mimeType: 'image/png', buffer: png });
-  await pageA.getByRole('button', { name: '⌖ Lokasi saya' }).click();
+  await pageA.getByRole('button', { name: '+ Add place' }).click();
+  await pageA.getByLabel('Place name').fill(placeName);
+  await pageA.getByLabel('Choose a place picture').setInputFiles({ name: 'place-qa.png', mimeType: 'image/png', buffer: png });
+  await pageA.getByRole('button', { name: '⌖ My current location' }).click();
   await waitVisible(pageA.getByText(/^Pin:/), 'Geolocation perangkat tidak mengisi pin.');
-  await pageA.getByRole('button', { name: 'Simpan pin 📍' }).click();
+  await pageA.getByRole('button', { name: 'Save pin 📍' }).click();
   await reloadUntilVisible(pageB, pageB.getByText(placeName, { exact: true }).last(), 'Tempat tidak tersinkron ke pasangan.');
   await pageA.getByRole('button', { name: new RegExp(placeName) }).click();
-  await pageA.getByRole('button', { name: '🗑️ Hapus' }).click();
-  await pageA.getByRole('button', { name: 'Yakin hapus' }).click();
+  await pageA.getByRole('button', { name: '🗑️ Delete' }).click();
+  await pageA.getByRole('button', { name: 'Confirm delete' }).click();
   await pageB.reload({ waitUntil: 'domcontentloaded' });
   if (await pageB.getByText(placeName, { exact: true }).count()) throw new Error('Tempat yang dihapus masih terlihat pada akun pasangan.');
 

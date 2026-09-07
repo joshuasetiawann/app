@@ -88,7 +88,7 @@ export default function StatesPage() {
         <div style={pcss('border-radius:22px;background:var(--sf,#fff);padding:17px;box-shadow:var(--shadow,0 8px 24px rgba(0,0,0,.04));text-align:center')}>
           <div style={{ font: '700 9.5px "Nunito",sans-serif', letterSpacing: '.12em', color: '#C2506B', textAlign: 'left' }}>ERROR</div>
           <div style={{ fontSize: 38, marginTop: 14 }}>💔</div>
-          <div style={pcss("font:700 13px 'Nunito',sans-serif;color:var(--ink,#4A4A4A);margin-top:10px")}>Koneksi ngambek!</div>
+          <div style={pcss("font:700 13px 'Nunito',sans-serif;color:var(--ink,#4A4A4A);margin-top:10px")}>Connection interrupted</div>
           <div style={pcss("font:600 11px/1.5 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:4px")}>Enable offline mode above to test recovery.</div>
           <button
             type="button"
@@ -97,7 +97,7 @@ export default function StatesPage() {
             style={pcss(`margin-top:12px;padding:10px 16px;border:0;border-radius:100px;background:${offline ? '#FFE1E1' : 'var(--sf2,#FFF4F1)'};color:${offline ? '#C2506B' : 'var(--mut,#A99A9E)'};font:700 11.5px 'Nunito',sans-serif;cursor:${offline ? 'pointer' : 'not-allowed'}`)}
             onClick={toggleOffline}
           >
-            {offline ? 'Pulihkan koneksi' : 'Connected'}
+            {offline ? 'Restore connection' : 'Connected'}
           </button>
         </div>
 

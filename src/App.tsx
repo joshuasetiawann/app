@@ -44,7 +44,7 @@ function AppBoot({ error }: { error?: string }) {
     );
   }
   return (
-    <main className="kk-app-boot" aria-label="Memuat KisahKita" aria-busy="true">
+    <main className="kk-app-boot" aria-label="Loading KisahKita" aria-busy="true">
       <section className="kk-boot-card">
         <div className="kk-boot-head"><div className="kk-brand-mark"><span>♥</span><i /></div><div><strong>KisahKita</strong><small>Preparing your shared space…</small></div></div>
         <div className="kk-skeleton kk-skeleton-title" />
@@ -58,7 +58,7 @@ function AppBoot({ error }: { error?: string }) {
 
 function PageSkeleton() {
   return (
-    <div style={{ padding: '24px', maxWidth: 980, margin: '0 auto' }} aria-label="Memuat halaman" aria-busy="true">
+    <div style={{ padding: '24px', maxWidth: 980, margin: '0 auto' }} aria-label="Loading page" aria-busy="true">
       <div className="kk-skeleton kk-skeleton-title" />
       <div className="kk-skeleton kk-skeleton-line" />
       <div className="kk-skeleton kk-skeleton-line short" />

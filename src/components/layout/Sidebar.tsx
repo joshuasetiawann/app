@@ -34,11 +34,18 @@ function NavRow({ item, open }: { item: NavItem; open: boolean }) {
 }
 
 export function Sidebar() {
-  const { viewport } = useAppState();
-  const { profile, partner } = useAuthState();
+  const { viewport, syncStatus } = useAppState();
+  const { profile, partner, mode } = useAuthState();
   const isTablet = viewport === 'tablet';
   const open = !isTablet;
   const coupleNames = `${profile?.name || 'You'} & ${partner?.name || 'Partner'}`;
+  const syncCopy = mode === 'supabase'
+    ? syncStatus === 'loading'
+      ? { icon: '↻', title: 'Syncing with Supabase…', detail: 'Updating your private shared space' }
+      : syncStatus === 'error'
+        ? { icon: '!', title: 'Sync needs attention', detail: 'Open Settings to retry the connection' }
+        : { icon: '✓', title: 'Supabase synced', detail: 'Your shared changes are up to date' }
+    : { icon: '◌', title: 'Preview on this device', detail: 'Connect Supabase for shared sync' };
 
   return (
     <aside
@@ -65,7 +72,7 @@ export function Sidebar() {
         <NavRow key={item.path} item={item} open={open} />
       ))}
 
-      {open && <div style={pcss('font:700 9.5px "Nunito",sans-serif;letter-spacing:.14em;color:var(--mut,#A99A9E);padding:16px 10px 8px')}>✨ LAINNYA</div>}
+      {open && <div style={pcss('font:700 9.5px "Nunito",sans-serif;letter-spacing:.14em;color:var(--mut,#A99A9E);padding:16px 10px 8px')}>✨ MORE</div>}
       {NAV_MORE.map((item) => (
         <NavRow key={item.path} item={item} open={open} />
       ))}
@@ -77,16 +84,13 @@ export function Sidebar() {
 
       <div style={{ marginTop: 'auto', paddingTop: 14 }}>
         {open && (
-          <div style={pcss('border-radius:18px;background:var(--sf2,#FFF4F1);padding:13px 14px')}>
+          <NavLink to="/settings" style={pcss('display:block;border-radius:18px;background:var(--sf2,#FFF4F1);padding:13px 14px;text-decoration:none')}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 14 }}>☁️</span>
-              <span style={pcss('font:700 11px "Nunito",sans-serif;color:var(--ink,#4A4A4A)')}>42,3 / 100 GB</span>
+              <span aria-hidden="true" style={pcss(`width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:${syncStatus === 'error' ? '#FFE1E6' : '#DDF2E7'};color:${syncStatus === 'error' ? '#B84F67' : '#376858'};font:900 10px 'Nunito',sans-serif`)}>{syncCopy.icon}</span>
+              <span style={pcss('font:700 11px "Nunito",sans-serif;color:var(--ink,#4A4A4A)')}>{syncCopy.title}</span>
             </div>
-            <div style={pcss('height:6px;border-radius:6px;background:var(--ln,rgba(74,74,74,.1));margin-top:9px')}>
-              <div style={pcss('width:42%;height:6px;border-radius:6px;background:linear-gradient(90deg,var(--pk,#FFB7B2),var(--lav,#E3D7F7))')} />
-            </div>
-            <div style={pcss('font:600 10px "Nunito",sans-serif;color:var(--mut,#A99A9E);margin-top:7px')}>All memories are safe ✨</div>
-          </div>
+            <div style={pcss('font:600 10px/1.4 "Nunito",sans-serif;color:var(--mut,#A99A9E);margin-top:7px')}>{syncCopy.detail}</div>
+          </NavLink>
         )}
       </div>
     </aside>

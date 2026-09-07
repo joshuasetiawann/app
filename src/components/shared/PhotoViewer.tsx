@@ -16,14 +16,14 @@ function PhotoActions({ photo }: { photo: Photo }) {
         <div style={pcss('max-width:520px;margin:0 auto 12px;padding:12px;border-radius:16px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px)')}>
           <input value={caption} onChange={(event) => setCaption(event.target.value)} aria-label="Edit picture caption" maxLength={120} style={pcss("width:100%;min-height:40px;padding:9px 12px;border:0;border-radius:11px;background:#fff;color:#4A4A4A;font:700 11px 'Nunito',sans-serif;outline:none")} />
           <select value={album} onChange={(event) => setAlbum(event.target.value)} aria-label="Move picture to album" style={pcss("width:100%;min-height:40px;margin-top:8px;padding:0 12px;border:0;border-radius:11px;background:#fff;color:#4A4A4A;font:700 11px 'Nunito',sans-serif;outline:none")}>
-            <option value="">Tanpa album</option>
+            <option value="">No album</option>
             {albums.map((item) => <option key={item.id} value={item.title}>{item.icon} {item.title}</option>)}
           </select>
         </div>
       )}
       <div style={{ display: 'flex', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
         {editing ? (
-          <button type="button" onClick={() => { updatePhoto(photo.id, { caption, album }); setEditing(false); toast('Picture details updated'); }} style={pcss("padding:10px 16px;border:0;border-radius:100px;background:#fff;color:#4A4A4A;font:700 11px 'Nunito',sans-serif;cursor:pointer")}>Save perubahan</button>
+          <button type="button" onClick={() => { updatePhoto(photo.id, { caption, album }); setEditing(false); toast('Picture details updated'); }} style={pcss("padding:10px 16px;border:0;border-radius:100px;background:#fff;color:#4A4A4A;font:700 11px 'Nunito',sans-serif;cursor:pointer")}>Save changes</button>
         ) : (
           <button type="button" onClick={() => setEditing(true)} style={pcss("padding:10px 16px;border:0;border-radius:100px;background:#fff;color:#4A4A4A;font:700 11px 'Nunito',sans-serif;cursor:pointer")}>✏️ Edit</button>
         )}

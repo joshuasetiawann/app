@@ -6,10 +6,10 @@ import { useAuthState } from '../state/AuthState';
 
 const EVENT_TAGS = [
   { icon: '📞', label: 'Video Call' },
-  { icon: '📚', label: 'Kelas' },
-  { icon: '🏀', label: 'Olahraga' },
-  { icon: '✈️', label: 'Penerbangan' },
-  { icon: '🎂', label: 'Ulang tahun' },
+  { icon: '📚', label: 'Class' },
+  { icon: '🏀', label: 'Sports' },
+  { icon: '✈️', label: 'Flight' },
+  { icon: '🎂', label: 'Birthday' },
   { icon: '🎉', label: 'Anniversary' },
 ];
 
@@ -86,7 +86,7 @@ export function EventSheetContent() {
       startsAt: startsAt.toISOString(),
       tzNote: partner?.timezone
         ? `${partner.nickname || partner.name}: ${formatInZone(startsAt, partner.timezone)} · ${partner.timezone}`
-        : `Zona perangkat: ${deviceZone}`,
+        : `Device time zone: ${deviceZone}`,
       scope,
       colorTag: scope === 'Berdua' ? 'pk' : 'mint',
       dayOfMonth: Number(date.slice(8, 10)),
