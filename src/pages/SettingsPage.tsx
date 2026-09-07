@@ -239,6 +239,7 @@ export default function SettingsPage() {
 
       <div style={{ textAlign: 'center', padding: '6px 0 14px' }}>
         <div style={pcss("font:600 11px 'Nunito',sans-serif;color:var(--mut,#A99A9E)")}>KisahKita v1.0 · a private digital space for two 💗</div>
+        <p className="kk-copyright">© 2026 Joshua Setiawan &amp; Kelly Wong</p>
         {logoutError && <div role="alert" style={pcss("font:700 11.5px/1.4 'Nunito',sans-serif;color:#C2506B;margin-top:10px")}>{logoutError}</div>}
         <button
           type="button"

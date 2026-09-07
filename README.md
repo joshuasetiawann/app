@@ -146,25 +146,14 @@ Skrip mengosongkan Storage melalui API terlebih dahulu, menghapus pengguna lewat
 Auth Admin API, membersihkan seluruh tabel aplikasi, lalu memverifikasi semuanya
 benar-benar kosong. Operasi ini permanen.
 
-## Mengaktifkan login Google
+## Login aplikasi
 
-Login Google tidak memerlukan API buatan sendiri. Gunakan OAuth project Google
-yang sama dengan integrasi Drive:
+Web dan APK memakai email dan password melalui Supabase Auth untuk masuk,
+mendaftar, dan memulihkan password. Koneksi Google hanya digunakan untuk
+Google Drive melalui menu Files dan tidak dipakai untuk login aplikasi.
 
-1. Pada Google Cloud Console, buat OAuth Client ID bertipe **Web application**.
-2. Tambahkan callback Supabase
-   `https://PROJECT_REF.supabase.co/auth/v1/callback` ke **Authorized redirect URIs**.
-3. Di Supabase buka **Authentication → Sign In / Providers → Google**, aktifkan
-   provider, lalu masukkan Web Client ID dan Client Secret dari Google Cloud.
-4. Tambahkan URL lokal dan domain produksi ke **Authentication → URL
-   Configuration → Redirect URLs**.
-5. Jalankan
-   [`supabase/migrations/20260831_google_auth.sql`](supabase/migrations/20260831_google_auth.sql)
-   agar nama profil akun baru mengikuti nama Google.
-
-APK memakai ID token Google native lalu menukarnya langsung dengan sesi Supabase.
-Web memakai redirect OAuth Supabase. Izin Drive tetap diminta terpisah ketika
-pengguna membuka menu Drive.
+Akun lama yang dibuat melalui Google dapat menggunakan **Forgot password?**
+untuk menetapkan password pada email yang sama.
 
 ## Mengaktifkan Google Drive
 

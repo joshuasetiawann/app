@@ -201,6 +201,7 @@ export default function PairingPage() {
           </div>
         </section>
       )}
+      <p className="kk-copyright">© 2026 Joshua Setiawan &amp; Kelly Wong</p>
     </main>
   );
 }
