@@ -19,6 +19,7 @@ export function BottomTabBar() {
             const on = location.pathname === t.path;
             return (
               <button
+                className="kk-tab"
                 key={t.path}
                 type="button"
                 onClick={() => navigate(t.path)}
@@ -26,11 +27,12 @@ export function BottomTabBar() {
                 style={{ width: '100%', padding: 0, border: 0, background: 'transparent', color: 'inherit', font: 'inherit', cursor: 'pointer' }}
               >
                 <div
+                  className="kk-tab-icon"
                   style={pcss(
                     `width:40px;height:30px;margin:0 auto;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:15px;background:${on ? 'var(--pk,#FFB7B2)' : 'transparent'};opacity:${on ? '1' : '.5'}`,
                   )}
                 >
-                  {t.icon}
+                  <span>{t.icon}</span>
                 </div>
                 <div
                   style={pcss(

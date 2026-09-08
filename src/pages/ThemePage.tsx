@@ -4,6 +4,7 @@ import { ScrollColumn } from '../components/shared/ScrollColumn';
 import { THEMES, type ThemeKey } from '../lib/theme';
 import { ACCENT_SWATCHES } from '../data/mockData';
 import type { AnimLevel } from '../state/AppState';
+import { LoveDoodle } from '../components/shared/LoveDoodle';
 
 const THEME_LIST: ThemeKey[] = ['sakura', 'midnight', 'matcha', 'taipei'];
 const SWATCH_THEME: Record<string, ThemeKey> = {
@@ -32,10 +33,14 @@ export default function ThemePage() {
 
   return (
     <ScrollColumn>
+      <div className="kk-motion-preview">
+        <LoveDoodle />
+        <div><strong>A little more you, a little more us.</strong><p>Soft colors, tiny cuddles, and just the right amount of motion.</p></div>
+      </div>
       <div style={pcss('display:flex;justify-content:space-between;align-items:center;border-radius:22px;background:var(--sf,#fff);padding:16px 17px;box-shadow:var(--shadow,0 8px 24px rgba(0,0,0,.04))')}>
         <div>
-          <div style={pcss("font:700 14px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Mode gelap</div>
-          <div style={pcss("font:600 10.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:2px")}>{dark ? 'Nyala · Deep Midnight' : 'Off · Warm Pearl'}</div>
+          <div style={pcss("font:700 14px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Dark appearance</div>
+          <div style={pcss("font:600 10.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:2px")}>{dark ? 'On · Deep Midnight' : 'Off · Warm Pearl'}</div>
         </div>
         <button
           type="button"
@@ -98,7 +103,7 @@ export default function ThemePage() {
           <button type="button" style={{ ...animBtnStyle(animLevel === 'off'), border: 0 }} onClick={() => setLevel('off', 'Power saver 🔋 animations off')} aria-pressed={animLevel === 'off'}>Power saver 🔋</button>
         </div>
         <div style={pcss("font:600 10.5px/1.5 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:10px")}>
-          Power saver disables falling petals, pulsing hearts, and tilted pictures—useful for low battery or motion sensitivity.
+          Full adds tiny cuddles and sparkles. Calm keeps gentle button and page transitions without looping decorations. Power saver turns motion off. Your device’s Reduce Motion preference always takes priority.
         </div>
       </div>
     </ScrollColumn>

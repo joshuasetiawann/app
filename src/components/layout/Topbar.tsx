@@ -112,7 +112,7 @@ export function Topbar() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 'none' }}>
         {!isMobile && <ViewportSwitcher />}
         <button type="button" style={iconBtn} onClick={toggleDark} title="Light or dark appearance" aria-label={dark ? 'Use light appearance' : 'Use dark appearance'}>
-          {dark ? '🌙' : '☀️'}
+          <span key={String(dark)} className="kk-icon-pop">{dark ? '🌙' : '☀️'}</span>
         </button>
         <button type="button" style={iconBtn} onClick={() => navigate('/notif')} title="Notifications" aria-label="Open notifications">
           🔔

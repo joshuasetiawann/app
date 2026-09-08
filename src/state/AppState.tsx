@@ -192,7 +192,7 @@ interface AppStateApi extends AppStateShape {
   toggleLocation: () => void;
   setLocation: (on: boolean) => void;
   togglePrivacy: (key: keyof PrivacyToggles) => void;
-  /** Mirrors the design: "Penuh"/"Kalem" both leave motion on, only "Hemat daya" flips `reduced`. */
+  /** Calm keeps interaction feedback; power saver and the OS preference reduce all motion. */
   setAnimLevel: (l: AnimLevel) => void;
   setQuietHours: (hours: { from: string; to: string }) => void;
   toggleOffline: () => void;
@@ -270,7 +270,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<ThemeKey>(() => auth.mode === 'local' ? readStoredTheme() : 'sakura');
   const [vpForce, setVpForce] = useState<Viewport | ''>('');
   const [width, setWidth] = useState(() => (typeof window !== 'undefined' ? window.innerWidth : 1440));
-  const [reduced, setReduced] = useState(() => readStoredReduced() || (auth.mode === 'local' && readStoredValue<AnimLevel>(`${storageBase}:animation`, 'full') === 'off'));
+  const [systemReduced, setSystemReduced] = useState(readStoredReduced);
   const [offline, setOffline] = useState(false);
 
   const [sheet, setSheet] = useState<SheetKind>('');
@@ -313,6 +313,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [locationOn, setLocationOn] = useState(() => auth.mode === 'local' ? readStoredValue(`${storageBase}:location`, false) : false);
   const [privacy, setPrivacy] = useState<PrivacyToggles>(() => auth.mode === 'local' ? readStoredValue(`${storageBase}:privacy`, { onlineOn: true, lastSeenOn: true, actOn: true, galOn: true, meTime: false }) : { onlineOn: true, lastSeenOn: true, actOn: true, galOn: true, meTime: false });
   const [animLevel, setAnimLevelState] = useState<AnimLevel>(() => auth.mode === 'local' ? readStoredValue(`${storageBase}:animation`, 'full') : 'full');
+  const reduced = systemReduced || animLevel === 'off';
   const [quietHours, setQuietHoursState] = useState(() => auth.mode === 'local' ? readStoredValue(`${storageBase}:quiet-hours`, { from: '22:00', to: '07:00' }) : { from: '22:00', to: '07:00' });
   const [syncStatus, setSyncStatus] = useState<SyncStatus>(auth.mode === 'supabase' ? 'loading' : 'local');
   const [syncError, setSyncError] = useState('');
@@ -326,6 +327,14 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const markingReadRef = useRef(false);
   const chatPresenceRef = useRef<ChatPresence | null>(null);
   const notificationIdsRef = useRef<Set<string> | null>(null);
+
+  useEffect(() => {
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const onPreference = () => setSystemReduced(preference.matches);
+    preference.addEventListener('change', onPreference);
+    onPreference();
+    return () => preference.removeEventListener('change', onPreference);
+  }, []);
 
   useEffect(() => {
     const onResize = () => setWidth(window.innerWidth);
@@ -442,7 +451,6 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setThemeState(snapshot.preferences.theme);
     setDark(snapshot.preferences.dark);
     setAnimLevelState(snapshot.preferences.animation);
-    setReduced(readStoredReduced() || snapshot.preferences.animation === 'off');
     setQuietHoursState(snapshot.preferences.quietHours);
   }, []);
 
@@ -939,7 +947,6 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   const setAnimationLevel = useCallback((level: AnimLevel) => {
     setAnimLevelState(level);
-    setReduced(readStoredReduced() || level === 'off');
     if (syncContext) runRemote(updateSharedProfile(syncContext, { preferences: { animation: level } }));
   }, [runRemote, syncContext]);
 

@@ -6,6 +6,7 @@ export function PhotoOpenTarget({ index, style, children }: { index: number; sty
   const { openViewer } = useAppState();
   return (
     <button
+      className="kk-photo-target"
       type="button"
       onClick={() => openViewer(index)}
       style={{ display: 'block', padding: 0, border: 0, background: 'transparent', color: 'inherit', font: 'inherit', textAlign: 'inherit', cursor: 'pointer', ...style }}

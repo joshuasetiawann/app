@@ -11,7 +11,7 @@ import { FoodSheetContent } from '../../sheets/FoodSheet';
 
 export function SheetHeading({ title, sub }: { title: string; sub?: string }) {
   return (
-    <div style={{ marginBottom: 14 }}>
+    <div style={{ marginBottom: 16, paddingRight: 28 }}>
       <div style={pcss("font:700 18px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>{title}</div>
       {sub && <div style={pcss("font:600 11.5px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:3px")}>{sub}</div>}
     </div>
@@ -106,15 +106,17 @@ export function BottomSheet() {
 
   return (
     <div
-      style={pcss('position:absolute;inset:0;z-index:75;background:rgba(40,28,33,.42);display:flex;align-items:flex-end;justify-content:center;animation:kk-fade .18s ease')}
+      className="kk-sheet-backdrop"
+      style={pcss('position:absolute;inset:0;z-index:75;background:rgba(40,28,33,.42);display:flex;align-items:flex-end;justify-content:center;animation:kk-fade .2s ease')}
       onClick={(event) => {
         if (event.target === event.currentTarget) closeSheet();
       }}
       role="presentation"
     >
       <div
+        className="kk-sheet-panel"
         style={pcss(
-          "position:relative;width:100%;max-width:520px;background:var(--sf,#fff);border-radius:26px 26px 0 0;padding:12px 20px 26px;box-shadow:0 -14px 40px rgba(60,40,50,.24);animation:kk-up .26s cubic-bezier(.2,.9,.25,1);max-height:86%;overflow-y:auto",
+          "position:relative;width:100%;max-width:520px;background:var(--sf,#fff);border-radius:30px 30px 0 0;padding:12px 20px max(26px,env(safe-area-inset-bottom));box-shadow:0 -12px 36px rgba(60,40,50,.18);animation:kk-sheet-in .34s cubic-bezier(.16,1,.3,1);max-height:86%;overflow-y:auto;overscroll-behavior:contain",
         )}
         onClick={(e) => e.stopPropagation()}
         role="dialog"

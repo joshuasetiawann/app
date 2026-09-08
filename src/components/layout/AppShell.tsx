@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { pcss } from '../../lib/pcss';
 import { useAppState } from '../../state/AppState';
@@ -10,29 +11,36 @@ import { Toast } from '../shared/Toast';
 import { PhotoViewer } from '../shared/PhotoViewer';
 import { BottomSheet } from '../shared/BottomSheet';
 
-function FallingPetals() {
+function LittleSparkles() {
   return (
-    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 60 }} aria-hidden="true">
-      <div style={{ position: 'absolute', left: '8%', top: -20, fontSize: 13, animation: 'kk-fall 11s linear infinite' }}>🌸</div>
-      <div style={{ position: 'absolute', left: '34%', top: -20, fontSize: 10, animation: 'kk-fall 14s linear infinite 2.5s' }}>🌸</div>
-      <div style={{ position: 'absolute', left: '61%', top: -20, fontSize: 15, animation: 'kk-fall 12.5s linear infinite 5s' }}>🌸</div>
-      <div style={{ position: 'absolute', left: '83%', top: -20, fontSize: 11, animation: 'kk-fall 15s linear infinite 7.5s' }}>🌸</div>
+    <div className="kk-little-sparkles kk-decorative" aria-hidden="true">
+      <span>♡</span><span>✧</span><span>♡</span><span>✧</span>
     </div>
   );
 }
 
 export function AppShell() {
-  const { viewport, vpForce, cssVars, theme, offline, reduced, animLevel } = useAppState();
+  const { viewport, vpForce, cssVars, offline, reduced, animLevel } = useAppState();
   const location = useLocation();
+  const shellRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const pauseMotion = () => {
+      if (shellRef.current) shellRef.current.dataset.backgrounded = String(document.hidden);
+    };
+    pauseMotion();
+    document.addEventListener('visibilitychange', pauseMotion);
+    return () => document.removeEventListener('visibilitychange', pauseMotion);
+  }, []);
 
   const showSidebar = viewport === 'tablet' || viewport === 'laptop' || viewport === 'desktop';
   const showRight = (viewport === 'desktop' || viewport === 'laptop') && RIGHT_RAIL_ROUTES.has(location.pathname);
   const isMobile = viewport === 'mobile';
-  const showPetals = theme === 'sakura' && !reduced;
+  const showSparkles = animLevel === 'full' && !reduced && location.pathname !== '/chat';
   const forced = !!vpForce && (vpForce === 'mobile' || vpForce === 'tablet');
 
   return (
-    <div className={`kk-motion-${animLevel}`} style={{ ...cssVars, height: '100dvh', fontFamily: "'Quicksand',system-ui,sans-serif" }}>
+    <div ref={shellRef} className={`kk-app kk-motion-${animLevel}`} style={{ ...cssVars, height: '100dvh', fontFamily: "'Quicksand',system-ui,sans-serif" }}>
       <div
         style={pcss(
           `position:relative;height:100%;display:flex;align-items:stretch;justify-content:center;padding:${forced ? '44px 20px 20px' : '0'};background:${forced ? '#EFE4E0' : 'var(--bg,#FDFBF7)'};overflow:hidden`,
@@ -44,7 +52,7 @@ export function AppShell() {
             `position:relative;overflow:hidden;width:${viewport === 'mobile' ? '390px' : viewport === 'tablet' ? '834px' : '100%'};max-width:1680px;height:${forced ? (viewport === 'mobile' ? '844px' : '1000px') : '100%'};max-height:100%;border-radius:${forced ? '34px' : '0'};box-shadow:${forced ? '0 26px 60px rgba(90,60,70,.28)' : 'none'};background:var(--bg,#FDFBF7);border:${forced ? '8px solid #2E2530' : 'none'}`,
           )}
         >
-          {showPetals && <FallingPetals />}
+          {showSparkles && <LittleSparkles />}
 
           <div
             style={pcss(

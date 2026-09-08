@@ -8,6 +8,7 @@ import { useAppNow, formatTimeInZone, formatDateLabel, daysSince, daysUntil } fr
 import { THEMES } from '../lib/theme';
 import { RELATIONSHIP } from '../data/mockData';
 import { PhotoOpenTarget } from '../components/shared/PhotoOpenTarget';
+import { LoveDoodle } from '../components/shared/LoveDoodle';
 import { useAuthState } from '../state/AuthState';
 import { distanceBetweenKm } from '../lib/geolocation';
 import { getLatestLocationPings, subscribeToLocationPings, type LocationPing } from '../services/authService';
@@ -62,7 +63,7 @@ export default function HomePage() {
   const myCity = profile?.city || 'Your city';
   const partnerCity = partner?.city || "Partner's city";
   const zoneDifference = Math.abs(zoneOffsetMinutes(now, partnerZone) - zoneOffsetMinutes(now, myZone)) / 60;
-  const zoneDifferenceLabel = zoneDifference === 0 ? 'SAME TIME ZONE' : `${Number.isInteger(zoneDifference) ? zoneDifference : zoneDifference.toFixed(1)} HOURS APART ⏳`;
+  const zoneDifferenceLabel = zoneDifference === 0 ? 'SAME TIME ZONE' : `${Number.isInteger(zoneDifference) ? zoneDifference : zoneDifference.toFixed(1)} ${zoneDifference === 1 ? 'HOUR' : 'HOURS'} APART`;
   const daysTogether = Math.max(1, daysSince(couple?.startedAt || RELATIONSHIP.startedAt, now));
   const nextCountdown = [...countdowns]
     .filter((countdown) => new Date(countdown.targetDate).getTime() > now.getTime())
@@ -101,14 +102,14 @@ export default function HomePage() {
       {/* Hero: dual clock + status + days-together */}
       <HeroSurface background={heroBg} style={pcss('border-radius:26px;padding:20px 18px 18px;position:relative;overflow:hidden;box-shadow:0 8px 26px rgba(255,140,150,.16)')}>
         <div style={{ position: 'absolute', top: -30, right: -22, width: 110, height: 110, borderRadius: '50%', background: 'radial-gradient(circle,rgba(255,255,255,.55),rgba(255,255,255,0) 70%)' }} />
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', position: 'relative', gap: 8 }}>
+        <div className="kk-couple-clocks" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto minmax(0,1fr)', alignItems: 'center', position: 'relative', gap: 8 }}>
           <div>
             <div style={pcss("font:700 11px 'Nunito',sans-serif;color:var(--ink2,#6B5B60)")}>{profile?.countryFlag || '📍'} {myCity} · {zoneAbbreviation(now, myZone)}</div>
             <div style={pcss("font:700 30px/1 'Quicksand',sans-serif;color:var(--ink,#4A4A4A);margin-top:6px")}>{formatTimeInZone(now, myZone)}</div>
             <div style={pcss("font:600 10.5px 'Nunito',sans-serif;color:var(--ink2,#6B5B60);opacity:.75;margin-top:5px")}>{formatDateLabel(now, myZone)}</div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
-            <div style={pcss('width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 0 6px rgba(255,255,255,.4),0 5px 15px rgba(255,140,150,.3);animation:kk-pulse 2.6s ease-in-out infinite')}>💞</div>
+            <LoveDoodle />
             <div style={pcss("font:700 8.5px 'Nunito',sans-serif;color:var(--pki,#E86F87);background:rgba(255,255,255,.92);padding:3px 9px;border-radius:100px;white-space:nowrap")}>{zoneDifferenceLabel}</div>
           </div>
           <div style={{ textAlign: 'right' }}>
@@ -144,9 +145,9 @@ export default function HomePage() {
             <div style={pcss("font:700 16px 'Quicksand',sans-serif;color:var(--ink,#4A4A4A)")}>Have you eaten yet?</div>
             <div style={pcss("font:600 11px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:3px")}>{foodLine(foodStatus, partnerFoodStatus)}</div>
           </div>
-          <span style={{ fontSize: 22, animation: 'kk-float 3s ease-in-out infinite' }}>🍜</span>
+          <span className="kk-decorative" style={{ fontSize: 22, animation: 'kk-float 5s ease-in-out infinite' }}>🍜</span>
         </div>
-        <div style={{ display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap' }}>
+        <div className="kk-check-in" style={{ display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap' }}>
           <button type="button" style={foodBtnStyle(foodStatus === 'ate')} onClick={() => { setFoodStatus('ate'); toast('Meal saved · feeling full 😋'); }} aria-pressed={foodStatus === 'ate'}>I already ate 😋</button>
           <button type="button" style={foodBtnStyle(foodStatus === 'now')} onClick={() => { setFoodStatus('now'); toast('Enjoy your meal 🍜'); }} aria-pressed={foodStatus === 'now'}>Eating now 🍜</button>
           <button type="button" style={foodBtnStyle(foodStatus === 'not')} onClick={() => { setFoodStatus('not'); toast('Remember to eat something 🥺'); }} aria-pressed={foodStatus === 'not'}>Not yet 🥺</button>
@@ -174,7 +175,7 @@ export default function HomePage() {
               <div style={pcss("font:700 8px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:5px")}>{myCity.slice(0, 3).toUpperCase()}</div>
             </div>
             <div style={{ flex: 1, borderTop: '2px dotted rgba(232,111,135,.5)', margin: '0 8px', position: 'relative', top: -6 }}>
-              <span style={{ position: 'absolute', left: '44%', top: -12, fontSize: 13, animation: 'kk-float 3.4s ease-in-out infinite' }}>✈️</span>
+              <span className="kk-decorative" style={{ position: 'absolute', left: '44%', top: -12, fontSize: 13, animation: 'kk-float 5s ease-in-out infinite' }}>✈️</span>
             </div>
             <div style={{ textAlign: 'center', position: 'relative' }}>
               <div style={{ width: 11, height: 11, borderRadius: '50%', background: '#84A9FF', boxShadow: '0 0 0 5px rgba(132,169,255,.2)', margin: '0 auto' }} />
@@ -218,11 +219,11 @@ export default function HomePage() {
               style={pcss(`flex:none;width:158px;background:#fff;padding:10px 10px 0;border-radius:5px;box-shadow:0 8px 20px rgba(120,90,100,.16);transform:rotate(${p.rotationDeg ?? 0}deg);cursor:pointer;transition:transform .2s`)}
             >
               <div style={pcss('aspect-ratio:1;background:repeating-linear-gradient(135deg,#EFE6E2 0 8px,#F8F2EE 8px 16px);display:flex;align-items:center;justify-content:center;border-radius:2px')}>
-                {p.imageUrl ? <img src={p.imageUrl} alt={p.caption} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={pcss("font:700 9px 'Nunito',sans-serif;color:rgba(74,74,74,.32)")}>{p.slotLabel}</span>}
+                {p.imageUrl ? <img src={p.imageUrl} alt={p.caption} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={pcss("font:700 9px 'Nunito',sans-serif;color:rgba(74,74,74,.32)")}>{p.slotLabel}</span>}
               </div>
               <div style={{ padding: '9px 3px 4px', textAlign: 'center' }}>
-                <div style={pcss("font:600 16px/1.1 'Caveat',cursive;color:var(--ink,#4A4A4A)")}>{p.caption}</div>
-                <div style={pcss("font:700 8px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:3px")}>{p.meta}</div>
+                <div style={pcss("font:600 16px/1.1 'Caveat',cursive;color:#4A4A4A")}>{p.caption}</div>
+                <div style={pcss("font:700 8px 'Nunito',sans-serif;color:#857179;margin-top:3px")}>{p.meta}</div>
               </div>
             </PhotoOpenTarget>
           ))}
@@ -265,7 +266,7 @@ export default function HomePage() {
         <button type="button" style={pcss('border-radius:24px;background:var(--sf2,#FFF4F1);border:1px dashed rgba(232,111,135,.45);padding:16px 17px;cursor:pointer;text-align:left;color:inherit')} onClick={() => navigate('/notes')}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <span style={pcss("font:700 10px 'Nunito',sans-serif;letter-spacing:.12em;color:var(--pki,#E86F87)")}>{featuredNote?.tag || 'LOVE NOTES'} 💌</span>
-            <span style={{ fontSize: 17, display: 'inline-block', animation: 'kk-wiggle 2.2s ease-in-out infinite' }}>{featuredNote?.state === 'open' ? '💌' : '🔒'}</span>
+            <span className="kk-decorative" style={{ fontSize: 17, display: 'inline-block', animation: 'kk-wiggle 6s ease-in-out infinite' }}>{featuredNote?.state === 'open' ? '💌' : '🔒'}</span>
           </div>
           <div style={pcss("font:600 21px/1.2 'Caveat',cursive;color:var(--ink,#4A4A4A);margin-top:8px")}>{featuredNote?.preview || 'There are no love notes in this space yet.'}</div>
           <div style={pcss("font:600 11px 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:8px")}>{featuredNote?.meta || 'Write something sweet for your partner.'}</div>

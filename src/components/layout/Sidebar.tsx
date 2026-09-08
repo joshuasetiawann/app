@@ -9,6 +9,7 @@ function NavRow({ item, open }: { item: NavItem; open: boolean }) {
   const on = location.pathname === item.path;
   return (
     <NavLink
+      className="kk-nav-row"
       to={item.path}
       title={item.label}
       aria-current={on ? 'page' : undefined}
@@ -16,7 +17,7 @@ function NavRow({ item, open }: { item: NavItem; open: boolean }) {
         `display:flex;align-items:center;gap:11px;padding:${open ? '10px 12px' : '11px 0'};margin-bottom:2px;border-radius:14px;cursor:pointer;justify-content:${open ? 'flex-start' : 'center'};background:${on ? 'var(--pk,#FFB7B2)' : 'transparent'};color:${on ? '#5C3A42' : 'var(--ink2,#6B5B60)'};font:${on ? '700' : '600'} 12.5px "Nunito",sans-serif;transition:background .15s;text-decoration:none`,
       )}
     >
-      <span style={{ fontSize: 15, width: 20, textAlign: 'center', flex: 'none' }}>{item.icon}</span>
+      <span className="kk-nav-icon" style={{ fontSize: 15, width: 20, textAlign: 'center', flex: 'none' }}>{item.icon}</span>
       {open && (
         <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.label}</span>
       )}
@@ -53,7 +54,7 @@ export function Sidebar() {
         `display:flex;flex-direction:column;padding:${isTablet ? '16px 12px' : '18px 14px'};border-right:1px solid var(--ln,rgba(74,74,74,.08));background:var(--sf,#fff);overflow-y:auto`,
       )}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 8px 16px' }}>
+      <div style={{ display: 'flex', flexShrink: 0, alignItems: 'center', gap: 10, padding: '6px 8px 20px' }}>
         <div
           style={pcss(
             'width:38px;height:38px;border-radius:13px;background:linear-gradient(140deg,var(--pk,#FFB7B2),var(--lav,#E3D7F7));display:flex;align-items:center;justify-content:center;font-size:17px;flex:none',

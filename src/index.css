@@ -220,23 +220,27 @@ button,
 [role='button'],
 a {
   -webkit-tap-highlight-color: transparent;
-  transition: scale 180ms cubic-bezier(0.2, 0.8, 0.2, 1), filter 180ms ease, opacity 180ms ease;
+  transition: scale 200ms cubic-bezier(.2,.8,.2,1), translate 240ms ease, background-color 200ms ease, border-color 200ms ease, opacity 180ms ease;
 }
 
 @media (hover: hover) {
   button:not(:disabled):hover,
   [role='button']:hover,
   a:hover {
-    filter: brightness(0.985) saturate(1.03);
-    scale: 1.012;
+    scale: 1.015;
   }
 }
 
 button:not(:disabled):active,
 [role='button']:active,
 a:active {
-  scale: 0.975;
+  scale: 0.97;
 }
+
+/* Keep large surfaces, navigation and map controls stable while interacting. */
+.kk-nav-row:hover, .kk-tab:hover, .kk-card-action:hover, .kk-photo-target:hover,
+.leaflet-container a:hover, .leaflet-container button:hover,
+.leaflet-container a:active, .leaflet-container button:active { scale: 1; }
 
 button:disabled {
   cursor: not-allowed;
@@ -273,13 +277,10 @@ textarea:focus-visible,
   }
 }
 @keyframes kk-wiggle {
-  0%,
-  100% {
-    transform: rotate(-7deg);
-  }
-  50% {
-    transform: rotate(7deg);
-  }
+  0%, 70%, 100% { transform: rotate(0); }
+  78% { transform: rotate(-7deg); }
+  86% { transform: rotate(7deg); }
+  94% { transform: rotate(-3deg); }
 }
 @keyframes kk-orbit {
   from {
@@ -314,25 +315,8 @@ textarea:focus-visible,
   }
 }
 @keyframes kk-shim {
-  0% {
-    background-position: -320px 0;
-  }
-  100% {
-    background-position: 320px 0;
-  }
-}
-@keyframes kk-fall {
-  0% {
-    transform: translateY(-8%) rotate(0);
-    opacity: 0;
-  }
-  12% {
-    opacity: 0.85;
-  }
-  100% {
-    transform: translateY(760px) rotate(240deg);
-    opacity: 0;
-  }
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
 }
 @keyframes kk-fade {
   from {
@@ -384,7 +368,8 @@ textarea:focus-visible,
 
 .kk-route-enter {
   min-height: 100%;
-  animation: kk-page-in 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  /* Opacity only: never turn the page into a containing block for fixed cameras/maps. */
+  animation: kk-fade 240ms ease-out;
 }
 
 .kk-app-boot {
@@ -428,11 +413,18 @@ textarea:focus-visible,
 }
 
 .kk-skeleton {
+  position: relative;
   overflow: hidden;
   border-radius: 12px;
-  background: linear-gradient(100deg, #eee6e2 20%, #faf6f3 38%, #eee6e2 56%);
-  background-size: 220% 100%;
-  animation: kk-shim 1.45s linear infinite;
+  background: color-mix(in srgb, var(--sf2,#eee6e2) 88%, var(--ink,#4a4a4a) 12%);
+}
+
+.kk-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 15%, color-mix(in srgb, var(--sf,#fff) 60%, transparent) 50%, transparent 85%);
+  animation: kk-shim 1.65s ease-in-out infinite;
 }
 
 .kk-skeleton-title { width: 52%; height: 24px; margin-bottom: 14px; }
@@ -1066,6 +1058,99 @@ textarea:focus-visible,
   }
 }
 
+/* A small romantic motion vocabulary, shared across the app. */
+.kk-app { --ease-soft: cubic-bezier(.16,1,.3,1); }
+.kk-main-scroll { overscroll-behavior-y: contain; scrollbar-width: thin; }
+.kk-scroll-column > * { min-width: 0; }
+.kk-hero { position: relative; isolation: isolate; }
+.kk-hero::after {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border: 1px dashed rgba(255,255,255,.72);
+  border-radius: inherit;
+  pointer-events: none;
+}
+.kk-couple-clocks { font-variant-numeric: tabular-nums; }
+.kk-couple-clocks > div { min-width: 0; overflow-wrap: anywhere; }
+.kk-love-doodle { display: block; width: 100px; height: 70px; overflow: visible; flex: none; }
+.kk-cuddle-left { transform-origin: 40px 73px; animation: kk-cuddle-left 7s ease-in-out infinite; }
+.kk-cuddle-right { transform-origin: 85px 73px; animation: kk-cuddle-right 7s ease-in-out infinite; }
+.kk-doodle-eyes { transform-box: fill-box; transform-origin: center; animation: kk-blink 6s ease-in-out infinite; }
+.kk-doodle-heart { transform-origin: 60px 23px; animation: kk-little-heart 7s ease-in-out infinite; }
+@keyframes kk-cuddle-left { 0%, 25%, 100% { transform: rotate(0); } 45%, 72% { transform: rotate(7deg); } }
+@keyframes kk-cuddle-right { 0%, 25%, 100% { transform: rotate(0); } 45%, 72% { transform: rotate(-7deg); } }
+@keyframes kk-blink { 0%, 43%, 47%, 100% { transform: scaleY(1); } 45% { transform: scaleY(.12); } }
+@keyframes kk-little-heart { 0%, 25%, 100% { transform: translateY(0) scale(1); } 45%, 72% { transform: translateY(-4px) scale(1.12); } }
+
+.kk-little-sparkles { position: absolute; inset: 0; z-index: 45; pointer-events: none; overflow: hidden; color: var(--pki,#e86f87); }
+.kk-little-sparkles span { position: absolute; font-size: 14px; opacity: 0; animation: kk-twinkle 9s ease-in-out infinite; }
+.kk-little-sparkles span:nth-child(1) { left: 3px; top: 22%; }
+.kk-little-sparkles span:nth-child(2) { right: 3px; top: 39%; animation-delay: -3s; }
+.kk-little-sparkles span:nth-child(3) { left: 3px; top: 68%; animation-delay: -6s; }
+.kk-little-sparkles span:nth-child(4) { right: 3px; top: 81%; animation-delay: -1.5s; }
+@keyframes kk-twinkle { 0%, 65%, 100% { opacity: 0; transform: translateY(3px) scale(.8); } 30% { opacity: .38; transform: translateY(-3px) scale(1); } }
+
+.kk-nav-row { flex-shrink: 0; min-height: 44px; }
+.kk-nav-row .kk-nav-icon { transition: translate 240ms ease; }
+.kk-nav-row[aria-current='page'] .kk-nav-icon,
+.kk-tab[aria-current='page'] .kk-tab-icon > span,
+.kk-icon-pop { display: inline-block; animation: kk-button-bloom 360ms var(--ease-soft); }
+.kk-tab { min-height: 48px; }
+.kk-tab-icon { transition: background-color 220ms ease, border-radius 220ms ease, opacity 220ms ease; }
+.kk-tab[aria-current='page'] .kk-tab-icon { border-radius: 14px 14px 10px 10px !important; }
+.kk-chip-row { scrollbar-width: none; overscroll-behavior-x: contain; }
+.kk-chip-row::-webkit-scrollbar { display: none; }
+.kk-chip-row button { min-height: 38px; }
+.kk-check-in button[aria-pressed='true'] { animation: kk-button-bloom 320ms var(--ease-soft); }
+@keyframes kk-button-bloom { 0% { scale: .91; } 60% { scale: 1.045; } 100% { scale: 1; } }
+@media (hover: hover) and (pointer: fine) {
+  .kk-nav-row:hover .kk-nav-icon { translate: 2px 0; }
+  .kk-photo-target:hover, .kk-card-action:hover { translate: 0 -3px; }
+}
+.kk-photo-target { transition: translate 240ms var(--ease-soft), scale 200ms ease !important; }
+.kk-photo-target:active { translate: 0 0; }
+.kk-photo-target img { display: block; }
+.kk-empty-state { overflow: hidden; }
+.kk-empty-sticker {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 82px;
+  height: 82px;
+  margin: 22px auto 18px;
+  border-radius: 28px 32px 26px 34px;
+  background: var(--sf2,#fff4f1);
+  border: 1px dashed color-mix(in srgb, var(--pki,#e86f87) 35%, transparent);
+  rotate: -5deg;
+}
+.kk-empty-sticker > span { font-size: 36px; animation: kk-float 6s ease-in-out infinite; }
+.kk-empty-sticker::after { content: '♡'; position: absolute; right: -8px; top: -10px; rotate: 16deg; font: 700 26px 'Nunito',sans-serif; color: var(--pki,#e86f87); }
+.kk-motion-preview { display: flex; align-items: center; gap: 16px; padding: 18px; border-radius: 24px; background: var(--sf2,#fff4f1); }
+.kk-motion-preview strong { color: var(--ink,#4a4a4a); font: 700 16px/1.4 'Quicksand',sans-serif; }
+.kk-motion-preview p { margin: 5px 0 0; color: var(--ink2,#6b5b60); font: 600 11.5px/1.5 'Nunito',sans-serif; }
+.kk-toast-note { max-width: min(480px,100%); text-wrap: pretty; }
+@keyframes kk-sheet-in { from { transform: translateY(38px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (min-width: 768px) {
+  .kk-sheet-backdrop { padding: 24px; }
+  .kk-sheet-panel { border-radius: 30px !important; }
+}
+@media (max-width: 359px) {
+  .kk-couple-clocks .kk-love-doodle { width: 76px; height: 59px; }
+  .kk-motion-preview { gap: 10px; padding: 14px; }
+  .kk-motion-preview .kk-love-doodle { width: 78px; }
+}
+
+/* Calm removes only decoration, not progress indicators or interaction feedback. */
+.kk-motion-calm .kk-decorative,
+.kk-motion-calm .kk-decorative *,
+.kk-motion-off .kk-decorative,
+.kk-motion-off .kk-decorative * { animation: none !important; }
+.kk-motion-off button, .kk-motion-off a, .kk-motion-off [role='button'] { scale: none !important; translate: none !important; }
+.kk-app[data-backgrounded='true'] *,
+.kk-app[data-backgrounded='true'] *::before,
+.kk-app[data-backgrounded='true'] *::after { animation-play-state: paused !important; }
+
 /* Reduced-motion: honor OS preference in addition to the in-app toggle */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -1079,4 +1164,6 @@ textarea:focus-visible,
   html {
     scroll-behavior: auto;
   }
+  button, a, [role='button'] { scale: none !important; translate: none !important; }
+  .kk-little-sparkles { display: none; }
 }

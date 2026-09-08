@@ -8,7 +8,7 @@ export function ScrollColumn({ children, style, maxWidth = 860 }: { children: Re
   const gap = isMobile ? 14 : 16;
   const pad = isMobile ? 16 : 22;
   return (
-    <div
+    <div className="kk-scroll-column"
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -17,7 +17,6 @@ export function ScrollColumn({ children, style, maxWidth = 860 }: { children: Re
         maxWidth,
         width: '100%',
         margin: '0 auto',
-        animation: 'kk-fade .22s ease',
         ...style,
       }}
     >

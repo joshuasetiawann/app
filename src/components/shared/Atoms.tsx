@@ -4,7 +4,7 @@ import { pcss } from '../../lib/pcss';
 /** Filter chip row, e.g. gallery/food/place category filters. */
 export function ChipRow({ items, active, onSelect }: { items: string[]; active: string; onSelect: (v: string) => void }) {
   return (
-    <div style={{ display: 'flex', gap: 7, overflowX: 'auto', padding: '2px 0 4px' }}>
+    <div className="kk-chip-row" style={{ display: 'flex', gap: 7, overflowX: 'auto', padding: '2px 0 4px' }}>
       {items.map((label) => (
         <button
           type="button"
@@ -45,7 +45,7 @@ export function HeroSurface({ background, children, style }: { background: strin
     '--sf2': '#FFF4F1',
     '--ln': 'rgba(74,74,74,.1)',
   } as CSSProperties;
-  return <div style={{ ...lightNeutrals, background, ...style }}>{children}</div>;
+  return <div className="kk-hero" style={{ ...lightNeutrals, background, ...style }}>{children}</div>;
 }
 
 export function Card({ children, style, onClick }: { children: ReactNode; style?: CSSProperties; onClick?: () => void }) {
@@ -58,10 +58,10 @@ export function Card({ children, style, onClick }: { children: ReactNode; style?
     ...style,
   };
 
-  if (!onClick) return <div style={cardStyle}>{children}</div>;
+  if (!onClick) return <div className="kk-card" style={cardStyle}>{children}</div>;
 
   return (
-    <button type="button" onClick={onClick} style={{ width: '100%', border: 0, color: 'inherit', font: 'inherit', textAlign: 'left', ...cardStyle }}>
+    <button className="kk-card kk-card-action" type="button" onClick={onClick} style={{ width: '100%', border: 0, color: 'inherit', font: 'inherit', textAlign: 'left', ...cardStyle }}>
       {children}
     </button>
   );
@@ -173,9 +173,9 @@ export function EmptyState({
   actionStyle?: 'primary' | 'muted';
 }) {
   return (
-    <div style={pcss('border-radius:22px;background:var(--sf,#fff);padding:17px;box-shadow:var(--shadow,0 8px 24px rgba(0,0,0,.04));text-align:center')}>
+    <div className="kk-empty-state" style={pcss('border-radius:22px;background:var(--sf,#fff);padding:24px 20px;box-shadow:var(--shadow,0 8px 24px rgba(0,0,0,.04));text-align:center')}>
       <div style={{ font: '700 9.5px "Nunito",sans-serif', letterSpacing: '.12em', color: tagColor, textAlign: 'left' }}>{tag}</div>
-      <div style={{ fontSize: 38, marginTop: 14 }}>{emoji}</div>
+      <div className="kk-empty-sticker" aria-hidden="true"><span className="kk-decorative">{emoji}</span></div>
       <div style={pcss("font:700 13px 'Nunito',sans-serif;color:var(--ink,#4A4A4A);margin-top:10px")}>{title}</div>
       <div style={pcss("font:600 11px/1.5 'Nunito',sans-serif;color:var(--mut,#A99A9E);margin-top:4px")}>{body}</div>
       <button
